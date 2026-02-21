@@ -127,7 +127,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onRegisterClick, onQuickRegister
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center pt-32 pb-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
             {/* Background Decor */}
             <div className="absolute inset-0 z-0 pointer-events-none">
                 <div className="absolute top-0 right-0 w-1/2 h-full bg-gkk-navy/5 skew-x-12 transform origin-top-right"></div>
