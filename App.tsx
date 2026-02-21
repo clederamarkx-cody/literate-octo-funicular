@@ -14,7 +14,7 @@ import Footer from './components/layout/Footer';
 import ChatWidget from './components/layout/ChatWidget';
 import { FileText, Calendar, Mail } from 'lucide-react';
 import { Applicant, ApplicantDocument } from './types';
-import { getApplicant, getAllApplicants, addApplicantDocument, updateApplicant, createUserProfile, createApplicant } from './services/dbService';
+import { getApplicant, addApplicantDocument, updateApplicant, createUserProfile, createApplicant } from './services/dbService';
 
 // Lazy load components
 const NominationForm = lazy(() => import('./components/portal/NominationForm'));
@@ -32,7 +32,6 @@ function App() {
   const [prevView, setPrevView] = useState<ViewState>('home');
   const [applicants, setApplicants] = useState<Applicant[]>([]);
   const [currentApplicantId, setCurrentApplicantId] = useState<string | null>(null);
-  const [currentUserRole, setCurrentUserRole] = useState<string | null>(null);
   const [isLoadingSession, setIsLoadingSession] = useState(true);
 
   useEffect(() => {
