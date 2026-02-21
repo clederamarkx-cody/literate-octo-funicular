@@ -39,6 +39,7 @@ import {
   FileIcon
 } from 'lucide-react';
 import { Applicant, ApplicantDocument } from '../../types';
+import { getAllApplicants } from '../../services/dbService';
 
 interface EvaluatorPortalProps {
   onLogout: () => void;
@@ -49,20 +50,36 @@ interface EvaluatorPortalProps {
   onToggleRound3?: (applicantId: string, unlocked: boolean) => void;
 }
 
-const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev, applicants: propApplicants, userRole, onToggleRound2, onToggleRound3 }) => {
+const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev, applicants: localApplicants, userRole, onToggleRound2, onToggleRound3 }) => {
   const [activeTab, setActiveTab] = useState<'dashboard' | 'entries'>('dashboard');
   const [view, setView] = useState<'list' | 'review'>('list');
   const [selectedApplicant, setSelectedApplicant] = useState<Applicant | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const [localApplicants, setLocalApplicants] = useState<Applicant[]>(localApplicants);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchApplicants = async () => {
+      try {
+        const data = await getAllApplicants();
+        setLocalApplicants(data);
+      } catch (error) {
+        console.error("Failed to load applicants", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchApplicants();
+  }, []);
   const [round2Open, setRound2Open] = useState(false);
   const [docEvaluations, setDocEvaluations] = useState<Record<string, 'pass' | 'fail'>>({});
   const [previewModalOpen, setPreviewModalOpen] = useState(false);
   const [previewDoc, setPreviewDoc] = useState<{ name: string, url: string | null, type: string } | null>(null);
   const [isExporting, setIsExporting] = useState<number | null>(null);
 
-  const applicants = propApplicants || [];
+  const applicants = localApplicants || [];
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
