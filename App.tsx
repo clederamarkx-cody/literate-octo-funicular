@@ -20,12 +20,12 @@ import { getApplicant, getAllApplicants, addApplicantDocument, updateApplicant, 
 const NominationForm = lazy(() => import('./components/portal/NominationForm'));
 const Login = lazy(() => import('./components/portal/Login'));
 const ApplicantPortal = lazy(() => import('./components/portal/ApplicantPortal'));
-const EvaluatorPortal = lazy(() => import('./components/portal/EvaluatorPortal'));
+
 const HallOfFame = lazy(() => import('./components/portal/HallOfFame'));
 const UnderDevelopment = lazy(() => import('./components/UnderDevelopment'));
 
 
-type ViewState = 'home' | 'nominate' | 'login' | 'applicant-portal' | 'evaluator-portal' | 'hall-of-fame' | 'under-development';
+type ViewState = 'home' | 'nominate' | 'login' | 'applicant-portal' | 'hall-of-fame' | 'under-development';
 
 function App() {
   const [view, setView] = useState<ViewState>('home');
@@ -46,12 +46,7 @@ function App() {
       if (session) {
         try {
           const { role, uid } = JSON.parse(session);
-          if (['evaluator', 'admin', 'reu', 'dole', 'scd'].includes(role)) {
-            const allData = await getAllApplicants();
-            setApplicants(allData);
-            setCurrentUserRole(role);
-            setView('evaluator-portal');
-          } else if (role === 'applicant' && uid) {
+          if (role === 'applicant' && uid) {
             const data = await getApplicant(uid);
             if (data) {
               setApplicants([data]);
@@ -237,11 +232,6 @@ function App() {
                     setCurrentApplicantId(uid);
                     navigateTo('applicant-portal');
                   }
-                } else if (role === 'evaluator') {
-                  const allData = await getAllApplicants();
-                  setApplicants(allData);
-                  setCurrentUserRole(role);
-                  navigateTo('evaluator-portal');
                 }
               }}
             />
@@ -260,18 +250,7 @@ function App() {
           </Suspense>
         )}
 
-        {view === 'evaluator-portal' && (
-          <Suspense fallback={<div className="flex justify-center items-center h-screen">Loading...</div>}>
-            <EvaluatorPortal
-              onLogout={handleLogout}
-              onUnderDev={() => navigateTo('under-development')}
-              applicants={applicants}
-              userRole={currentUserRole}
-              onToggleRound2={handleToggleRound2}
-              onToggleRound3={handleToggleRound3}
-            />
-          </Suspense>
-        )}
+
 
         {view === 'hall-of-fame' && (
           <Suspense fallback={<div className="flex justify-center items-center h-screen">Loading...</div>}>

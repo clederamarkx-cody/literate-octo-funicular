@@ -179,3 +179,25 @@ export const getHallOfFame = async (): Promise<any[]> => {
         };
     });
 };
+/**
+ * Fetches an applicant by their registration/invitation key (Pass Key)
+ */
+export const getApplicantByPassKey = async (passKey: string): Promise<Applicant | null> => {
+    const applicantsRef = collection(db, APPLICANTS_COLLECTION);
+    const q = query(applicantsRef, where('regId', '==', passKey));
+
+    try {
+        const querySnapshot = await getDocs(q);
+        if (!querySnapshot.empty) {
+            return querySnapshot.docs[0].data() as Applicant;
+        }
+    } catch (error) {
+        console.error("Error querying applicant by pass key", error);
+    }
+
+    // Fallback for mock users
+    const mockApplicant = INITIAL_APPLICANTS.find(a => a.regId === passKey);
+    if (mockApplicant) return mockApplicant;
+
+    return null;
+};
