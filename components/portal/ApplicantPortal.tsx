@@ -65,6 +65,7 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
 
   // Accordion State
   const [round2Open, setRound2Open] = useState(false);
+  const [round3Open, setRound3Open] = useState(false);
 
   // Onboarding Tour State
   const [isTourOpen, setIsTourOpen] = useState(false);
@@ -604,7 +605,7 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
                   <div className="space-y-4">
                     <div className={`rounded-3xl border transition-all duration-300 overflow-hidden ${applicantData?.round3Unlocked ? 'bg-white border-gray-200 shadow-xl' : 'bg-gray-50 border-gray-100 opacity-60'}`}>
                       <button
-                        onClick={() => applicantData?.round3Unlocked && setRound2Open(!round2Open)}
+                        onClick={() => applicantData?.round3Unlocked && setRound3Open(!round3Open)}
                         disabled={!applicantData?.round3Unlocked}
                         className={`w-full p-8 flex items-center justify-between group transition-colors ${applicantData?.round3Unlocked ? 'cursor-pointer hover:bg-gold-50/20' : 'cursor-not-allowed'}`}
                       >
@@ -624,12 +625,12 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
                         </div>
                         {applicantData?.round3Unlocked && (
                           <div className="flex items-center space-x-3 text-gkk-gold bg-gold-50 px-5 py-2 rounded-2xl font-bold uppercase tracking-widest text-[10px] group-hover:bg-gkk-gold group-hover:text-gkk-navy transition-all">
-                            <span>{round2Open ? 'Hide' : 'Review'}</span>
-                            {round2Open ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                            <span>{round3Open ? 'Hide' : 'Review'}</span>
+                            {round3Open ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                           </div>
                         )}
                       </button>
-                      <div className={`transition-all duration-700 ease-in-out ${round2Open && applicantData?.round3Unlocked ? 'max-h-[2000px] border-t border-gray-100 p-8 bg-white' : 'max-h-0 overflow-hidden'}`}>
+                      <div className={`transition-all duration-700 ease-in-out ${round3Open && applicantData?.round3Unlocked ? 'max-h-[2000px] border-t border-gray-100 p-8 bg-white' : 'max-h-0 overflow-hidden'}`}>
                         {renderDocumentGrid(3)}
                       </div>
                     </div>
