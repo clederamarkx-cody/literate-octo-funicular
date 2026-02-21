@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import {
   Trophy,
   Medal,
@@ -11,6 +11,7 @@ import {
   Building2,
   History,
   ChevronRight,
+  ChevronLeft,
   ExternalLink,
   ShieldCheck
 } from 'lucide-react';
@@ -54,7 +55,16 @@ const HallOfFame: React.FC<HallOfFameProps> = ({ onBack }) => {
     fetchData();
   }, []);
 
-  const years = ['All', '2024', '2023', '2022', '2021', '2020', '2019', '2018', '2017', '2016', '2015', '2014', '2013', '2012'];
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const scrollNav = (direction: 'left' | 'right') => {
+    if (scrollRef.current) {
+      const scrollAmount = 200;
+      scrollRef.current.scrollBy({ left: direction === 'left' ? -scrollAmount : scrollAmount, behavior: 'smooth' });
+    }
+  };
+
+  const years = ['All', '2025', '2024', '2023', '2022', '2021', '2020', '2019', '2018', '2017', '2016', '2015', '2014', '2013', '2012'];
   const sectors = ['All', 'Institutional', 'Individual', 'Government', 'Micro'];
 
   const filteredWinners = useMemo(() => {
@@ -128,18 +138,36 @@ const HallOfFame: React.FC<HallOfFameProps> = ({ onBack }) => {
 
             {/* Selectors */}
             <div className="flex flex-wrap items-center gap-4 w-full lg:w-auto">
-              <div className="flex items-center gap-2">
-                <History size={16} className="text-gray-400" />
-                <div className="flex bg-gray-50 p-1 rounded-xl border border-gray-100">
-                  {years.map(year => (
-                    <button
-                      key={year}
-                      onClick={() => setSelectedYear(year)}
-                      className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${selectedYear === year ? 'bg-gkk-navy text-white shadow-lg shadow-gkk-navy/20' : 'text-gray-400 hover:text-gkk-navy'}`}
-                    >
-                      {year}
-                    </button>
-                  ))}
+              <div className="flex items-center gap-2 w-full lg:w-auto min-w-0">
+                <History size={16} className="text-gray-400 shrink-0" />
+                <div className="relative flex items-center w-full lg:w-96">
+                  <button
+                    onClick={() => scrollNav('left')}
+                    className="absolute left-0 z-10 h-full px-1 bg-gradient-to-r from-gray-50 via-gray-50 to-transparent text-gray-400 hover:text-gkk-navy"
+                  >
+                    <ChevronLeft size={16} />
+                  </button>
+                  <div
+                    ref={scrollRef}
+                    className="flex bg-gray-50 p-1 rounded-xl border border-gray-100 overflow-x-auto scrollbar-hide mx-6 w-full"
+                    style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                  >
+                    {years.map(year => (
+                      <button
+                        key={year}
+                        onClick={() => setSelectedYear(year)}
+                        className={`shrink-0 px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${selectedYear === year ? 'bg-gkk-navy text-white shadow-lg shadow-gkk-navy/20' : 'text-gray-400 hover:text-gkk-navy'}`}
+                      >
+                        {year}
+                      </button>
+                    ))}
+                  </div>
+                  <button
+                    onClick={() => scrollNav('right')}
+                    className="absolute right-0 z-10 h-full px-1 bg-gradient-to-l from-gray-50 via-gray-50 to-transparent text-gray-400 hover:text-gkk-navy"
+                  >
+                    <ChevronRight size={16} />
+                  </button>
                 </div>
               </div>
 
