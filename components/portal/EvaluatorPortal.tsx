@@ -60,6 +60,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
   const [docEvaluations, setDocEvaluations] = useState<Record<string, 'pass' | 'fail'>>({});
   const [previewModalOpen, setPreviewModalOpen] = useState(false);
   const [previewDoc, setPreviewDoc] = useState<{ name: string, url: string | null, type: string } | null>(null);
+  const [isExporting, setIsExporting] = useState<number | null>(null);
 
   const applicants = propApplicants || [];
 
@@ -86,6 +87,41 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
   const handlePreview = (doc: ApplicantDocument) => {
     setPreviewDoc({ name: doc.name, url: doc.url || null, type: doc.type });
     setPreviewModalOpen(true);
+  };
+
+  const handleExportStage = async (round: number) => {
+    if (!selectedApplicant || !selectedApplicant.documents) return;
+    setIsExporting(round);
+
+    const stagePrefix = round === 1 ? 'r1' : round === 2 ? 'r2' : 'r3';
+    const docsToExport = selectedApplicant.documents.filter(doc => doc.slotId?.startsWith(stagePrefix) && doc.url);
+
+    if (docsToExport.length === 0) {
+      alert("No documents uploaded for this stage yet.");
+      setIsExporting(null);
+      return;
+    }
+
+    try {
+      // Create hidden link element for sequential download triggers
+      for (const doc of docsToExport) {
+        if (!doc.url) continue;
+        const link = document.createElement('a');
+        link.href = doc.url;
+        link.download = doc.name || `download_stage${round}`;
+        link.target = '_blank'; // Fail-safe to ensure it triggers
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        // Small delay to prevent browser from blocking multiple simultaneous downloads
+        await new Promise(resolve => setTimeout(resolve, 300));
+      }
+    } catch (error) {
+      console.error("Export failed:", error);
+      alert("Failed to export some documents. Check your browser's pop-up blocker.");
+    } finally {
+      setIsExporting(null);
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -299,9 +335,18 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
         </div>
 
         <div className="space-y-8">
-          <div>
-            <h3 className="text-2xl font-serif font-bold text-gkk-navy uppercase tracking-widest">Stage 1 Documents</h3>
-            <p className="text-xs text-gray-500 mt-2 font-bold uppercase tracking-widest italic opacity-60">Evaluate the initial compliance records.</p>
+          <div className="flex justify-between items-start">
+            <div>
+              <h3 className="text-2xl font-serif font-bold text-gkk-navy uppercase tracking-widest">Stage 1 Documents</h3>
+              <p className="text-xs text-gray-500 mt-2 font-bold uppercase tracking-widest italic opacity-60">Evaluate the initial compliance records.</p>
+            </div>
+            <button
+              onClick={() => handleExportStage(1)}
+              disabled={isExporting === 1}
+              className="px-6 py-3 bg-white border border-gray-200 text-gray-600 font-bold rounded-2xl hover:bg-gray-50 transition-all text-[10px] uppercase tracking-widest flex items-center gap-2 shadow-sm"
+            >
+              <Download size={14} /> {isExporting === 1 ? "Exporting..." : "Export PDFs"}
+            </button>
           </div>
           <div className="space-y-4">{renderDocumentGrid(1)}</div>
 
@@ -330,9 +375,20 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                       <div className={`w-16 h-16 rounded-3xl flex items-center justify-center transition-all ${(selectedApplicant.round2Unlocked || userRole === 'admin' || userRole === 'scd') ? 'bg-blue-600 text-white shadow-xl' : 'bg-gray-200 text-gray-400'}`}>{(selectedApplicant.round2Unlocked || userRole === 'admin' || userRole === 'scd') ? <Unlock size={28} /> : <Lock size={28} />}</div>
                       <div className="text-left"><h4 className="font-bold text-gkk-navy text-xl uppercase tracking-tighter leading-none">Stage 2 Verification</h4><p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-3">{selectedApplicant.round2Unlocked ? 'Reviewing national shortlist' : (userRole === 'admin' || userRole === 'scd') ? 'SCD Trigger Required' : 'Locked'}</p></div>
                     </div>
-                    {(userRole === 'admin' || userRole === 'scd') && (
-                      <button onClick={() => onToggleRound2 && onToggleRound2(selectedApplicant.id, !selectedApplicant.round2Unlocked)} className={`px-10 py-4 rounded-[20px] font-bold transition-all shadow-xl text-[10px] tracking-widest uppercase ${selectedApplicant.round2Unlocked ? 'bg-red-50 text-red-600 border border-red-100 hover:bg-red-100' : 'bg-gkk-gold text-gkk-navy hover:bg-gkk-navy hover:text-white'}`}>{selectedApplicant.round2Unlocked ? 'Deactivate Stage 2' : 'Activate Stage 2'}</button>
-                    )}
+                    <div className="flex items-center gap-4">
+                      {(selectedApplicant.round2Unlocked || userRole === 'admin' || userRole === 'scd') && (
+                        <button
+                          onClick={() => handleExportStage(2)}
+                          disabled={isExporting === 2}
+                          className="px-6 py-4 bg-white border border-gray-200 text-gray-600 font-bold rounded-[20px] hover:bg-gray-50 transition-all text-[10px] uppercase tracking-widest flex items-center gap-2 shadow-sm"
+                        >
+                          <Download size={16} /> {isExporting === 2 ? "Export..." : "Export PDFs"}
+                        </button>
+                      )}
+                      {(userRole === 'admin' || userRole === 'scd') && (
+                        <button onClick={() => onToggleRound2 && onToggleRound2(selectedApplicant.id, !selectedApplicant.round2Unlocked)} className={`px-10 py-4 rounded-[20px] font-bold transition-all shadow-xl text-[10px] tracking-widest uppercase ${selectedApplicant.round2Unlocked ? 'bg-red-50 text-red-600 border border-red-100 hover:bg-red-100' : 'bg-gkk-gold text-gkk-navy hover:bg-gkk-navy hover:text-white'}`}>{selectedApplicant.round2Unlocked ? 'Deactivate Stage 2' : 'Activate Stage 2'}</button>
+                      )}
+                    </div>
                   </div>
                   {(selectedApplicant.round2Unlocked || userRole === 'admin' || userRole === 'scd') && (
                     <div className="border-t border-gray-100">
@@ -350,9 +406,20 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                       <div className={`w-16 h-16 rounded-3xl flex items-center justify-center transition-all ${(selectedApplicant.round3Unlocked || userRole === 'admin' || userRole === 'scd') ? 'bg-gkk-gold text-gkk-navy shadow-xl' : 'bg-gray-200 text-gray-400'}`}>{(selectedApplicant.round3Unlocked || userRole === 'admin' || userRole === 'scd') ? <Unlock size={28} /> : <Lock size={28} />}</div>
                       <div className="text-left"><h4 className="font-bold text-gkk-navy text-xl uppercase tracking-tighter leading-none">Stage 3 Verification</h4><p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-3">{selectedApplicant.round3Unlocked ? 'National Board Final Evaluation' : (userRole === 'admin' || userRole === 'scd') ? 'SCD Trigger Required' : 'Locked'}</p></div>
                     </div>
-                    {(userRole === 'admin' || userRole === 'scd') && (
-                      <button onClick={() => onToggleRound3 && onToggleRound3(selectedApplicant.id, !selectedApplicant.round3Unlocked)} className={`px-10 py-4 rounded-[20px] font-bold transition-all shadow-xl text-[10px] tracking-widest uppercase ${selectedApplicant.round3Unlocked ? 'bg-red-50 text-red-600 border border-red-100 hover:bg-red-100' : 'bg-gkk-navy text-white hover:bg-gkk-royalBlue'}`}>{selectedApplicant.round3Unlocked ? 'Deactivate Stage 3' : 'Activate Stage 3'}</button>
-                    )}
+                    <div className="flex items-center gap-4">
+                      {(selectedApplicant.round3Unlocked || userRole === 'admin' || userRole === 'scd') && (
+                        <button
+                          onClick={() => handleExportStage(3)}
+                          disabled={isExporting === 3}
+                          className="px-6 py-4 bg-white border border-gray-200 text-gray-600 font-bold rounded-[20px] hover:bg-gray-50 transition-all text-[10px] uppercase tracking-widest flex items-center gap-2 shadow-sm"
+                        >
+                          <Download size={16} /> {isExporting === 3 ? "Export..." : "Export PDFs"}
+                        </button>
+                      )}
+                      {(userRole === 'admin' || userRole === 'scd') && (
+                        <button onClick={() => onToggleRound3 && onToggleRound3(selectedApplicant.id, !selectedApplicant.round3Unlocked)} className={`px-10 py-4 rounded-[20px] font-bold transition-all shadow-xl text-[10px] tracking-widest uppercase ${selectedApplicant.round3Unlocked ? 'bg-red-50 text-red-600 border border-red-100 hover:bg-red-100' : 'bg-gkk-navy text-white hover:bg-gkk-royalBlue'}`}>{selectedApplicant.round3Unlocked ? 'Deactivate Stage 3' : 'Activate Stage 3'}</button>
+                      )}
+                    </div>
                   </div>
                   {(selectedApplicant.round3Unlocked || userRole === 'admin' || userRole === 'scd') && (
                     <div className="border-t border-gray-100">

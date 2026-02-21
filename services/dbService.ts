@@ -2,7 +2,7 @@ import { collection, doc, setDoc, getDoc, updateDoc, query, where, getDocs, arra
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, storage } from './firebase';
 import { Applicant, ApplicantDocument, UserRole } from '../types';
-import { INITIAL_APPLICANTS } from '../constants';
+import { INITIAL_APPLICANTS, INITIAL_HALL_OF_FAME } from '../constants';
 
 // Collection references
 export const USERS_COLLECTION = 'users';
@@ -203,6 +203,30 @@ export const getApplicantByPassKey = async (passKey: string): Promise<Applicant 
 };
 
 /**
+ * Verifies an access key (Pass Key) for Evaluators/Admins
+ * Returns the evaluator's user record if valid
+ */
+export const verifyAccessKey = async (passKey: string): Promise<{ uid: string, role: UserRole } | null> => {
+    try {
+        const keysRef = collection(db, 'access_keys');
+        const q = query(keysRef, where('key', '==', passKey));
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+            const docSnap = querySnapshot.docs[0];
+            const data = docSnap.data();
+            return {
+                uid: data.uid,
+                role: data.role
+            };
+        }
+    } catch (error) {
+        console.error("Error verifying generic access key", error);
+    }
+    return null;
+};
+
+/**
  * DEVELOPMENT ONLY: Seeds the database with the initial mock applicants and evaluator accounts
  */
 export const seedFirebase = async () => {
@@ -221,9 +245,27 @@ export const seedFirebase = async () => {
             count++;
         }
 
-        // Ensure REU evaluator exists too
-        await createUserProfile('user_reu_mock', 'reu@oshe.gov.ph', 'evaluator');
-        console.log(`Successfully seeded ${count} applicants and evaluators.`);
+        // Seed Specific Role Profiles
+        await createUserProfile('user_reu_mock', 'reu@oshe.gov.ph', 'reu');
+        await createUserProfile('user_scd_mock', 'scd@oshe.gov.ph', 'scd');
+        await createUserProfile('user_admin_mock', 'admin@oshe.gov.ph', 'admin');
+        await createUserProfile('user_evaluator_mock', 'evaluator@oshe.gov.ph', 'evaluator');
+
+        // Seed Associated Access Keys
+        const keysRef = collection(db, 'access_keys');
+        await setDoc(doc(keysRef, 'key_reu'), { key: 'GKK-KEY-REU', uid: 'user_reu_mock', role: 'reu' });
+        await setDoc(doc(keysRef, 'key_scd'), { key: 'GKK-KEY-SCD', uid: 'user_scd_mock', role: 'scd' });
+        await setDoc(doc(keysRef, 'key_admin'), { key: 'GKK-KEY-ADMIN', uid: 'user_admin_mock', role: 'admin' });
+        await setDoc(doc(keysRef, 'key_eval'), { key: 'GKK-KEY-EVAL', uid: 'user_evaluator_mock', role: 'evaluator' });
+
+        // Seed Hall of Fame
+        const hofCollection = collection(db, 'hall_of_fame');
+        for (const winner of INITIAL_HALL_OF_FAME) {
+            const newDocRef = doc(hofCollection);
+            await setDoc(newDocRef, winner);
+        }
+
+        console.log(`Successfully seeded ${count} applicants, evaluators, and hall of fame.`);
         return true;
     } catch (err) {
         console.error("Failed to seed database:", err);

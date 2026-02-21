@@ -14,7 +14,7 @@ import Footer from './components/layout/Footer';
 import ChatWidget from './components/layout/ChatWidget';
 import { FileText, Calendar, Mail } from 'lucide-react';
 import { Applicant, ApplicantDocument } from './types';
-import { getApplicant, addApplicantDocument, updateApplicant, createUserProfile, createApplicant } from './services/dbService';
+import { getApplicant, addApplicantDocument, updateApplicant, createUserProfile, createApplicant, seedFirebase } from './services/dbService';
 
 // Lazy load components
 const NominationForm = lazy(() => import('./components/portal/NominationForm'));
@@ -36,6 +36,9 @@ function App() {
   const [isLoadingSession, setIsLoadingSession] = useState(true);
 
   useEffect(() => {
+    // Temporary seed execution triggered by HMR
+    seedFirebase().then(() => console.log('Successfully published seeded collections to Firebase!'));
+
     const restoreSession = async () => {
       const savedView = sessionStorage.getItem('gkk_last_view') as ViewState;
       if (savedView && ['hall-of-fame', 'nominate', 'login', 'under-development'].includes(savedView)) {

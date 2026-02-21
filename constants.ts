@@ -93,3 +93,51 @@ export const INITIAL_APPLICANTS: Applicant[] = [
     }
   }
 ];
+
+export const INITIAL_HALL_OF_FAME = [
+  {
+    category: 'Manufacturing',
+    company: 'Toyota Motor Philippines Corp.',
+    region: 'Region IV-A',
+    award: 'Presidential',
+    year: '2022',
+    sector: 'Institutional',
+    achievement: '10 Million Safe Man-Hours without LTI'
+  },
+  {
+    category: 'Construction',
+    company: 'Megawide Construction Corporation',
+    region: 'NCR',
+    award: 'Gold',
+    year: '2022',
+    sector: 'Institutional',
+    achievement: 'Excellence in High-Rise Safety Protocols'
+  },
+  {
+    category: 'Mining',
+    company: 'Philex Mining Corporation',
+    region: 'CAR',
+    award: 'Presidential',
+    year: '2020',
+    sector: 'Institutional',
+    achievement: 'Exemplary Underground Mining Safety Programs'
+  },
+  {
+    category: 'Agriculture',
+    company: 'Del Monte Philippines, Inc.',
+    region: 'Region X',
+    award: 'Silver',
+    year: '2020',
+    sector: 'Institutional',
+    achievement: 'Sustainable OSH Practices in Agribusiness'
+  },
+  {
+    category: 'Training & Consulting',
+    company: 'People360 Consulting Corporation',
+    region: 'NCR',
+    award: 'Gold',
+    year: '2022',
+    sector: 'Institutional',
+    achievement: 'Excellence in Safety Training and Testing Services'
+  }
+];
