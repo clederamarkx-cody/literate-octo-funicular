@@ -35,15 +35,16 @@ const Login: React.FC<LoginProps> = ({ onLogin, onRegisterClick, onQuickRegister
 
         try {
             if (loginMethod === 'passkey') {
+                const cleanAccessCode = accessCode.trim();
                 // First check if it's an evaluator passkey
-                const evalAccess = await verifyAccessKey(accessCode);
+                const evalAccess = await verifyAccessKey(cleanAccessCode);
                 if (evalAccess && onLogin) {
                     onLogin(evalAccess.role, evalAccess.uid);
                     return;
                 }
 
                 // Fallback to checking applicant passkey
-                const applicant = await getApplicantByPassKey(accessCode);
+                const applicant = await getApplicantByPassKey(cleanAccessCode);
                 if (applicant) {
                     if (onLogin) onLogin('applicant', applicant.id);
                 } else {
