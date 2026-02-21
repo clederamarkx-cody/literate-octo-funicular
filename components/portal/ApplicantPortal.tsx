@@ -125,7 +125,6 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadStatus, setUploadStatus] = useState<'idle' | 'uploading' | 'success'>('idle');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [uploadRemarks, setUploadRemarks] = useState('');
 
   // Toast State
   const [toast, setToast] = useState<{ message: string, type: ToastType } | null>(null);
@@ -283,7 +282,7 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
     setUploadStatus('idle');
     setUploadProgress(0);
     setSelectedFile(null);
-    setUploadRemarks('');
+    setSelectedFile(null);
     setIsUploadModalOpen(true);
   };
 
@@ -313,11 +312,10 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
         type: selectedFile.type,
         url: fileUrl,
         date: today,
-        slotId: selectedDocId || undefined,
-        remarks: uploadRemarks
+        slotId: selectedDocId || undefined
       };
 
-      setDocuments(prev => prev.map(doc => doc.id === selectedDocId ? { ...doc, status: 'uploaded', fileName: selectedFile.name, lastUpdated: today, previewUrl: fileUrl, type: selectedFile.type, remarks: uploadRemarks } : doc));
+      setDocuments(prev => prev.map(doc => doc.id === selectedDocId ? { ...doc, status: 'uploaded', fileName: selectedFile.name, lastUpdated: today, previewUrl: fileUrl, type: selectedFile.type } : doc));
 
       if (onDocumentUpload) onDocumentUpload(updatedDoc);
       setTimeout(() => handleCloseUpload(), 1500);
@@ -694,13 +692,10 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
                   </div>
                   {uploadStatus === 'idle' && (
                     <div className="space-y-4">
-                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 px-1">Upload Notes / Remarks</p>
-                      <textarea
-                        value={uploadRemarks}
-                        onChange={(e) => setUploadRemarks(e.target.value)}
-                        placeholder="Add any specific context or notes about this file..."
-                        className="w-full h-24 p-4 bg-gray-50 border border-gray-100 rounded-2xl text-sm focus:ring-4 focus:ring-gkk-gold/20 focus:border-gkk-gold outline-none transition-all resize-none"
-                      />
+                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 px-1">Selected File</p>
+                      <div className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl text-sm text-gkk-navy font-bold">
+                        {selectedFile ? selectedFile.name : 'No file selected.'}
+                      </div>
                     </div>
                   )}
                   {uploadStatus === 'uploading' && (
