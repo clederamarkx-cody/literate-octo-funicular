@@ -102,10 +102,10 @@ const OnboardingTour: React.FC<OnboardingTourProps> = ({ steps, isOpen, onComple
                 style={!isCentered ? popoverStyle : {}}
             >
                 {!isCentered && activeStep.placement === 'bottom' && (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-b-[12px] border-b-white" />
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-b-[12px] border-b-white z-10" />
                 )}
                 {!isCentered && activeStep.placement === 'top' && (
-                    <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-t-[12px] border-t-white" />
+                    <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-t-[12px] border-t-white z-10" />
                 )}
 
                 <div className="p-6">

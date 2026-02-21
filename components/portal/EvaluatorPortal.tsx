@@ -138,7 +138,8 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                 {catReqs.map((req, localIdx) => {
                   // Reconstruct the global index for the slotId to match how ApplicantPortal saves it
                   const globalIdx = activeRequirements.findIndex(r => r.label === req.label);
-                  const slotId = `r${round}-${globalIdx}`;
+                  const stagePrefix = round === 1 ? 'r1' : round === 2 ? 'r2' : 'r3';
+                  const slotId = `${stagePrefix}-${globalIdx}`;
                   const evalKey = `${selectedApplicant.id}-${round}-${req.label}`;
                   const docStatus = docEvaluations[evalKey];
                   const doc = selectedApplicant.documents?.find(d => d.slotId === slotId);
@@ -172,6 +173,41 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
             </div>
           );
         })}
+      </div>
+    );
+  };
+
+  const calculateProgress = (applicant: Applicant, round: number) => {
+    const requirements = round === 1 ? round1Requirements : round === 2 ? round2Requirements : round3Requirements;
+    const stagePrefix = round === 1 ? 'r1' : round === 2 ? 'r2' : 'r3';
+
+    if (!applicant.documents) return 0;
+
+    const uploadedCount = requirements.filter(req => {
+      const globalIdx = requirements.findIndex(r => r.label === req.label);
+      const slotId = `${stagePrefix}-${globalIdx}`;
+      return applicant.documents.some(d => d.slotId === slotId);
+    }).length;
+
+    return Math.round((uploadedCount / requirements.length) * 100);
+  };
+
+  const renderProgressBar = (applicant: Applicant, round: number) => {
+    const progress = calculateProgress(applicant, round);
+    const colorClass = round === 1 ? 'bg-gkk-navy' : round === 2 ? 'bg-blue-600' : 'bg-gkk-gold';
+
+    return (
+      <div className="w-full">
+        <div className="flex justify-between items-center mb-1.5">
+          <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Stage {round} Progress</span>
+          <span className="text-[9px] font-bold text-gray-400">{progress}%</span>
+        </div>
+        <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+          <div
+            className={`h-full ${colorClass} transition-all duration-1000 ease-out`}
+            style={{ width: `${progress}%` }}
+          />
+        </div>
       </div>
     );
   };
@@ -235,63 +271,98 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
     return (
       <div className="animate-in fade-in duration-500 space-y-8 pb-20">
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 bg-white p-6 rounded-[35px] border border-gray-200 shadow-sm sticky top-0 z-30"><div className="flex items-center gap-5"><button onClick={handleBackToList} className="p-3 bg-gray-50 text-gray-500 hover:bg-gkk-navy hover:text-white rounded-2xl transition-all border border-gray-100"><ChevronLeft size={24} /></button><div><h2 className="text-2xl font-serif font-bold text-gkk-navy leading-none uppercase tracking-tight">{selectedApplicant.name}</h2><div className="flex items-center gap-3 mt-3"><span className="bg-gray-100 px-3 py-0.5 rounded-full font-bold text-[9px] text-gray-500 uppercase tracking-widest">ID: {selectedApplicant.regId}</span><span className={`px-3 py-0.5 rounded-full text-[9px] font-bold border uppercase tracking-widest ${getStatusColor(selectedApplicant.status)}`}>{selectedApplicant.status.replace('_', ' ')}</span></div></div></div><div className="flex items-center gap-3 w-full lg:w-auto"><button onClick={onUnderDev} className="flex-1 lg:flex-none flex items-center justify-center px-6 py-3 bg-white border border-gray-200 text-gray-400 font-bold rounded-2xl hover:bg-gray-50 transition-all text-xs uppercase tracking-widest"><Save size={18} className="mr-2" /> Draft</button><button onClick={onUnderDev} className="flex-1 lg:flex-none flex items-center justify-center px-8 py-3 bg-gkk-navy text-white font-bold rounded-2xl hover:bg-gkk-royalBlue transition-all text-xs uppercase tracking-widest shadow-xl shadow-gkk-navy/20">Finalize</button></div></div>
-        <div className="bg-white rounded-[40px] border border-gray-200 shadow-sm overflow-hidden p-8"><div className="flex flex-col md:flex-row justify-between gap-10 items-start md:items-center"><div className="flex items-center space-x-6"><div className="p-4 bg-gkk-navy/5 rounded-[25px] text-gkk-navy ring-1 ring-gkk-navy/10"><Building2 size={36} /></div><div><h2 className="text-3xl font-serif font-bold text-gkk-navy leading-tight uppercase tracking-tight">{selectedApplicant.name}</h2><p className="text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em] mt-2 flex items-center gap-2"><MapPin size={12} className="text-gkk-gold" /> {selectedApplicant.region}, Philippines</p></div></div><div className="md:w-64 bg-gray-50 rounded-[30px] p-6 text-center border border-gray-100"><p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">Submission Readiness</p><div className="text-4xl font-serif font-bold text-gkk-navy">100%</div><div className="mt-3 px-4 py-1.5 bg-gkk-navy text-white rounded-full text-[9px] font-bold uppercase tracking-widest">Validated Phase 1</div></div></div></div>
-        <div className="space-y-8"><div><h3 className="text-2xl font-serif font-bold text-gkk-navy uppercase tracking-widest">Artifact Board</h3><p className="text-xs text-gray-500 mt-2 font-bold uppercase tracking-widest italic opacity-60">Mark artifacts as PASS or FAIL to complete validation.</p></div>
+        <div className="bg-white rounded-[40px] border border-gray-200 shadow-sm overflow-hidden p-8">
+          <div className="flex flex-col md:flex-row justify-between gap-10 items-start md:items-center">
+            <div className="flex items-center space-x-6">
+              <div className="p-4 bg-gkk-navy/5 rounded-[25px] text-gkk-navy ring-1 ring-gkk-navy/10"><Building2 size={36} /></div>
+              <div>
+                <h2 className="text-3xl font-serif font-bold text-gkk-navy leading-tight uppercase tracking-tight">{selectedApplicant.name}</h2>
+                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em] mt-2 flex items-center gap-2"><MapPin size={12} className="text-gkk-gold" /> {selectedApplicant.region}, Philippines</p>
+              </div>
+            </div>
+            <div className="flex gap-4 items-center">
+              <div className="w-32 bg-gray-50 rounded-[20px] p-4 text-center border border-gray-100">
+                {renderProgressBar(selectedApplicant, 1)}
+              </div>
+              {userRole !== 'reu' && (selectedApplicant.round2Unlocked || userRole === 'admin' || userRole === 'scd') && (
+                <div className="w-32 bg-gray-50 rounded-[20px] p-4 text-center border border-gray-100">
+                  {renderProgressBar(selectedApplicant, 2)}
+                </div>
+              )}
+              {userRole !== 'reu' && (selectedApplicant.round3Unlocked || userRole === 'admin' || userRole === 'scd') && (
+                <div className="w-32 bg-gray-50 rounded-[20px] p-4 text-center border border-gray-100">
+                  {renderProgressBar(selectedApplicant, 3)}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-8">
+          <div>
+            <h3 className="text-2xl font-serif font-bold text-gkk-navy uppercase tracking-widest">Stage 1 Documents</h3>
+            <p className="text-xs text-gray-500 mt-2 font-bold uppercase tracking-widest italic opacity-60">Evaluate the initial compliance records.</p>
+          </div>
           <div className="space-y-4">{renderDocumentGrid(1)}</div>
 
-          <div className="space-y-4">
-            <div className={`rounded-[40px] border transition-all duration-300 overflow-hidden ${(selectedApplicant.round2Unlocked || userRole === 'admin' || userRole === 'scd') ? 'bg-white border-gray-200 shadow-xl' : 'bg-gray-50 border-gray-100 opacity-60'}`}>
-              <div className="p-10 flex flex-col md:flex-row items-center justify-between gap-8">
-                <div className="flex items-center space-x-8">
-                  <div className={`w-16 h-16 rounded-3xl flex items-center justify-center transition-all ${(selectedApplicant.round2Unlocked || userRole === 'admin' || userRole === 'scd') ? 'bg-gkk-gold text-gkk-navy shadow-xl' : 'bg-gray-200 text-gray-400'}`}>{(selectedApplicant.round2Unlocked || userRole === 'admin' || userRole === 'scd') ? <Unlock size={28} /> : <Lock size={28} />}</div>
-                  <div className="text-left"><h4 className="font-bold text-gkk-navy text-xl uppercase tracking-tighter leading-none">Phase 2 Verification</h4><p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-3">{selectedApplicant.round2Unlocked ? 'Reviewing national shortlist' : (userRole === 'admin' || userRole === 'scd') ? 'Preview Mode (System Authorized)' : 'Region 1 Review pending'}</p></div>
-                </div>
-                <button onClick={() => onToggleRound2 && onToggleRound2(selectedApplicant.id, !selectedApplicant.round2Unlocked)} className={`px-10 py-4 rounded-[20px] font-bold transition-all shadow-xl text-[10px] tracking-widest uppercase ${selectedApplicant.round2Unlocked ? 'bg-red-50 text-red-600 border border-red-100 hover:bg-red-100' : 'bg-gkk-gold text-gkk-navy hover:bg-white'}`}>{selectedApplicant.round2Unlocked ? 'Deactivate Round 2' : 'Authorize Round 2'}</button>
+          {userRole === 'reu' && (
+            <div className="bg-white rounded-[30px] p-8 border border-gkk-navy/10 shadow-xl flex items-center justify-between">
+              <div>
+                <h4 className="font-bold text-gkk-navy text-lg uppercase">REU Verification</h4>
+                <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mt-1">Mark this profile as passed for Regional review.</p>
               </div>
-              {(selectedApplicant.round2Unlocked || userRole === 'admin' || userRole === 'scd') && (
-                <div className="border-t border-gray-100">
-                  <button onClick={() => setRound2Open(!round2Open)} className="w-full py-5 bg-gray-50/50 hover:bg-gray-100 transition-colors flex items-center justify-center text-[10px] font-bold text-gray-400 uppercase tracking-[0.4em]">{(round2Open || userRole === 'admin' || userRole === 'scd') ? 'Collapse Records' : 'Review Records'}{(round2Open || userRole === 'admin' || userRole === 'scd') ? <ChevronUp size={16} className="ml-2" /> : <ChevronDown size={16} className="ml-2" />}</button>
-                  <div className={`transition-all duration-700 ease-in-out ${(round2Open || userRole === 'admin' || userRole === 'scd') ? 'max-h-[2000px] p-10 bg-white' : 'max-h-0 overflow-hidden'}`}>{renderDocumentGrid(2)}</div>
-                </div>
-              )}
+              <button
+                onClick={() => onToggleRound2 && onToggleRound2(selectedApplicant.id, true)}
+                className={`px-10 py-4 rounded-2xl font-bold uppercase tracking-widest text-xs transition-all shadow-lg ${selectedApplicant.stage1PassedByReu ? 'bg-green-100 text-green-600 cursor-default' : 'bg-gkk-gold text-gkk-navy hover:bg-gkk-navy hover:text-white'}`}
+                disabled={selectedApplicant.stage1PassedByReu}
+              >
+                {selectedApplicant.stage1PassedByReu ? 'Passed' : 'Mark as Passed'}
+              </button>
             </div>
-          </div>
+          )}
 
-          <div className="space-y-4">
-            <div className={`rounded-[40px] border transition-all duration-300 overflow-hidden ${(selectedApplicant.round3Unlocked || userRole === 'admin' || userRole === 'scd') ? 'bg-white border-gray-200 shadow-xl' : 'bg-gray-50 border-gray-100 opacity-60'}`}>
-              <div className="p-10 flex flex-col md:flex-row items-center justify-between gap-8">
-                <div className="flex items-center space-x-8">
-                  <div className={`w-16 h-16 rounded-3xl flex items-center justify-center transition-all ${(selectedApplicant.round3Unlocked || userRole === 'admin' || userRole === 'scd') ? 'bg-gkk-navy text-white shadow-xl' : 'bg-gray-200 text-gray-400'}`}>{(selectedApplicant.round3Unlocked || userRole === 'admin' || userRole === 'scd') ? <Unlock size={28} /> : <Lock size={28} />}</div>
-                  <div className="text-left">
-                    <h4 className="font-bold text-gkk-navy text-xl uppercase tracking-tighter leading-none">Stage 3 Verification</h4>
-                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-3">
-                      {selectedApplicant.round3Unlocked ? 'National Board Final Evaluation' : (userRole === 'scd' || userRole === 'admin') ? 'Preview Mode (Master Authority)' : 'Pending Team Leader Approval'}
-                    </p>
+          {userRole !== 'reu' && (
+            <>
+              <div className="space-y-4">
+                <div className={`rounded-[40px] border transition-all duration-300 overflow-hidden ${(selectedApplicant.round2Unlocked || userRole === 'admin' || userRole === 'scd') ? 'bg-white border-gray-200 shadow-xl' : 'bg-gray-50 border-gray-100 opacity-60'}`}>
+                  <div className="p-10 flex flex-col md:flex-row items-center justify-between gap-8">
+                    <div className="flex items-center space-x-8">
+                      <div className={`w-16 h-16 rounded-3xl flex items-center justify-center transition-all ${(selectedApplicant.round2Unlocked || userRole === 'admin' || userRole === 'scd') ? 'bg-blue-600 text-white shadow-xl' : 'bg-gray-200 text-gray-400'}`}>{(selectedApplicant.round2Unlocked || userRole === 'admin' || userRole === 'scd') ? <Unlock size={28} /> : <Lock size={28} />}</div>
+                      <div className="text-left"><h4 className="font-bold text-gkk-navy text-xl uppercase tracking-tighter leading-none">Stage 2 Verification</h4><p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-3">{selectedApplicant.round2Unlocked ? 'Reviewing national shortlist' : (userRole === 'admin' || userRole === 'scd') ? 'SCD Trigger Required' : 'Locked'}</p></div>
+                    </div>
+                    {(userRole === 'admin' || userRole === 'scd') && (
+                      <button onClick={() => onToggleRound2 && onToggleRound2(selectedApplicant.id, !selectedApplicant.round2Unlocked)} className={`px-10 py-4 rounded-[20px] font-bold transition-all shadow-xl text-[10px] tracking-widest uppercase ${selectedApplicant.round2Unlocked ? 'bg-red-50 text-red-600 border border-red-100 hover:bg-red-100' : 'bg-gkk-gold text-gkk-navy hover:bg-gkk-navy hover:text-white'}`}>{selectedApplicant.round2Unlocked ? 'Deactivate Stage 2' : 'Activate Stage 2'}</button>
+                    )}
                   </div>
+                  {(selectedApplicant.round2Unlocked || userRole === 'admin' || userRole === 'scd') && (
+                    <div className="border-t border-gray-100">
+                      <button onClick={() => setRound2Open(!round2Open)} className="w-full py-5 bg-gray-50/50 hover:bg-gray-100 transition-colors flex items-center justify-center text-[10px] font-bold text-gray-400 uppercase tracking-[0.4em]">{(round2Open || userRole === 'admin' || userRole === 'scd') ? 'Collapse Records' : 'Review Records'}{(round2Open || userRole === 'admin' || userRole === 'scd') ? <ChevronUp size={16} className="ml-2" /> : <ChevronDown size={16} className="ml-2" />}</button>
+                      <div className={`transition-all duration-700 ease-in-out ${(round2Open || userRole === 'admin' || userRole === 'scd') ? 'max-h-[2000px] p-10 bg-white' : 'max-h-0 overflow-hidden'}`}>{renderDocumentGrid(2)}</div>
+                    </div>
+                  )}
                 </div>
-
-                {(userRole === 'scd' || userRole === 'admin') ? (
-                  <button
-                    onClick={() => onToggleRound3 && onToggleRound3(selectedApplicant.id, !selectedApplicant.round3Unlocked)}
-                    className={`px-10 py-4 rounded-[20px] font-bold transition-all shadow-xl text-[10px] tracking-widest uppercase ${selectedApplicant.round3Unlocked ? 'bg-red-50 text-red-600 border border-red-100 hover:bg-red-100' : 'bg-gkk-navy text-white hover:bg-gkk-royalBlue'}`}
-                  >
-                    {selectedApplicant.round3Unlocked ? 'Deactivate Stage 3' : 'Proceed to Stage 3'}
-                  </button>
-                ) : (
-                  <div className="px-6 py-4 bg-gray-100 rounded-2xl text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                    Restricted to SCD Team Leader
-                  </div>
-                )}
               </div>
-              {(selectedApplicant.round3Unlocked || userRole === 'admin' || userRole === 'scd') && (
-                <div className="border-t border-gray-100">
-                  <div className="p-10 bg-white">
-                    {renderDocumentGrid(3)}
+
+              <div className="space-y-4">
+                <div className={`rounded-[40px] border transition-all duration-300 overflow-hidden ${(selectedApplicant.round3Unlocked || userRole === 'admin' || userRole === 'scd') ? 'bg-white border-gray-200 shadow-xl' : 'bg-gray-50 border-gray-100 opacity-60'}`}>
+                  <div className="p-10 flex flex-col md:flex-row items-center justify-between gap-8">
+                    <div className="flex items-center space-x-8">
+                      <div className={`w-16 h-16 rounded-3xl flex items-center justify-center transition-all ${(selectedApplicant.round3Unlocked || userRole === 'admin' || userRole === 'scd') ? 'bg-gkk-gold text-gkk-navy shadow-xl' : 'bg-gray-200 text-gray-400'}`}>{(selectedApplicant.round3Unlocked || userRole === 'admin' || userRole === 'scd') ? <Unlock size={28} /> : <Lock size={28} />}</div>
+                      <div className="text-left"><h4 className="font-bold text-gkk-navy text-xl uppercase tracking-tighter leading-none">Stage 3 Verification</h4><p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-3">{selectedApplicant.round3Unlocked ? 'National Board Final Evaluation' : (userRole === 'admin' || userRole === 'scd') ? 'SCD Trigger Required' : 'Locked'}</p></div>
+                    </div>
+                    {(userRole === 'admin' || userRole === 'scd') && (
+                      <button onClick={() => onToggleRound3 && onToggleRound3(selectedApplicant.id, !selectedApplicant.round3Unlocked)} className={`px-10 py-4 rounded-[20px] font-bold transition-all shadow-xl text-[10px] tracking-widest uppercase ${selectedApplicant.round3Unlocked ? 'bg-red-50 text-red-600 border border-red-100 hover:bg-red-100' : 'bg-gkk-navy text-white hover:bg-gkk-royalBlue'}`}>{selectedApplicant.round3Unlocked ? 'Deactivate Stage 3' : 'Activate Stage 3'}</button>
+                    )}
                   </div>
+                  {(selectedApplicant.round3Unlocked || userRole === 'admin' || userRole === 'scd') && (
+                    <div className="border-t border-gray-100">
+                      <div className="p-10 bg-white">{renderDocumentGrid(3)}</div>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-          </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
     );

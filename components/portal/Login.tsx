@@ -44,7 +44,11 @@ const Login: React.FC<LoginProps> = ({ onLogin, onRegisterClick, onQuickRegister
             } else {
                 // Email/Password login logic
                 if (email === 'abyguel@scd.com' && password === 'scd123') {
-                    if (onLogin) onLogin('applicant', 'user_abyguel_mock');
+                    if (onLogin) onLogin('evaluator', 'user_abyguel_mock');
+                    return;
+                }
+                if (email === 'reu@oshe.gov.ph' && password === 'reu123') {
+                    if (onLogin) onLogin('evaluator', 'user_reu_mock');
                     return;
                 }
 

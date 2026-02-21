@@ -100,14 +100,14 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
     },
     {
       targetId: "documents-section",
-      title: "Evidence Repository",
-      content: "Upload your mandatory Compliance and Legal reports here. Once verified, they will be locked and sent directly to your Regional Board.",
+      title: "Stage 1 Submission",
+      content: "Upload your mandatory Compliance and Legal reports here. Once Stage 2 is triggered, these will be locked and sent to the Regional Board.",
       placement: "top"
     },
     {
       targetId: "round-2-lock",
-      title: "Round 2 Submission",
-      content: "This section is currently locked. It will automatically unlock once the Technical Board fully approves your Round 1 documents.",
+      title: "Stage 2 Submission",
+      content: "This section automatically unlocks once the Technical Board fully approves your Stage 1 documents.",
       placement: "top"
     }
   ];
@@ -125,6 +125,7 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadStatus, setUploadStatus] = useState<'idle' | 'uploading' | 'success'>('idle');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploadRemarks, setUploadRemarks] = useState('');
 
   // Toast State
   const [toast, setToast] = useState<{ message: string, type: ToastType } | null>(null);
@@ -243,7 +244,8 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
             fileName: savedDoc.name,
             lastUpdated: savedDoc.date || '-',
             previewUrl: savedDoc.url || null,
-            type: savedDoc.type || ''
+            type: savedDoc.type || '',
+            remarks: savedDoc.remarks || ''
           };
         }
         return doc;
@@ -257,20 +259,31 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
     { id: 'OSH Systems', name: 'OSH Management', icon: ShieldCheck },
   ];
 
-  const round1Docs = documents.filter(d => d.round === 1);
-  const completedRound1 = round1Docs.filter(d => d.status === 'uploaded').length;
-  const round1Progress = Math.round((completedRound1 / round1Docs.length) * 100);
+  const getProgress = (round: number) => {
+    const roundDocs = documents.filter(d => d.round === round);
+    if (roundDocs.length === 0) return 0;
+    const completed = roundDocs.filter(d => d.status === 'uploaded').length;
+    return Math.round((completed / roundDocs.length) * 100);
+  };
+
+  const stage1Progress = getProgress(1);
+  const stage2Progress = getProgress(2);
+  const stage3Progress = getProgress(3);
 
   const handleOpenUpload = (id: string) => {
     const doc = documents.find(d => d.id === id);
     if (doc?.status === 'uploaded') {
-      setToast({ message: "This document is already uploaded and locked.", type: 'info' });
-      return;
+      const isLocked = (doc.round === 1 && applicantData?.round2Unlocked) || (doc.round === 2 && applicantData?.round3Unlocked);
+      if (isLocked) {
+        setToast({ message: `Stage ${doc.round} is now locked for board evaluation.`, type: 'info' });
+        return;
+      }
     }
     setSelectedDocId(id);
     setUploadStatus('idle');
     setUploadProgress(0);
     setSelectedFile(null);
+    setUploadRemarks('');
     setIsUploadModalOpen(true);
   };
 
@@ -295,8 +308,18 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
       setUploadStatus('success');
 
       const today = new Date().toLocaleDateString();
-      setDocuments(prev => prev.map(doc => doc.id === selectedDocId ? { ...doc, status: 'uploaded', fileName: selectedFile.name, lastUpdated: today, previewUrl: fileUrl, type: selectedFile.type } : doc));
-      if (onDocumentUpload) onDocumentUpload({ name: selectedFile.name, type: selectedFile.type, url: fileUrl, date: today, slotId: selectedDocId || undefined });
+      const updatedDoc: ApplicantDocument = {
+        name: selectedFile.name,
+        type: selectedFile.type,
+        url: fileUrl,
+        date: today,
+        slotId: selectedDocId || undefined,
+        remarks: uploadRemarks
+      };
+
+      setDocuments(prev => prev.map(doc => doc.id === selectedDocId ? { ...doc, status: 'uploaded', fileName: selectedFile.name, lastUpdated: today, previewUrl: fileUrl, type: selectedFile.type, remarks: uploadRemarks } : doc));
+
+      if (onDocumentUpload) onDocumentUpload(updatedDoc);
       setTimeout(() => handleCloseUpload(), 1500);
     } catch (e) {
       console.error("Firebase Storage Upload Failed", e);
@@ -311,7 +334,7 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
   };
 
   const handleFinalSubmit = () => {
-    if (round1Progress < 100) {
+    if (stage1Progress < 100) {
       setToast({ message: "Incomplete Submission. Please upload all required documents.", type: 'warning' });
       return;
     }
@@ -358,7 +381,7 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
                   {doc.fileName && <p className="text-[11px] text-blue-600 truncate mb-3">{doc.fileName}</p>}
 
                   <div className="flex gap-2 mt-3">
-                    {doc.status === 'uploaded' ? (
+                    {doc.status === 'uploaded' && applicantData?.round2Unlocked ? (
                       <div className="flex-1 flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-400 rounded text-xs font-bold cursor-not-allowed">
                         <Lock size={12} />
                         <span>Locked</span>
@@ -366,10 +389,10 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
                     ) : (
                       <button
                         onClick={() => handleOpenUpload(doc.id)}
-                        className="flex-1 py-1.5 bg-gkk-navy text-white hover:bg-gkk-royalBlue rounded text-xs font-bold transition-all flex items-center justify-center gap-2"
+                        className={`flex-1 py-1.5 ${doc.status === 'uploaded' ? 'bg-gkk-gold/20 text-gkk-navy hover:bg-gkk-gold/30' : 'bg-gkk-navy text-white hover:bg-gkk-royalBlue'} rounded text-xs font-bold transition-all flex items-center justify-center gap-2`}
                       >
                         <Upload size={12} />
-                        <span>Upload</span>
+                        <span>{doc.status === 'uploaded' ? 'Re-upload' : 'Upload'}</span>
                       </button>
                     )}
                     {doc.status === 'uploaded' && (
@@ -378,6 +401,12 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
                       </button>
                     )}
                   </div>
+                  {doc.remarks && (
+                    <div className="mt-3 p-2 bg-gray-50 rounded border border-gray-100">
+                      <p className="text-[10px] font-bold text-gray-400 uppercase mb-1">Remarks</p>
+                      <p className="text-[11px] text-gray-600 italic">"{doc.remarks}"</p>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -388,6 +417,28 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
   );
 
   const circumference = 226.2;
+
+  const renderProgressBar = (round: number) => {
+    const progress = getProgress(round);
+    const label = round === 1 ? 'Technical' : round === 2 ? 'Shortlist' : 'Final Board';
+    const colorClass = round === 1 ? 'bg-gkk-gold' : round === 2 ? 'bg-blue-600' : 'bg-gkk-navy';
+    const locked = round === 2 ? !applicantData?.round2Unlocked : round === 3 ? !applicantData?.round3Unlocked : false;
+
+    return (
+      <div className={`w-full ${locked ? 'opacity-40' : ''}`}>
+        <div className="flex justify-between items-center mb-1.5">
+          <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Stage {round}: {label}</span>
+          <span className="text-[9px] font-bold text-gkk-navy">{progress}%</span>
+        </div>
+        <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+          <div
+            className={`h-full ${colorClass} transition-all duration-1000 ease-out`}
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="flex h-screen bg-gray-50 font-sans overflow-hidden page-transition">
@@ -430,7 +481,7 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
           <div className="flex items-center text-xs text-gray-500 font-bold uppercase tracking-wider">
             <span>Nomination Portal</span>
             <ChevronRight size={14} className="mx-2" />
-            <span className="text-gkk-navy">{activeTab === 'dashboard' ? 'Summary' : 'Record Verification'}</span>
+            <span className="text-gkk-navy">{activeTab === 'dashboard' ? 'Summary' : 'Stage 1 Verification'}</span>
           </div>
 
           <div className="flex items-center space-x-4">
@@ -510,16 +561,22 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
                           <div className="space-y-2"><span className="text-[10px] font-bold text-gray-400 uppercase block">Safety Focal</span><div className="flex items-center gap-2 text-sm font-bold text-gkk-navy"><HardHat size={16} className="text-gkk-gold" /> {profileData.safetyOfficer}</div></div>
                         </div>
                       </div>
-                      <div id="readiness-meter" className="md:w-72 bg-gradient-to-br from-gray-50 to-white rounded-3xl p-8 flex flex-col justify-center items-center text-center border border-gray-100 shadow-inner">
-                        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-6">READINESS</p>
-                        <div className="relative w-28 h-28 flex items-center justify-center mb-6">
-                          <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-                            <circle cx="50" cy="50" r="36" stroke="currentColor" strokeWidth="8" fill="transparent" className="text-gray-100" />
-                            <circle cx="50" cy="50" r="36" stroke="currentColor" strokeWidth="8" fill="transparent" className="text-gkk-gold transition-all duration-1000" strokeDasharray={circumference} strokeDashoffset={circumference - (circumference * round1Progress) / 100} strokeLinecap="round" />
-                          </svg>
-                          <span className="absolute text-2xl font-bold text-gkk-navy">{round1Progress}%</span>
+                      <div id="readiness-meter" className="md:w-80 bg-gradient-to-br from-gray-50 to-white rounded-3xl p-8 flex flex-col justify-center border border-gray-100 shadow-inner space-y-6">
+                        <div className="text-center">
+                          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Submission Progress</p>
+                          <div className="relative w-28 h-28 flex items-center justify-center mx-auto mb-4">
+                            <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                              <circle cx="50" cy="50" r="36" stroke="currentColor" strokeWidth="8" fill="transparent" className="text-gray-100" />
+                              <circle cx="50" cy="50" r="36" stroke="currentColor" strokeWidth="8" fill="transparent" className="text-gkk-gold transition-all duration-1000" strokeDasharray={circumference} strokeDashoffset={circumference - (circumference * stage1Progress) / 100} strokeLinecap="round" />
+                            </svg>
+                            <span className="absolute text-2xl font-bold text-gkk-navy">{stage1Progress}%</span>
+                          </div>
+                          <div className="inline-flex items-center gap-2 bg-gkk-navy text-white px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest">Stage 1 Readiness</div>
                         </div>
-                        <div className="flex items-center gap-2 bg-gkk-navy text-white px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest">Technical Verification</div>
+                        <div className="space-y-4 pt-4 border-t border-gray-100">
+                          {renderProgressBar(2)}
+                          {renderProgressBar(3)}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -527,7 +584,7 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
 
                 <div id="documents-section" className="space-y-8">
                   <div>
-                    <h3 className="text-2xl font-serif font-bold text-gkk-navy uppercase tracking-widest">Cycle Evidence Repository</h3>
+                    <h3 className="text-2xl font-serif font-bold text-gkk-navy uppercase tracking-widest">Stage 1 Submission</h3>
                     <div className="flex items-center gap-3 mt-4">
                       <button onClick={onUnderDev} className="flex items-center px-4 py-2 bg-white text-gray-700 font-bold rounded-lg text-xs border border-gray-300 hover:bg-gray-50 transition-all"><Download size={14} className="mr-2" /> Templates</button>
                     </div>
@@ -538,7 +595,7 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
                       <button onClick={() => applicantData?.round2Unlocked && setRound2Open(!round2Open)} disabled={!applicantData?.round2Unlocked} className={`w-full p-8 flex items-center justify-between group transition-colors ${applicantData?.round2Unlocked ? 'cursor-pointer hover:bg-blue-50/20' : 'cursor-not-allowed'}`}>
                         <div className="flex items-center space-x-6">
                           <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all ${applicantData?.round2Unlocked ? 'bg-blue-600 text-white shadow-lg' : 'bg-gray-200 text-gray-400'}`}>{applicantData?.round2Unlocked ? <Unlock size={24} /> : <Lock size={24} />}</div>
-                          <div className="text-left"><div className="flex items-center gap-3"><div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${applicantData?.round2Unlocked ? 'bg-gkk-navy text-white' : 'bg-gray-300 text-white'}`}>2</div><h4 className="font-bold text-gkk-navy text-xl leading-none">Round 2 Submission</h4></div><p className="text-xs text-gray-500 mt-2 font-bold uppercase tracking-widest">{applicantData?.round2Unlocked ? 'Unlocked - Technical Board' : 'Locked'}</p></div>
+                          <div className="text-left"><div className="flex items-center gap-3"><div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${applicantData?.round2Unlocked ? 'bg-gkk-navy text-white' : 'bg-gray-300 text-white'}`}>2</div><h4 className="font-bold text-gkk-navy text-xl leading-none">Stage 2 Submission</h4></div><p className="text-xs text-gray-500 mt-2 font-bold uppercase tracking-widest">{applicantData?.round2Unlocked ? 'Unlocked - Technical Board' : 'Locked'}</p></div>
                         </div>
                         {applicantData?.round2Unlocked && (
                           <div className="flex items-center space-x-3 text-blue-600 bg-blue-50 px-5 py-2 rounded-2xl font-bold uppercase tracking-widest text-[10px] group-hover:bg-blue-600 group-hover:text-white transition-all"><span>{round2Open ? 'Hide' : 'Review'}</span>{round2Open ? <ChevronUp size={16} /> : <ChevronDown size={16} />}</div>
@@ -595,8 +652,8 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
                           </div>
                         </div>
                         <div className="flex flex-col lg:flex-row justify-between items-center gap-8 bg-gray-50/50 p-6 rounded-3xl border border-gray-100">
-                          <div className="flex items-center gap-4 text-xs text-gray-400 font-bold uppercase tracking-widest"><Clock size={18} className="text-gkk-gold" /><span>{round1Progress === 100 ? 'Records Ready' : 'Pending Uploads'}</span></div>
-                          <button onClick={handleFinalSubmit} disabled={round1Progress < 100} className="flex items-center justify-center px-12 py-5 bg-gradient-to-r from-gkk-navy to-gkk-royalBlue text-white font-bold rounded-2xl shadow-2xl hover:shadow-gkk-navy/40 hover:-translate-y-1 transition-all disabled:opacity-30 disabled:cursor-not-allowed min-w-[320px] group text-sm uppercase tracking-widest"><Send size={20} className="mr-3 group-hover:translate-x-1 transition-transform" />Submit</button>
+                          <div className="flex items-center gap-4 text-xs text-gray-400 font-bold uppercase tracking-widest"><Clock size={18} className="text-gkk-gold" /><span>{stage1Progress === 100 ? 'Records Ready' : 'Pending Uploads'}</span></div>
+                          <button onClick={handleFinalSubmit} disabled={stage1Progress < 100} className="flex items-center justify-center px-12 py-5 bg-gradient-to-r from-gkk-navy to-gkk-royalBlue text-white font-bold rounded-2xl shadow-2xl hover:shadow-gkk-navy/40 hover:-translate-y-1 transition-all disabled:opacity-30 disabled:cursor-not-allowed min-w-[320px] group text-sm uppercase tracking-widest"><Send size={20} className="mr-3 group-hover:translate-x-1 transition-transform" />Submit</button>
                         </div>
                       </div>
                     </div>
@@ -635,6 +692,17 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
                       <p className="text-sm font-bold text-gkk-navy uppercase tracking-widest">{selectedFile ? selectedFile.name : 'Select Artifact'}</p>
                     </div>
                   </div>
+                  {uploadStatus === 'idle' && (
+                    <div className="space-y-4">
+                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 px-1">Upload Notes / Remarks</p>
+                      <textarea
+                        value={uploadRemarks}
+                        onChange={(e) => setUploadRemarks(e.target.value)}
+                        placeholder="Add any specific context or notes about this file..."
+                        className="w-full h-24 p-4 bg-gray-50 border border-gray-100 rounded-2xl text-sm focus:ring-4 focus:ring-gkk-gold/20 focus:border-gkk-gold outline-none transition-all resize-none"
+                      />
+                    </div>
+                  )}
                   {uploadStatus === 'uploading' && (
                     <div className="space-y-3"><div className="flex justify-between text-[10px] font-bold text-gray-400 uppercase tracking-widest"><span>Encrypting...</span><span>{uploadProgress}%</span></div><div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden"><div className="bg-gkk-gold h-full transition-all duration-300" style={{ width: `${uploadProgress}%` }}></div></div></div>
                   )}

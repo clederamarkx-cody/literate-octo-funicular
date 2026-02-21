@@ -22,10 +22,11 @@ const Login = lazy(() => import('./components/portal/Login'));
 const ApplicantPortal = lazy(() => import('./components/portal/ApplicantPortal'));
 
 const HallOfFame = lazy(() => import('./components/portal/HallOfFame'));
+const EvaluatorPortal = lazy(() => import('./components/portal/EvaluatorPortal'));
 const UnderDevelopment = lazy(() => import('./components/UnderDevelopment'));
 
 
-type ViewState = 'home' | 'nominate' | 'login' | 'applicant-portal' | 'hall-of-fame' | 'under-development';
+type ViewState = 'home' | 'nominate' | 'login' | 'applicant-portal' | 'evaluator-portal' | 'hall-of-fame' | 'under-development';
 
 function App() {
   const [view, setView] = useState<ViewState>('home');
@@ -54,6 +55,8 @@ function App() {
             } else {
               sessionStorage.removeItem('gkk_session');
             }
+          } else if (role === 'evaluator') {
+            setView('evaluator-portal');
           }
         } catch (e) {
           sessionStorage.removeItem('gkk_session');
@@ -231,6 +234,8 @@ function App() {
                     setCurrentApplicantId(uid);
                     navigateTo('applicant-portal');
                   }
+                } else if (role === 'evaluator') {
+                  navigateTo('evaluator-portal');
                 }
               }}
             />
@@ -245,6 +250,19 @@ function App() {
               applicantData={currentApplicant}
               onDocumentUpload={handleDocumentUpload}
               onUpdateApplicant={handleUpdateApplicant}
+            />
+          </Suspense>
+        )}
+
+        {view === 'evaluator-portal' && (
+          <Suspense fallback={<div className="flex justify-center items-center h-screen">Loading...</div>}>
+            <EvaluatorPortal
+              onLogout={handleLogout}
+              onUnderDev={() => navigateTo('under-development')}
+              applicants={applicants}
+              userRole={JSON.parse(sessionStorage.getItem('gkk_session') || '{}').uid === 'user_abyguel_mock' ? 'scd' : 'reu'}
+              onToggleRound2={handleToggleRound2}
+              onToggleRound3={handleToggleRound3}
             />
           </Suspense>
         )}

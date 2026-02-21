@@ -26,6 +26,7 @@ export interface ApplicantDocument {
   url?: string;
   date?: string;
   slotId?: string;
+  remarks?: string;
 }
 
 export interface Applicant {
@@ -40,6 +41,9 @@ export interface Applicant {
   documents: ApplicantDocument[];
   round2Unlocked?: boolean;
   round3Unlocked?: boolean;
+  stage1PassedByReu?: boolean;
+  stage2TriggeredByScd?: boolean;
+  stage3TriggeredByScd?: boolean;
   details?: {
     employees?: string;
     address?: string;
