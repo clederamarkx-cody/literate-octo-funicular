@@ -91,6 +91,32 @@ export const INITIAL_APPLICANTS: Applicant[] = [
       phone: '+63 999 888 7777',
       safetyOfficer: 'Abyguel'
     }
+  },
+  {
+    id: 'nominee_open',
+    regId: 'NOM-OPEN-STAGES',
+    name: 'Universal Safety Innovators (Demo)',
+    industry: 'Technology',
+    region: 'NCR',
+    status: 'in_progress',
+    submittedDate: 'Nov 01, 2024',
+    round2Unlocked: true,
+    round3Unlocked: true,
+    stage1PassedByReu: true,
+    stage2TriggeredByScd: true,
+    stage3TriggeredByScd: true,
+    documents: [
+      { name: 'OSH_Policy_Signed.pdf', type: 'application/pdf' }
+    ],
+    details: {
+      employees: '120',
+      address: 'Cyberpark, BGC, Taguig City',
+      representative: 'Juan O. Tech',
+      designation: 'EHS Lead',
+      email: 'juan.tech@universalsafety.demo',
+      phone: '+63 917 000 0000',
+      safetyOfficer: 'Engr. Techie'
+    }
   }
 ];
 
