@@ -199,6 +199,105 @@ export const INITIAL_APPLICANTS: Applicant[] = [
       phone: '+63 917 000 0000',
       safetyOfficer: 'Engr. Techie'
     }
+  },
+  {
+    id: 'nominee_7_stage1_pending',
+    regId: 'NOM-2024-007',
+    name: 'Summit Mining Corp',
+    industry: 'Mining',
+    region: 'Region XIII',
+    status: 'pending',
+    submittedDate: 'Oct 20, 2024',
+    round2Unlocked: false,
+    documents: [
+      { name: 'Environmental_Compliance_Cert.pdf', type: 'application/pdf' }
+    ],
+    details: {
+      employees: '1200',
+      address: 'Surigao del Sur',
+      representative: 'Luis Mercado',
+      designation: 'Operations Head',
+      email: 'luis@summitmining.demo',
+      phone: '+63 922 111 2222',
+      safetyOfficer: 'Engr. Jhonnel'
+    }
+  },
+  {
+    id: 'nominee_8_stage2_active',
+    regId: 'NOM-2024-008',
+    name: 'Blue Wave Shipping',
+    industry: 'Logistics',
+    region: 'Region VII',
+    status: 'in_progress',
+    submittedDate: 'Oct 25, 2024',
+    round2Unlocked: true,
+    stage1PassedByReu: true,
+    stage2TriggeredByScd: true,
+    documents: [
+      { name: 'Maritime_Safety_Audit.pdf', type: 'application/pdf' }
+    ],
+    details: {
+      employees: '500',
+      address: 'Pier 4, Cebu City',
+      representative: 'Capt. Antonio',
+      designation: 'Fleet Manager',
+      email: 'antonio@bluewave.demo',
+      phone: '+63 923 333 4444',
+      safetyOfficer: 'Engr. Marina'
+    }
+  },
+  {
+    id: 'nominee_9_stage3_active',
+    regId: 'NOM-2024-009',
+    name: 'Eco-Foods Manufacturing',
+    industry: 'Manufacturing',
+    region: 'Region IV-A',
+    status: 'in_progress',
+    submittedDate: 'Nov 05, 2024',
+    round2Unlocked: true,
+    round3Unlocked: true,
+    stage1PassedByReu: true,
+    stage2TriggeredByScd: true,
+    stage3TriggeredByScd: true,
+    documents: [
+      { name: 'HACCP_Certification.pdf', type: 'application/pdf' }
+    ],
+    details: {
+      employees: '850',
+      address: 'Carmona Industrial Park',
+      representative: 'Grace Lim',
+      designation: 'Plant Director',
+      email: 'grace@ecofoods.demo',
+      phone: '+63 924 555 6666',
+      safetyOfficer: 'Engr. Paolo'
+    }
+  },
+  {
+    id: 'nominee_10_completed_fail',
+    regId: 'NOM-2024-010',
+    name: 'Apex Construction Builders',
+    industry: 'Construction',
+    region: 'NCR',
+    status: 'completed',
+    verdict: 'Fail',
+    submittedDate: 'Nov 10, 2024',
+    round2Unlocked: true,
+    round3Unlocked: true,
+    stage1PassedByReu: true,
+    stage2TriggeredByScd: true,
+    stage3TriggeredByScd: true,
+    documents: [
+      { name: 'Final_Assessment_Report.pdf', type: 'application/pdf' }
+    ],
+    details: {
+      employees: '600',
+      address: 'Ortigas Center, Pasig',
+      representative: 'Mark Reyes',
+      designation: 'Project Director',
+      email: 'mark@apex.demo',
+      phone: '+63 925 777 8888',
+      safetyOfficer: 'Engr. Dennis'
+    }
   }
 ];
 
