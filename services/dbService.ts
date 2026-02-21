@@ -201,3 +201,32 @@ export const getApplicantByPassKey = async (passKey: string): Promise<Applicant 
 
     return null;
 };
+
+/**
+ * DEVELOPMENT ONLY: Seeds the database with the initial mock applicants and evaluator accounts
+ */
+export const seedFirebase = async () => {
+    try {
+        console.log("Seeding Firebase database...");
+        let count = 0;
+
+        for (const applicant of INITIAL_APPLICANTS) {
+            // Create user profile
+            const role = applicant.id.includes('mock') ? 'evaluator' : 'applicant';
+            await createUserProfile(applicant.id, applicant.details.email.toLowerCase(), role as UserRole);
+
+            // Create applicant record
+            const applicantRef = doc(db, APPLICANTS_COLLECTION, applicant.id);
+            await setDoc(applicantRef, applicant);
+            count++;
+        }
+
+        // Ensure REU evaluator exists too
+        await createUserProfile('user_reu_mock', 'reu@oshe.gov.ph', 'evaluator');
+        console.log(`Successfully seeded ${count} applicants and evaluators.`);
+        return true;
+    } catch (err) {
+        console.error("Failed to seed database:", err);
+        return false;
+    }
+};

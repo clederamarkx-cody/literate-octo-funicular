@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 /* Added missing Loader2 to the lucide-react import list */
 import { Eye, EyeOff, Shield, User, Lock, ArrowRight, LayoutDashboard, KeyRound, Zap, Loader2, Building2, AlertCircle, Mail } from 'lucide-react';
-import { getUserByEmail, getApplicantByPassKey } from '../../services/dbService';
+import { getUserByEmail, getApplicantByPassKey, seedFirebase } from '../../services/dbService';
 interface LoginProps {
     onLogin?: (role: 'applicant' | 'evaluator', email?: string) => void;
     onRegisterClick?: () => void;
@@ -233,6 +233,23 @@ const Login: React.FC<LoginProps> = ({ onLogin, onRegisterClick, onQuickRegister
                             >
                                 <LayoutDashboard className="w-4 h-4" />
                                 Autofill Demo Account
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={async () => {
+                                    setIsLoading(true);
+                                    const success = await seedFirebase();
+                                    if (success) {
+                                        setError("Database successfully seeded with mock data!");
+                                    } else {
+                                        setError("Failed to seed database.");
+                                    }
+                                    setIsLoading(false);
+                                }}
+                                className="w-full py-3 px-4 border border-dashed border-orange-200 rounded-2xl text-xs font-bold text-orange-400 hover:text-orange-600 hover:border-orange-400 hover:bg-orange-50 transition-all flex items-center justify-center gap-2 uppercase tracking-widest"
+                            >
+                                DEV: Seed Mock Data
                             </button>
                         </div>
                     </form>
