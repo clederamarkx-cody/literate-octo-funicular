@@ -50,49 +50,131 @@ export const PARTNERS = [
 
 export const INITIAL_APPLICANTS: Applicant[] = [
   {
-    id: '1',
-    regId: 'NOM-2024-8821',
-    name: 'Acme Manufacturing Phils.',
-    industry: 'Manufacturing',
-    region: 'Region IV-A',
+    id: 'nominee_1_new',
+    regId: 'NOM-2024-001',
+    name: 'Pioneer Builders Inc.',
+    industry: 'Construction',
+    region: 'NCR',
     status: 'pending',
-    submittedDate: 'Oct 15, 2024',
+    submittedDate: 'Oct 10, 2024',
     round2Unlocked: false,
     documents: [
       { name: 'OSH_Policy_Signed.pdf', type: 'application/pdf' },
       { name: 'Annual_Accident_Report_2023.pdf', type: 'application/pdf' }
     ],
     details: {
-      employees: '250',
-      address: 'Bldg 2, Industrial Park, Santa Rosa, Laguna',
-      representative: 'Juan Dela Cruz',
-      designation: 'HR Manager',
-      email: 'hr@acmemfg.com',
-      phone: '+63 917 123 4567',
-      safetyOfficer: 'Engr. Maria Clara'
+      employees: '450',
+      address: 'Tower 1, Makati CBD',
+      representative: 'Carlos Magnaye',
+      designation: 'VP of Operations',
+      email: 'carlos@pioneer.demo',
+      phone: '+63 917 111 2222',
+      safetyOfficer: 'Engr. Danica Flores'
     }
   },
   {
-    id: 'user_abyguel_mock',
-    regId: 'NOM-2024-1102',
-    name: 'Abyguel OSHC Services',
-    industry: 'Education & Training',
-    region: 'NCR',
-    status: 'pending',
-    submittedDate: 'Feb 21, 2026',
-    round2Unlocked: false,
-    documents: [],
+    id: 'nominee_2_stage1_pass',
+    regId: 'NOM-2024-002',
+    name: 'Agri-Tech Solutions Mindanao',
+    industry: 'Agriculture',
+    region: 'Region XI',
+    status: 'in_progress',
+    submittedDate: 'Oct 15, 2024',
+    round2Unlocked: false, // Waiting for SCD to trigger Stage 2
+    stage1PassedByReu: true,
+    documents: [
+      { name: 'OSH_Policy_Current.pdf', type: 'application/pdf' },
+      { name: 'Training_Certificates.zip', type: 'application/zip' }
+    ],
     details: {
-      employees: '50',
-      address: 'North Avenue cor. Agham Road, Diliman, Quezon City',
-      representative: 'Abyguel',
-      designation: 'Safety Director',
-      email: 'abyguel@scd.com',
-      phone: '+63 999 888 7777',
-      safetyOfficer: 'Abyguel'
+      employees: '120',
+      address: 'Davao Agribusiness Park',
+      representative: 'Maria Santos',
+      designation: 'General Manager',
+      email: 'maria@agritech.demo',
+      phone: '+63 918 333 4444',
+      safetyOfficer: 'Engr. Roberto Luna'
     }
   },
   {
+    id: 'nominee_3_stage2_active',
+    regId: 'NOM-2024-003',
+    name: 'Oceanic Shipping Corp',
+    industry: 'Logistics',
+    region: 'Region VII',
+    status: 'in_progress',
+    submittedDate: 'Nov 01, 2024',
+    round2Unlocked: true,
+    stage1PassedByReu: true,
+    stage2TriggeredByScd: true,
+    documents: [
+      { name: 'DOLE_Clearance.pdf', type: 'application/pdf' }
+    ],
+    details: {
+      employees: '890',
+      address: 'Cebu Port Authority Complex',
+      representative: 'Capt. Rizal',
+      designation: 'Fleet Commander',
+      email: 'rizal@oceanic.demo',
+      phone: '+63 919 555 6666',
+      safetyOfficer: 'Engr. Sarah Lim'
+    }
+  },
+  {
+    id: 'nominee_4_stage3_active',
+    regId: 'NOM-2024-004',
+    name: 'Peak Energy grid',
+    industry: 'Energy',
+    region: 'Region III',
+    status: 'in_progress',
+    submittedDate: 'Nov 15, 2024',
+    round2Unlocked: true,
+    round3Unlocked: true,
+    stage1PassedByReu: true,
+    stage2TriggeredByScd: true,
+    stage3TriggeredByScd: true,
+    documents: [
+      { name: 'Risk_Assessment_Summary.pdf', type: 'application/pdf' }
+    ],
+    details: {
+      employees: '300',
+      address: 'Industrial Park, Pampanga',
+      representative: 'Dr. Emily Chen',
+      designation: 'EHS Director',
+      email: 'emily@peakenergy.demo',
+      phone: '+63 920 777 8888',
+      safetyOfficer: 'Engr. Mark Bautista'
+    }
+  },
+  {
+    id: 'nominee_5_completed',
+    regId: 'NOM-2024-005',
+    name: 'Metro Health Alliance',
+    industry: 'Healthcare',
+    region: 'NCR',
+    status: 'completed',
+    verdict: 'Pass',
+    submittedDate: 'Dec 01, 2024',
+    round2Unlocked: true,
+    round3Unlocked: true,
+    stage1PassedByReu: true,
+    stage2TriggeredByScd: true,
+    stage3TriggeredByScd: true,
+    documents: [
+      { name: 'Final_Validation_Report.pdf', type: 'application/pdf' }
+    ],
+    details: {
+      employees: '1500',
+      address: 'Medical Center Avenue, QC',
+      representative: 'Dr. Alex Reyes',
+      designation: 'Chief Medical Officer',
+      email: 'alex@metrohealth.demo',
+      phone: '+63 921 999 0000',
+      safetyOfficer: 'Engr. Bea Cruz'
+    }
+  },
+  {
+    // Keeping the completely open test account for the user's direct login testing
     id: 'nominee_open',
     regId: 'NOM-OPEN-STAGES',
     name: 'Universal Safety Innovators (Demo)',

@@ -1,4 +1,4 @@
-import { collection, doc, setDoc, getDoc, updateDoc, query, where, getDocs, arrayUnion } from 'firebase/firestore';
+import { collection, doc, setDoc, getDoc, updateDoc, query, where, getDocs, arrayUnion, deleteDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, storage } from './firebase';
 import { Applicant, ApplicantDocument, UserRole } from '../types';
@@ -231,6 +231,20 @@ export const verifyAccessKey = async (passKey: string): Promise<{ uid: string, r
  */
 export const seedFirebase = async () => {
     try {
+        console.log("Cleaning Database...");
+        const clearCollection = async (collectionName: string) => {
+            const collRef = collection(db, collectionName);
+            const snapshot = await getDocs(collRef);
+            const deletePromises = snapshot.docs.map(docSnap => deleteDoc(doc(db, collectionName, docSnap.id)));
+            await Promise.all(deletePromises);
+            console.log(`Cleared ${collectionName}`);
+        };
+
+        await clearCollection(USERS_COLLECTION);
+        await clearCollection(APPLICANTS_COLLECTION);
+        await clearCollection('access_keys');
+        await clearCollection('hall_of_fame');
+
         console.log("Seeding Firebase database...");
         let count = 0;
 
