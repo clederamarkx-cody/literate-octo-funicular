@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Eye, EyeOff, Shield, User, Lock, ArrowRight, LayoutDashboard, KeyRound, Zap, Loader2, Building2, AlertCircle, Mail } from 'lucide-react';
 import { getUserByEmail, getApplicantByPassKey, seedFirebase, verifyAccessKey } from '../../services/dbService';
 interface LoginProps {
-    onLogin?: (role: 'applicant' | 'evaluator', email?: string) => void;
+    onLogin?: (role: string, email?: string) => void;
     onRegisterClick?: () => void;
     onQuickRegister?: (companyName: string) => void;
     onBack?: () => void;
@@ -38,7 +38,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onRegisterClick, onQuickRegister
                 // First check if it's an evaluator passkey
                 const evalAccess = await verifyAccessKey(accessCode);
                 if (evalAccess && onLogin) {
-                    onLogin(evalAccess.role as 'evaluator', evalAccess.uid);
+                    onLogin(evalAccess.role, evalAccess.uid);
                     return;
                 }
 
@@ -52,11 +52,11 @@ const Login: React.FC<LoginProps> = ({ onLogin, onRegisterClick, onQuickRegister
             } else {
                 // Email/Password login logic
                 if (email === 'abyguel@scd.com' && password === 'scd123') {
-                    if (onLogin) onLogin('evaluator', 'user_abyguel_mock');
+                    if (onLogin) onLogin('scd', 'user_scd_mock');
                     return;
                 }
                 if (email === 'reu@oshe.gov.ph' && password === 'reu123') {
-                    if (onLogin) onLogin('evaluator', 'user_reu_mock');
+                    if (onLogin) onLogin('reu', 'user_reu_mock');
                     return;
                 }
 

@@ -139,5 +139,77 @@ export const INITIAL_HALL_OF_FAME = [
     year: '2022',
     sector: 'Institutional',
     achievement: 'Excellence in Safety Training and Testing Services'
+  },
+  {
+    category: 'Logistics',
+    company: 'LBC Express Inc.',
+    region: 'NCR',
+    award: 'Silver',
+    year: '2025',
+    sector: 'Institutional',
+    achievement: 'Innovative Fleet Safety Management'
+  },
+  {
+    category: 'Energy',
+    company: 'Energy Development Corporation',
+    region: 'Region VIII',
+    award: 'Presidential',
+    year: '2024',
+    sector: 'Institutional',
+    achievement: 'Zero Lost Time Incidents in Geothermal Operations'
+  },
+  {
+    category: 'Healthcare',
+    company: 'Makati Medical Center',
+    region: 'NCR',
+    award: 'Gold',
+    year: '2023',
+    sector: 'Institutional',
+    achievement: 'Advanced Infection Control and Occupational Health'
+  },
+  {
+    category: 'BPO',
+    company: 'Teleperformance Philippines',
+    region: 'NCR',
+    award: 'Silver',
+    year: '2021',
+    sector: 'Institutional',
+    achievement: 'Comprehensive Mental Health and Wellness Programs'
+  },
+  {
+    category: 'Telecommunications',
+    company: 'Globe Telecom',
+    region: 'NCR',
+    award: 'Gold',
+    year: '2018',
+    sector: 'Institutional',
+    achievement: 'Nationwide Safety Culture Integration'
+  },
+  {
+    category: 'Manufacturing',
+    company: 'Nestlé Philippines, Inc.',
+    region: 'Region IV-A',
+    award: 'Presidential',
+    year: '2016',
+    sector: 'Institutional',
+    achievement: 'Decade of Uninterrupted Safe Operations'
+  },
+  {
+    category: 'Utilities',
+    company: 'Manila Water Company',
+    region: 'NCR',
+    award: 'Gold',
+    year: '2014',
+    sector: 'Institutional',
+    achievement: 'Exemplary Water Treatment Facilities Safety'
+  },
+  {
+    category: 'Construction',
+    company: 'MDC (Makati Development Corporation)',
+    region: 'NCR',
+    award: 'Presidential',
+    year: '2012',
+    sector: 'Institutional',
+    achievement: 'Pioneering Safety Standards in Philippine Construction'
   }
 ];

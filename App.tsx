@@ -237,7 +237,7 @@ function App() {
                     setCurrentApplicantId(uid);
                     navigateTo('applicant-portal');
                   }
-                } else if (role === 'evaluator') {
+                } else if (['evaluator', 'scd', 'reu', 'admin'].includes(role)) {
                   navigateTo('evaluator-portal');
                 }
               }}

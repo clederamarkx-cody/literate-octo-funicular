@@ -583,9 +583,6 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
                 <div id="documents-section" className="space-y-8">
                   <div>
                     <h3 className="text-2xl font-serif font-bold text-gkk-navy uppercase tracking-widest">Stage 1 Submission</h3>
-                    <div className="flex items-center gap-3 mt-4">
-                      <button onClick={onUnderDev} className="flex items-center px-4 py-2 bg-white text-gray-700 font-bold rounded-lg text-xs border border-gray-300 hover:bg-gray-50 transition-all"><Download size={14} className="mr-2" /> Templates</button>
-                    </div>
                   </div>
                   <div className="space-y-4">{renderDocumentGrid(1)}</div>
                   <div className="space-y-4">
