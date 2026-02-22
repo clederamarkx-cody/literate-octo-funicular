@@ -89,7 +89,7 @@ function App() {
 
     try {
       await createUserProfile(newId, `contact@${companyName.replace(/[^a-zA-Z]/g, '').toLowerCase()}.demo`, 'nominee');
-      const newApp = await createApplicant(newId, regId, companyName);
+      const newApp = await createApplicant(newId, regId, companyName, 'private');
 
       sessionStorage.setItem('gkk_session', JSON.stringify({ role: 'applicant', uid: newId }));
       setApplicants(prev => [newApp, ...prev]);

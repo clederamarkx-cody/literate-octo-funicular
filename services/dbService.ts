@@ -23,7 +23,7 @@ export const createUserProfile = async (uid: string, email: string, role: UserRo
 /**
  * Creates a new applicant/nominee document linked to a user
  */
-export const createApplicant = async (uid: string, regId: string, name: string) => {
+export const createApplicant = async (uid: string, regId: string, name: string, nomineeCategory: Applicant['details']['nomineeCategory']) => {
     const applicantRef = doc(db, APPLICANTS_COLLECTION, uid); // Using uid as applicantId for 1-to-1 mapping
     const newApplicant: Applicant = {
         id: uid,
@@ -36,6 +36,7 @@ export const createApplicant = async (uid: string, regId: string, name: string) 
         round2Unlocked: false,
         documents: [],
         details: {
+            nomineeCategory,
             employees: '',
             address: '',
             representative: '',

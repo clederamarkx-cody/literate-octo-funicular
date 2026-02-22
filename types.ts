@@ -45,6 +45,7 @@ export interface Applicant {
   stage2TriggeredByScd?: boolean;
   stage3TriggeredByScd?: boolean;
   details?: {
+    nomineeCategory?: 'private' | 'government' | 'micro' | 'individual';
     employees?: string;
     address?: string;
     representative?: string;
