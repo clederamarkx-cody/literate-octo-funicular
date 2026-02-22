@@ -1,5 +1,6 @@
 import { collection, doc, setDoc, getDoc, updateDoc, query, where, getDocs, arrayUnion, deleteDoc } from 'firebase/firestore';
-import { db } from './firebase';
+import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+import { db, storage } from './firebase';
 import { Applicant, ApplicantDocument, UserRole } from '../types';
 import { INITIAL_APPLICANTS, INITIAL_HALL_OF_FAME } from '../constants';
 
@@ -100,103 +101,42 @@ export const addApplicantDocument = async (uid: string, document: ApplicantDocum
 };
 
 /**
- * Encodes a file to Base64, chunks it, and saves it to Firestore bypassing Firebase Storage requirements.
+ * Uploads a file directly to Firebase Cloud Storage with streaming progress.
  */
 export const uploadApplicantFile = async (uid: string, documentId: string, file: File, onProgress?: (progress: number) => void): Promise<string> => {
     return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = async () => {
-            if (typeof reader.result === 'string') {
+        const fileExtension = file.name.split('.').pop() || 'pdf';
+        const filePath = `applicants/${uid}/${documentId}_${Date.now()}.${fileExtension}`;
+        const storageRef = ref(storage, filePath);
+
+        const uploadTask = uploadBytesResumable(storageRef, file);
+
+        uploadTask.on('state_changed',
+            (snapshot) => {
+                const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                if (onProgress) onProgress(Math.floor(progress));
+            },
+            (error) => {
+                console.error("Firebase Storage upload failed", error);
+                reject(error);
+            },
+            async () => {
                 try {
-                    const base64Data = reader.result;
-                    if (onProgress) onProgress(10); // Encoding done
-
-                    // Chunk size 800KB (Firestore limit is 1MB)
-                    const CHUNK_SIZE = 800000;
-                    const fileUid = `${uid}_${documentId}_${Date.now()}`;
-                    const totalChunks = Math.ceil(base64Data.length / CHUNK_SIZE);
-
-                    // 1. Write File Metadata
-                    const fileRef = doc(db, 'gkk_files', fileUid);
-                    await setDoc(fileRef, {
-                        name: file.name,
-                        type: file.type,
-                        totalChunks,
-                        createdAt: new Date().toISOString()
-                    });
-                    if (onProgress) onProgress(20);
-
-                    // 2. Write Chunks
-                    for (let i = 0; i < totalChunks; i++) {
-                        const chunkData = base64Data.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
-                        const chunkRef = doc(db, `gkk_files/${fileUid}/chunks`, i.toString());
-                        await setDoc(chunkRef, { data: chunkData });
-
-                        // Calculate progress between 20% and 95%
-                        if (onProgress) {
-                            const chunkProgress = 20 + Math.floor(((i + 1) / totalChunks) * 75);
-                            onProgress(chunkProgress);
-                        }
-                    }
-
-                    if (onProgress) onProgress(100);
-                    resolve(`gkk-file://${fileUid}`);
-                } catch (error) {
-                    console.error("Chunk upload failed", error);
-                    reject(error);
+                    const downloadUrl = await getDownloadURL(uploadTask.snapshot.ref);
+                    resolve(downloadUrl);
+                } catch (err) {
+                    reject(err);
                 }
-            } else {
-                reject(new Error("File conversion failed"));
             }
-        };
-        reader.onerror = () => reject(new Error("File reading interrupted"));
-        reader.readAsDataURL(file);
+        );
     });
 };
 
 /**
- * Resolves a gkk-file:// URL back into a readable Blob URL
+ * Passes through standard HTTP URLs for compatibility with earlier versions.
  */
 export const resolveFileUrl = async (url: string | null | undefined): Promise<string> => {
-    if (!url) return '';
-    if (!url.startsWith('gkk-file://')) return url;
-
-    const fileUid = url.replace('gkk-file://', '');
-    const fileRef = doc(db, 'gkk_files', fileUid);
-    const fileSnap = await getDoc(fileRef);
-
-    if (!fileSnap.exists()) throw new Error("File not found in database");
-
-    const { totalChunks, type } = fileSnap.data();
-    let completeBase64 = '';
-
-    for (let i = 0; i < totalChunks; i++) {
-        const chunkRef = doc(db, `gkk_files/${fileUid}/chunks`, i.toString());
-        const chunkSnap = await getDoc(chunkRef);
-        if (chunkSnap.exists()) {
-            completeBase64 += chunkSnap.data().data;
-        }
-    }
-
-    // Extract raw base64 and create a Blob
-    const parts = completeBase64.split(',');
-    const b64Data = parts[1] || parts[0];
-    const contentType = type || 'application/pdf';
-
-    const byteCharacters = atob(b64Data);
-    const byteArrays = [];
-    for (let offset = 0; offset < byteCharacters.length; offset += 512) {
-        const slice = byteCharacters.slice(offset, offset + 512);
-        const byteNumbers = new Array(slice.length);
-        for (let i = 0; i < slice.length; i++) {
-            byteNumbers[i] = slice.charCodeAt(i);
-        }
-        const byteArray = new Uint8Array(byteNumbers);
-        byteArrays.push(byteArray);
-    }
-
-    const blob = new Blob(byteArrays, { type: contentType });
-    return URL.createObjectURL(blob);
+    return url || '';
 };
 
 /**
