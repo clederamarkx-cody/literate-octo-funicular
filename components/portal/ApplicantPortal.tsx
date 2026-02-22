@@ -90,7 +90,7 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
   const tourSteps: TourStep[] = [
     {
       targetId: null,
-      title: "Welcome to the 14th GKK Cycle",
+      title: <>Welcome to the 14<sup>th</sup> GKK Awards</>,
       content: "This is your official Nominee Portal. We'll guide you through a quick tour of your dashboard so you know exactly how to secure your nomination."
     },
     {
