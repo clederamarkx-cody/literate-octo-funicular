@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import JSZip from 'jszip';
 import {
   LayoutDashboard,
   Users,
@@ -161,49 +160,26 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
     }
 
     try {
-      const zip = new JSZip();
-      const safeName = selectedApplicant.name.replace(/[^a-zA-Z0-9]/g, '_');
-      const folderName = `GKK_Stage${round}_${safeName}`;
-      const folder = zip.folder(folderName);
-
-      if (!folder) throw new Error("Could not create zip folder");
-
+      // Create hidden link element for sequential download triggers
       for (const doc of docsToExport) {
         if (!doc.url) continue;
         const resolvedUrl = await resolveFileUrl(doc.url);
 
-        try {
-          // Fetch file blob securely before adding to ZIP
-          const response = await fetch(resolvedUrl, { mode: 'cors' });
-          if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-          const blob = await response.blob();
-          folder.file(doc.name || `document_${doc.slotId}.pdf`, blob);
-        } catch (fetchErr) {
-          console.warn(`Could not cross-origin fetch ${doc.name}, falling back to direct download`, fetchErr);
-          // If CORS completely blocks the fetch, immediately fallback to just popping open the standalone file
-          const link = document.createElement('a');
-          link.href = resolvedUrl;
-          link.download = doc.name || `document_${doc.slotId}.pdf`;
-          link.target = '_blank';
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          // Don't kill the whole zip process, just skip this file from the archive since it downloaded separately
-        }
+        // Use a blank target to ensure it works across all browser security policies
+        const link = document.createElement('a');
+        link.href = resolvedUrl;
+        link.download = doc.name || `document_${doc.slotId}.pdf`;
+        link.target = '_blank';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        // Small delay to prevent browser from totally blocking multiple simultaneous popups
+        await new Promise(resolve => setTimeout(resolve, 300));
       }
-
-      // Generate the final ZIP file and prompt user save
-      const content = await zip.generateAsync({ type: 'blob' });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(content);
-      link.download = `${folderName}.zip`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
     } catch (error) {
       console.error("Export failed:", error);
-      alert("Failed to export documents. Please try again.");
+      alert("Failed to open documents. Check your browser's pop-up blocker.");
     } finally {
       setIsExporting(null);
     }
