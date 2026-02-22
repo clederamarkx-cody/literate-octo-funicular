@@ -102,13 +102,15 @@ export const addApplicantDocument = async (uid: string, document: ApplicantDocum
 /**
  * Encodes a file to Base64, chunks it, and saves it to Firestore bypassing Firebase Storage requirements.
  */
-export const uploadApplicantFile = async (uid: string, documentId: string, file: File): Promise<string> => {
+export const uploadApplicantFile = async (uid: string, documentId: string, file: File, onProgress?: (progress: number) => void): Promise<string> => {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onloadend = async () => {
             if (typeof reader.result === 'string') {
                 try {
                     const base64Data = reader.result;
+                    if (onProgress) onProgress(10); // Encoding done
+
                     // Chunk size 800KB (Firestore limit is 1MB)
                     const CHUNK_SIZE = 800000;
                     const fileUid = `${uid}_${documentId}_${Date.now()}`;
@@ -122,14 +124,22 @@ export const uploadApplicantFile = async (uid: string, documentId: string, file:
                         totalChunks,
                         createdAt: new Date().toISOString()
                     });
+                    if (onProgress) onProgress(20);
 
                     // 2. Write Chunks
                     for (let i = 0; i < totalChunks; i++) {
                         const chunkData = base64Data.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
                         const chunkRef = doc(db, `gkk_files/${fileUid}/chunks`, i.toString());
                         await setDoc(chunkRef, { data: chunkData });
+
+                        // Calculate progress between 20% and 95%
+                        if (onProgress) {
+                            const chunkProgress = 20 + Math.floor(((i + 1) / totalChunks) * 75);
+                            onProgress(chunkProgress);
+                        }
                     }
 
+                    if (onProgress) onProgress(100);
                     resolve(`gkk-file://${fileUid}`);
                 } catch (error) {
                     console.error("Chunk upload failed", error);

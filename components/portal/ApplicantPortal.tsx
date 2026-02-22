@@ -301,10 +301,16 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
   const handleUpload = async () => {
     if (!selectedFile || !applicantData) return;
     setUploadStatus('uploading');
-    setUploadProgress(30);
+    setUploadProgress(0);
 
     try {
-      const fileUrl = await uploadApplicantFile(applicantData.id, selectedDocId || 'unknown_slot', selectedFile);
+      const fileUrl = await uploadApplicantFile(
+        applicantData.id,
+        selectedDocId || 'unknown_slot',
+        selectedFile,
+        (progress) => setUploadProgress(progress)
+      );
+
       setUploadProgress(100);
       setUploadStatus('success');
 
