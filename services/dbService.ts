@@ -277,6 +277,22 @@ export const seedFirebase = async () => {
         await setDoc(doc(keysRef, 'key_admin'), { key: 'GKK-KEY-ADMIN', uid: 'user_admin_mock', role: 'admin' });
         await setDoc(doc(keysRef, 'key_eval'), { key: 'GKK-KEY-EVAL', uid: 'user_evaluator_mock', role: 'evaluator' });
 
+        // Generate 20 Unused Registration Access Keys in the format GKK-2024-XXXX-XXXX
+        for (let i = 1; i <= 20; i++) {
+            const randomPart1 = Math.floor(1000 + Math.random() * 9000);
+            const randomPart2 = Math.floor(1000 + Math.random() * 9000);
+            const mockInviteKey = `GKK-2024-${randomPart1}-${randomPart2}`;
+
+            // These keys have no attached explicit uid yet. When a nominee registers, 
+            // the system creates the uid and consumes the key. For now, we seed them as 'unassigned_nominee_key'
+            await setDoc(doc(keysRef, `key_invite_${i}`), {
+                key: mockInviteKey,
+                role: 'nominee_invite',
+                status: 'unused',
+                generatedFor: `Mock Region ${i % 3 + 1}` // Just to give them some data
+            });
+        }
+
         // Seed Hall of Fame
         const hofCollection = collection(db, 'hall_of_fame');
         for (const winner of INITIAL_HALL_OF_FAME) {
