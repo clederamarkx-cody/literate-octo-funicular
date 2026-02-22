@@ -133,10 +133,49 @@ export const uploadApplicantFile = async (uid: string, documentId: string, file:
 };
 
 /**
- * Passes through standard HTTP URLs for compatibility with earlier versions.
+ * Dynamically resolves File URLs. If the file is a legacy chunked file,
+ * it reconstructs it from Firestore. Otherwise, it simply returns the HTTP url.
  */
 export const resolveFileUrl = async (url: string | null | undefined): Promise<string> => {
-    return url || '';
+    if (!url) return '';
+    if (!url.startsWith('gkk-file://')) return url;
+
+    const fileUid = url.replace('gkk-file://', '');
+    const fileRef = doc(db, 'gkk_files', fileUid);
+    const fileSnap = await getDoc(fileRef);
+
+    if (!fileSnap.exists()) throw new Error("File not found in database");
+
+    const { totalChunks, type } = fileSnap.data();
+    let completeBase64 = '';
+
+    for (let i = 0; i < totalChunks; i++) {
+        const chunkRef = doc(db, `gkk_files/${fileUid}/chunks`, i.toString());
+        const chunkSnap = await getDoc(chunkRef);
+        if (chunkSnap.exists()) {
+            completeBase64 += chunkSnap.data().data;
+        }
+    }
+
+    // Extract raw base64 and create a Blob
+    const parts = completeBase64.split(',');
+    const b64Data = parts[1] || parts[0];
+    const contentType = type || 'application/pdf';
+
+    const byteCharacters = atob(b64Data);
+    const byteArrays = [];
+    for (let offset = 0; offset < byteCharacters.length; offset += 512) {
+        const slice = byteCharacters.slice(offset, offset + 512);
+        const byteNumbers = new Array(slice.length);
+        for (let i = 0; i < slice.length; i++) {
+            byteNumbers[i] = slice.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        byteArrays.push(byteArray);
+    }
+
+    const blob = new Blob(byteArrays, { type: contentType });
+    return URL.createObjectURL(blob);
 };
 
 /**
