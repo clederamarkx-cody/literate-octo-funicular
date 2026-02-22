@@ -172,12 +172,24 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
         if (!doc.url) continue;
         const resolvedUrl = await resolveFileUrl(doc.url);
 
-        // Fetch file blob securely before adding to ZIP
-        const response = await fetch(resolvedUrl);
-        if (!response.ok) throw new Error(`Failed to retrieve ${doc.name}`);
-
-        const blob = await response.blob();
-        folder.file(doc.name || `document_${doc.slotId}.pdf`, blob);
+        try {
+          // Fetch file blob securely before adding to ZIP
+          const response = await fetch(resolvedUrl, { mode: 'cors' });
+          if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+          const blob = await response.blob();
+          folder.file(doc.name || `document_${doc.slotId}.pdf`, blob);
+        } catch (fetchErr) {
+          console.warn(`Could not cross-origin fetch ${doc.name}, falling back to direct download`, fetchErr);
+          // If CORS completely blocks the fetch, immediately fallback to just popping open the standalone file
+          const link = document.createElement('a');
+          link.href = resolvedUrl;
+          link.download = doc.name || `document_${doc.slotId}.pdf`;
+          link.target = '_blank';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          // Don't kill the whole zip process, just skip this file from the archive since it downloaded separately
+        }
       }
 
       // Generate the final ZIP file and prompt user save
