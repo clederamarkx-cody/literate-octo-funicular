@@ -445,7 +445,13 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                         </button>
                       )}
                       {(['admin', 'evaluator', 'scd'].includes(userRole || '')) && (
-                        <button onClick={() => onToggleRound2 && onToggleRound2(selectedApplicant.id, !selectedApplicant.round2Unlocked)} className={`px-10 py-4 rounded-[20px] font-bold transition-all shadow-xl text-[10px] tracking-widest uppercase ${selectedApplicant.round2Unlocked ? 'bg-red-50 text-red-600 border border-red-100 hover:bg-red-100' : 'bg-gkk-gold text-gkk-navy hover:bg-gkk-navy hover:text-white'}`}>{selectedApplicant.round2Unlocked ? 'Deactivate Stage 2' : 'Activate Stage 2'}</button>
+                        <button onClick={() => {
+                          const newStatus = !selectedApplicant.round2Unlocked;
+                          if (onToggleRound2) onToggleRound2(selectedApplicant.id, newStatus);
+                          const updated = { ...selectedApplicant, round2Unlocked: newStatus };
+                          setSelectedApplicant(updated);
+                          setLocalApplicants(prev => prev.map(a => a.id === updated.id ? updated : a));
+                        }} className={`px-10 py-4 rounded-[20px] font-bold transition-all shadow-xl text-[10px] tracking-widest uppercase ${selectedApplicant.round2Unlocked ? 'bg-red-50 text-red-600 border border-red-100 hover:bg-red-100' : 'bg-gkk-gold text-gkk-navy hover:bg-gkk-navy hover:text-white'}`}>{selectedApplicant.round2Unlocked ? 'Deactivate Stage 2' : 'Activate Stage 2'}</button>
                       )}
 
                       {(userRole === 'admin' || userRole === 'scd') && (
@@ -494,7 +500,13 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                         </button>
                       )}
                       {(userRole === 'admin' || userRole === 'scd') && (
-                        <button onClick={() => onToggleRound3 && onToggleRound3(selectedApplicant.id, !selectedApplicant.round3Unlocked)} className={`px-10 py-4 rounded-[20px] font-bold transition-all shadow-xl text-[10px] tracking-widest uppercase ${selectedApplicant.round3Unlocked ? 'bg-red-50 text-red-600 border border-red-100 hover:bg-red-100' : 'bg-gkk-navy text-white hover:bg-gkk-royalBlue'}`}>{selectedApplicant.round3Unlocked ? 'Deactivate Stage 3' : 'Activate Stage 3'}</button>
+                        <button onClick={() => {
+                          const newStatus = !selectedApplicant.round3Unlocked;
+                          if (onToggleRound3) onToggleRound3(selectedApplicant.id, newStatus);
+                          const updated = { ...selectedApplicant, round3Unlocked: newStatus };
+                          setSelectedApplicant(updated);
+                          setLocalApplicants(prev => prev.map(a => a.id === updated.id ? updated : a));
+                        }} className={`px-10 py-4 rounded-[20px] font-bold transition-all shadow-xl text-[10px] tracking-widest uppercase ${selectedApplicant.round3Unlocked ? 'bg-red-50 text-red-600 border border-red-100 hover:bg-red-100' : 'bg-gkk-navy text-white hover:bg-gkk-royalBlue'}`}>{selectedApplicant.round3Unlocked ? 'Deactivate Stage 3' : 'Activate Stage 3'}</button>
                       )}
 
                       {(userRole === 'admin' || userRole === 'scd') && (
