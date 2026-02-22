@@ -36,10 +36,12 @@ import {
   ShieldAlert,
   Scale,
   FileCheck,
-  FileIcon
+  FileIcon,
+  Zap,
+  Upload
 } from 'lucide-react';
 import { Applicant, ApplicantDocument } from '../../types';
-import { getAllApplicants, updateStageVerdict } from '../../services/dbService';
+import { getAllApplicants, updateStageVerdict, resolveFileUrl } from '../../services/dbService';
 
 interface EvaluatorPortalProps {
   onLogout: () => void;
@@ -76,6 +78,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
   const [round2Open, setRound2Open] = useState(false);
   const [docEvaluations, setDocEvaluations] = useState<Record<string, 'pass' | 'fail'>>({});
   const [previewModalOpen, setPreviewModalOpen] = useState(false);
+  const [isResolvingUrl, setIsResolvingUrl] = useState(false);
   const [previewDoc, setPreviewDoc] = useState<{ name: string, url: string | null, type: string } | null>(null);
   const [isExporting, setIsExporting] = useState<number | null>(null);
 
@@ -126,9 +129,21 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
     setView('list');
   };
 
-  const handlePreview = (doc: ApplicantDocument) => {
-    setPreviewDoc({ name: doc.name, url: doc.url || null, type: doc.type });
+  const handlePreview = async (doc: ApplicantDocument) => {
+    setIsResolvingUrl(true);
+    setPreviewDoc({ name: doc.name, url: null, type: doc.type });
     setPreviewModalOpen(true);
+
+    try {
+      const resolvedUrl = await resolveFileUrl(doc.url);
+      setPreviewDoc({ name: doc.name, url: resolvedUrl, type: doc.type });
+    } catch (e) {
+      console.error("Failed to load document", e);
+      alert("Failed to decrypt and load the evidence.");
+      setPreviewModalOpen(false);
+    } finally {
+      setIsResolvingUrl(false);
+    }
   };
 
   const handleExportStage = async (round: number) => {
@@ -148,8 +163,9 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
       // Create hidden link element for sequential download triggers
       for (const doc of docsToExport) {
         if (!doc.url) continue;
+        const resolvedUrl = await resolveFileUrl(doc.url);
         const link = document.createElement('a');
-        link.href = doc.url;
+        link.href = resolvedUrl;
         link.download = doc.name || `download_stage${round}`;
         link.target = '_blank'; // Fail-safe to ensure it triggers
         document.body.appendChild(link);
@@ -623,7 +639,25 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
         </header>
         <div className="flex-1 overflow-y-auto p-8 scroll-smooth"><div className="max-w-7xl mx-auto">{view === 'list' ? (activeTab === 'dashboard' ? renderDashboard() : renderEntries()) : renderReview()}</div></div>
       </main>
-      {previewModalOpen && previewDoc && (<div className="fixed inset-0 z-[110] flex items-center justify-center bg-gkk-navy/95 backdrop-blur-md p-4 animate-in fade-in duration-500"><div className="bg-white rounded-[40px] shadow-2xl w-full max-w-6xl h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-300"><div className="p-8 border-b border-gray-100 flex justify-between items-center bg-white shadow-sm z-10"><div className="flex items-center space-x-5"><div className="p-3 bg-gkk-navy text-white rounded-2xl shadow-lg"><FileText size={24} /></div><div><h3 className="text-xl font-bold text-gkk-navy uppercase tracking-wider">{previewDoc.name}</h3><p className="text-[10px] text-gray-400 uppercase font-bold mt-1 tracking-widest">Digital Evidence Viewer</p></div></div><button onClick={() => setPreviewModalOpen(false)} className="p-3 text-gray-400 hover:text-red-500 bg-gray-50 border border-gray-200 rounded-2xl transition-all"><X size={24} /></button></div><div className="flex-1 bg-gray-50 p-10 flex items-center justify-center">{previewDoc.url ? ((previewDoc.type && previewDoc.type.includes('image')) ? <img src={previewDoc.url} alt="Evidence" className="max-w-full max-h-full rounded-3xl shadow-2xl border-8 border-white" /> : <iframe src={previewDoc.url} title="Evidence Reader" className="w-full h-full rounded-3xl shadow-2xl bg-white border-0" />) : <div className="text-center p-20 bg-white rounded-[40px] shadow-2xl max-w-md"><FileIcon size={64} className="text-gray-200 mx-auto mb-8" /><h4 className="text-2xl font-bold text-gkk-navy leading-tight uppercase tracking-widest">Rendering...</h4></div>}</div></div></div>)}
+      {/* Preview Modal */}
+      {previewModalOpen && previewDoc && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-gkk-navy/90 backdrop-blur-md p-4 animate-in fade-in duration-500">
+          <div className="bg-white rounded-[40px] shadow-2xl w-full max-w-5xl h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-300">
+            <div className="p-8 border-b border-gray-100 flex justify-between items-center bg-white shadow-sm z-10">
+              <div className="flex items-center space-x-5">
+                <div className="p-3 bg-gkk-navy text-white rounded-2xl"><FileText size={24} /></div>
+                <div><h3 className="text-xl font-bold text-gkk-navy uppercase tracking-wider">{previewDoc.name}</h3><p className="text-[10px] text-gray-400 uppercase font-bold mt-1 tracking-widest">Verified Evidence Record</p></div>
+              </div>
+              <button onClick={() => setPreviewModalOpen(false)} className="p-3 text-gray-400 hover:text-red-500 transition-colors"><X size={32} /></button>
+            </div>
+            <div className="flex-1 bg-gray-50 p-10 flex items-center justify-center">
+              {previewDoc.url ? (
+                (previewDoc.type && previewDoc.type.includes('image')) ? <img src={previewDoc.url} alt="Evidence" className="max-w-full max-h-full rounded-3xl shadow-2xl border-8 border-white" /> : <iframe src={previewDoc.url} title="Reader" className="w-full h-full rounded-3xl shadow-2xl bg-white border-0" />
+              ) : <div className="text-center p-20 bg-white rounded-[40px] shadow-2xl max-w-md"><div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-8 text-gray-200"><FileIcon size={48} className="animate-pulse" /></div><h4 className="text-2xl font-bold text-gkk-navy uppercase tracking-widest text-gray-400 animate-pulse">Decrypting...</h4></div>}
+            </div>
+          </div>
+        </div>
+      )};
     </div>
   );
 };

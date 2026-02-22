@@ -34,7 +34,7 @@ import {
   ArrowLeft
 } from 'lucide-react';
 import { Applicant, ApplicantDocument } from '../../types';
-import { uploadApplicantFile } from '../../services/dbService';
+import { uploadApplicantFile, resolveFileUrl } from '../../services/dbService';
 import OnboardingTour, { TourStep } from './OnboardingTour';
 import Toast, { ToastType } from '../ui/Toast';
 
@@ -119,6 +119,7 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
 
   // Preview State
   const [previewModalOpen, setPreviewModalOpen] = useState(false);
+  const [isResolvingUrl, setIsResolvingUrl] = useState(false);
   const [previewDoc, setPreviewDoc] = useState<{ name: string, url: string | null, type: string } | null>(null);
 
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
@@ -327,9 +328,21 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
     }
   };
 
-  const handlePreview = (doc: any) => {
-    setPreviewDoc({ name: doc.label, url: doc.previewUrl, type: doc.type });
+  const handlePreview = async (doc: any) => {
+    setIsResolvingUrl(true);
+    setPreviewDoc({ name: doc.label, url: null, type: doc.type });
     setPreviewModalOpen(true);
+
+    try {
+      const resolvedUrl = await resolveFileUrl(doc.previewUrl);
+      setPreviewDoc({ name: doc.label, url: resolvedUrl, type: doc.type });
+    } catch (e) {
+      console.error("Failed to load document", e);
+      alert("Failed to decrypt and load the document.");
+      setPreviewModalOpen(false);
+    } finally {
+      setIsResolvingUrl(false);
+    }
   };
 
   const handleFinalSubmit = () => {

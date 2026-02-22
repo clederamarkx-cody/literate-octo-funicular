@@ -1,7 +1,5 @@
 import { collection, doc, setDoc, getDoc, updateDoc, query, where, getDocs, arrayUnion, deleteDoc } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { signInAnonymously } from 'firebase/auth';
-import { db, storage, auth } from './firebase';
+import { db } from './firebase';
 import { Applicant, ApplicantDocument, UserRole } from '../types';
 import { INITIAL_APPLICANTS, INITIAL_HALL_OF_FAME } from '../constants';
 
@@ -101,33 +99,94 @@ export const addApplicantDocument = async (uid: string, document: ApplicantDocum
     });
 };
 
-export const ensureAuth = async () => {
-    if (!auth.currentUser) {
-        try {
-            await signInAnonymously(auth);
-        } catch (error) {
-            console.error("Anonymous auth failed:", error);
-        }
-    }
+/**
+ * Encodes a file to Base64, chunks it, and saves it to Firestore bypassing Firebase Storage requirements.
+ */
+export const uploadApplicantFile = async (uid: string, documentId: string, file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = async () => {
+            if (typeof reader.result === 'string') {
+                try {
+                    const base64Data = reader.result;
+                    // Chunk size 800KB (Firestore limit is 1MB)
+                    const CHUNK_SIZE = 800000;
+                    const fileUid = `${uid}_${documentId}_${Date.now()}`;
+                    const totalChunks = Math.ceil(base64Data.length / CHUNK_SIZE);
+
+                    // 1. Write File Metadata
+                    const fileRef = doc(db, 'gkk_files', fileUid);
+                    await setDoc(fileRef, {
+                        name: file.name,
+                        type: file.type,
+                        totalChunks,
+                        createdAt: new Date().toISOString()
+                    });
+
+                    // 2. Write Chunks
+                    for (let i = 0; i < totalChunks; i++) {
+                        const chunkData = base64Data.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
+                        const chunkRef = doc(db, `gkk_files/${fileUid}/chunks`, i.toString());
+                        await setDoc(chunkRef, { data: chunkData });
+                    }
+
+                    resolve(`gkk-file://${fileUid}`);
+                } catch (error) {
+                    console.error("Chunk upload failed", error);
+                    reject(error);
+                }
+            } else {
+                reject(new Error("File conversion failed"));
+            }
+        };
+        reader.onerror = () => reject(new Error("File reading interrupted"));
+        reader.readAsDataURL(file);
+    });
 };
 
 /**
- * Encodes a file to Base64 and returns the Data URL.
- * We store this directly in Firestore to bypass disabled/unconfigured Firebase Storage buckets.
+ * Resolves a gkk-file:// URL back into a readable Blob URL
  */
-export const uploadApplicantFile = async (uid: string, documentId: string, file: File): Promise<string> => {
-    await ensureAuth(); // Ensure Firebase SDK has an auth context for Storage Rules
+export const resolveFileUrl = async (url: string | null | undefined): Promise<string> => {
+    if (!url) return '';
+    if (!url.startsWith('gkk-file://')) return url;
 
-    const fileExtension = file.name.split('.').pop() || 'pdf';
-    const filePath = `applicants/${uid}/${documentId}.${fileExtension}`;
-    const storageRef = ref(storage, filePath);
+    const fileUid = url.replace('gkk-file://', '');
+    const fileRef = doc(db, 'gkk_files', fileUid);
+    const fileSnap = await getDoc(fileRef);
 
-    // Upload the file to Firebase Storage
-    await uploadBytes(storageRef, file);
+    if (!fileSnap.exists()) throw new Error("File not found in database");
 
-    // Get and return the verified download URL
-    const downloadUrl = await getDownloadURL(storageRef);
-    return downloadUrl;
+    const { totalChunks, type } = fileSnap.data();
+    let completeBase64 = '';
+
+    for (let i = 0; i < totalChunks; i++) {
+        const chunkRef = doc(db, `gkk_files/${fileUid}/chunks`, i.toString());
+        const chunkSnap = await getDoc(chunkRef);
+        if (chunkSnap.exists()) {
+            completeBase64 += chunkSnap.data().data;
+        }
+    }
+
+    // Extract raw base64 and create a Blob
+    const parts = completeBase64.split(',');
+    const b64Data = parts[1] || parts[0];
+    const contentType = type || 'application/pdf';
+
+    const byteCharacters = atob(b64Data);
+    const byteArrays = [];
+    for (let offset = 0; offset < byteCharacters.length; offset += 512) {
+        const slice = byteCharacters.slice(offset, offset + 512);
+        const byteNumbers = new Array(slice.length);
+        for (let i = 0; i < slice.length; i++) {
+            byteNumbers[i] = slice.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        byteArrays.push(byteArray);
+    }
+
+    const blob = new Blob(byteArrays, { type: contentType });
+    return URL.createObjectURL(blob);
 };
 
 /**
