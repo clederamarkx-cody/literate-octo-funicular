@@ -260,6 +260,33 @@ export const getApplicantByPassKey = async (passKey: string): Promise<Applicant 
 };
 
 /**
+ * Validates and activates an unused Access Key for a new Nominee
+ */
+export const activateAccessKey = async (passKey: string, uid: string): Promise<boolean> => {
+    try {
+        const keysRef = collection(db, 'access_keys');
+        const q = query(keysRef, where('key', '==', passKey), where('status', '==', 'unused'));
+        const querySnapshot = await getDocs(q);
+
+        if (querySnapshot.empty) {
+            return false; // Key does not exist or is already used
+        }
+
+        const docRef = querySnapshot.docs[0].ref;
+        await updateDoc(docRef, {
+            status: 'used',
+            uid: uid,
+            role: 'applicant', // Upgrades the key from nominee_invite to full applicant
+            activatedAt: new Date().toISOString()
+        });
+        return true;
+    } catch (error) {
+        console.error("Error activating access key", error);
+        return false;
+    }
+};
+
+/**
  * Verifies an access key (Pass Key) for Evaluators/Admins
  * Returns the evaluator's user record if valid
  */

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { ArrowLeft, CheckCircle, Loader2, Mail, Lock, Eye, EyeOff, KeyRound, ShieldCheck } from 'lucide-react';
-import { createUserProfile, createApplicant } from '../../services/dbService';
+import { ArrowLeft, CheckCircle, Loader2, Mail, Lock, Eye, EyeOff, KeyRound, ShieldCheck, AlertCircle } from 'lucide-react';
+import { createUserProfile, createApplicant, activateAccessKey } from '../../services/dbService';
 import { Applicant } from '../../types';
 
 interface NominationFormProps {
@@ -11,6 +11,7 @@ const NominationForm: React.FC<NominationFormProps> = ({ onBack }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const [email, setEmail] = useState('');
   const [accessKey, setAccessKey] = useState('');
@@ -20,24 +21,33 @@ const NominationForm: React.FC<NominationFormProps> = ({ onBack }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setError(null);
 
     try {
       // 1. Generate unique internal ID
       const newId = 'user_' + Date.now().toString();
 
-      // 2. Create User Profile
+      // 2. Validate and Activate Key
+      const isActivated = await activateAccessKey(accessKey.trim(), newId);
+      if (!isActivated) {
+        setError("Invalid or previously activated Access Key. Please contact DOLE if you need assistance.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      // 3. Create User Profile
       await createUserProfile(newId, email.toLowerCase(), 'nominee');
 
-      // 3. Create Applicant Record
-      await createApplicant(newId, accessKey, companyName, category);
+      // 4. Create Applicant Record
+      await createApplicant(newId, accessKey.trim(), companyName, category);
 
       setIsSubmitting(false);
       setIsSuccess(true);
       window.scrollTo(0, 0);
-    } catch (error) {
-      console.error("Failed to activate nomination:", error);
+    } catch (err) {
+      console.error("Failed to activate nomination:", err);
       setIsSubmitting(false);
-      // Ideally show an error toast here
+      setError("System fault during activation. Please try again later.");
     }
   };
 
@@ -94,6 +104,13 @@ const NominationForm: React.FC<NominationFormProps> = ({ onBack }) => {
           <div className="h-2 bg-gradient-to-r from-gkk-gold via-yellow-400 to-gkk-goldDark"></div>
 
           <form onSubmit={handleSubmit} className="p-10 md:p-14 space-y-8">
+
+            {error && (
+              <div className="bg-red-50 border border-red-100 p-4 rounded-xl flex items-center gap-3 animate-shake">
+                <AlertCircle size={18} className="text-red-500 flex-shrink-0" />
+                <p className="text-xs text-red-700 font-bold leading-relaxed">{error}</p>
+              </div>
+            )}
 
             <div className="bg-blue-50 border border-blue-100 p-6 rounded-3xl flex items-start gap-4 ring-1 ring-blue-200/50">
               <KeyRound className="w-6 h-6 text-blue-600 flex-shrink-0 mt-1" />

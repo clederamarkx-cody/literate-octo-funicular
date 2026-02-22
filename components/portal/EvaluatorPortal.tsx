@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
+import JSZip from 'jszip';
 import {
   LayoutDashboard,
   Users,
@@ -160,23 +161,37 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
     }
 
     try {
-      // Create hidden link element for sequential download triggers
+      const zip = new JSZip();
+      const safeName = selectedApplicant.name.replace(/[^a-zA-Z0-9]/g, '_');
+      const folderName = `GKK_Stage${round}_${safeName}`;
+      const folder = zip.folder(folderName);
+
+      if (!folder) throw new Error("Could not create zip folder");
+
       for (const doc of docsToExport) {
         if (!doc.url) continue;
         const resolvedUrl = await resolveFileUrl(doc.url);
-        const link = document.createElement('a');
-        link.href = resolvedUrl;
-        link.download = doc.name || `download_stage${round}`;
-        link.target = '_blank'; // Fail-safe to ensure it triggers
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        // Small delay to prevent browser from blocking multiple simultaneous downloads
-        await new Promise(resolve => setTimeout(resolve, 300));
+
+        // Fetch file blob securely before adding to ZIP
+        const response = await fetch(resolvedUrl);
+        if (!response.ok) throw new Error(`Failed to retrieve ${doc.name}`);
+
+        const blob = await response.blob();
+        folder.file(doc.name || `document_${doc.slotId}.pdf`, blob);
       }
+
+      // Generate the final ZIP file and prompt user save
+      const content = await zip.generateAsync({ type: 'blob' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(content);
+      link.download = `${folderName}.zip`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
     } catch (error) {
       console.error("Export failed:", error);
-      alert("Failed to export some documents. Check your browser's pop-up blocker.");
+      alert("Failed to export documents. Please try again.");
     } finally {
       setIsExporting(null);
     }
