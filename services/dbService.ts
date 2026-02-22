@@ -1,6 +1,7 @@
 import { collection, doc, setDoc, getDoc, updateDoc, query, where, getDocs, arrayUnion, deleteDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { db, storage } from './firebase';
+import { signInAnonymously } from 'firebase/auth';
+import { db, storage, auth } from './firebase';
 import { Applicant, ApplicantDocument, UserRole } from '../types';
 import { INITIAL_APPLICANTS, INITIAL_HALL_OF_FAME } from '../constants';
 
@@ -100,11 +101,23 @@ export const addApplicantDocument = async (uid: string, document: ApplicantDocum
     });
 };
 
+export const ensureAuth = async () => {
+    if (!auth.currentUser) {
+        try {
+            await signInAnonymously(auth);
+        } catch (error) {
+            console.error("Anonymous auth failed:", error);
+        }
+    }
+};
+
 /**
  * Encodes a file to Base64 and returns the Data URL.
  * We store this directly in Firestore to bypass disabled/unconfigured Firebase Storage buckets.
  */
 export const uploadApplicantFile = async (uid: string, documentId: string, file: File): Promise<string> => {
+    await ensureAuth(); // Ensure Firebase SDK has an auth context for Storage Rules
+
     const fileExtension = file.name.split('.').pop() || 'pdf';
     const filePath = `applicants/${uid}/${documentId}.${fileExtension}`;
     const storageRef = ref(storage, filePath);
