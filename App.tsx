@@ -263,7 +263,7 @@ function App() {
               onLogout={handleLogout}
               onUnderDev={() => navigateTo('under-development')}
               applicants={applicants}
-              userRole={JSON.parse(sessionStorage.getItem('gkk_session') || '{}').uid === 'user_abyguel_mock' ? 'scd' : 'reu'}
+              userRole={JSON.parse(sessionStorage.getItem('gkk_session') || '{}').role}
               onToggleRound2={handleToggleRound2}
               onToggleRound3={handleToggleRound3}
             />
