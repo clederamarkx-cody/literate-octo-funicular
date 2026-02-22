@@ -657,7 +657,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
             </div>
           </div>
         </div>
-      )};
+      )}
     </div>
   );
 };
