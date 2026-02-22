@@ -380,8 +380,8 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
                   {doc.fileName && <p className="text-[11px] text-blue-600 truncate mb-3">{doc.fileName}</p>}
 
                   <div className="flex gap-2 mt-3">
-                    {doc.status === 'uploaded' && applicantData?.round2Unlocked ? (
-                      <div className="flex-1 flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-400 rounded text-xs font-bold cursor-not-allowed">
+                    {((round === 1 && applicantData?.round2Unlocked) || (round === 2 && applicantData?.round3Unlocked)) ? (
+                      <div className="flex-1 flex items-center justify-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-500 rounded text-xs font-bold cursor-not-allowed border border-gray-200">
                         <Lock size={12} />
                         <span>Locked</span>
                       </div>
