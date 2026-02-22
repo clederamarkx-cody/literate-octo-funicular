@@ -432,7 +432,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                   <div className="p-10 flex flex-col md:flex-row items-center justify-between gap-8">
                     <div className="flex items-center space-x-8">
                       <div className={`w-16 h-16 rounded-3xl flex items-center justify-center transition-all ${(selectedApplicant.round2Unlocked || ['admin', 'scd', 'evaluator'].includes(userRole || '')) ? 'bg-blue-600 text-white shadow-xl' : 'bg-gray-200 text-gray-400'}`}>{(selectedApplicant.round2Unlocked || ['admin', 'scd', 'evaluator'].includes(userRole || '')) ? <Unlock size={28} /> : <Lock size={28} />}</div>
-                      <div className="text-left"><h4 className="font-bold text-gkk-navy text-xl uppercase tracking-tighter leading-none">Stage 2 Verification</h4><p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-3">{selectedApplicant.round2Unlocked ? 'Reviewing national shortlist' : (userRole === 'admin' || userRole === 'evaluator') ? 'Evaluator Trigger Required' : (userRole === 'scd') ? 'Pending Evaluator Trigger' : 'Locked'}</p></div>
+                      <div className="text-left"><h4 className="font-bold text-gkk-navy text-xl uppercase tracking-tighter leading-none">Stage 2 Verification</h4><p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-3">{selectedApplicant.round2Unlocked ? 'Reviewing national shortlist' : (['admin', 'evaluator', 'scd'].includes(userRole || '')) ? 'Action Required: Trigger Stage 2' : 'Locked'}</p></div>
                     </div>
                     <div className="flex items-center gap-4">
                       {(selectedApplicant.round2Unlocked || ['admin', 'scd', 'evaluator'].includes(userRole || '')) && (
@@ -444,7 +444,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                           <Download size={16} /> {isExporting === 2 ? "Export..." : "Export PDFs"}
                         </button>
                       )}
-                      {(userRole === 'admin' || userRole === 'evaluator') && (
+                      {(['admin', 'evaluator', 'scd'].includes(userRole || '')) && (
                         <button onClick={() => onToggleRound2 && onToggleRound2(selectedApplicant.id, !selectedApplicant.round2Unlocked)} className={`px-10 py-4 rounded-[20px] font-bold transition-all shadow-xl text-[10px] tracking-widest uppercase ${selectedApplicant.round2Unlocked ? 'bg-red-50 text-red-600 border border-red-100 hover:bg-red-100' : 'bg-gkk-gold text-gkk-navy hover:bg-gkk-navy hover:text-white'}`}>{selectedApplicant.round2Unlocked ? 'Deactivate Stage 2' : 'Activate Stage 2'}</button>
                       )}
 
