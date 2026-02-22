@@ -129,7 +129,7 @@ const HallOfFame: React.FC<HallOfFameProps> = ({ onBack }) => {
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-gkk-gold transition-colors" size={18} />
               <input
                 type="text"
-                placeholder="Find a laureate..."
+                placeholder="Find a winner..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-gkk-gold/5 focus:bg-white focus:border-gkk-gold transition-all outline-none font-medium"
@@ -190,7 +190,7 @@ const HallOfFame: React.FC<HallOfFameProps> = ({ onBack }) => {
         </div>
       </div>
 
-      {/* Laureates Gallery */}
+      {/* Winners Gallery */}
       <section className="py-20 bg-gray-50/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {isLoading ? (
@@ -271,7 +271,7 @@ const HallOfFame: React.FC<HallOfFameProps> = ({ onBack }) => {
               <div className="w-24 h-24 bg-gray-100 rounded-[35px] flex items-center justify-center mx-auto mb-8 text-gray-300">
                 <Search size={40} />
               </div>
-              <h3 className="text-2xl font-serif font-bold text-gkk-navy mb-2">No Laureates Found</h3>
+              <h3 className="text-2xl font-serif font-bold text-gkk-navy mb-2">No Winners Found</h3>
               <p className="text-gray-500">Try adjusting your filters or search keywords.</p>
               <button
                 onClick={() => { setSelectedYear('All'); setSelectedSector('All'); setSearchTerm(''); }}

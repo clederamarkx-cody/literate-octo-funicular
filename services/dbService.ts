@@ -172,12 +172,19 @@ export const getUserByEmail = async (email: string): Promise<{ uid: string, role
 export const getHallOfFame = async (): Promise<any[]> => {
     const hofRef = collection(db, 'hall_of_fame');
     const querySnapshot = await getDocs(hofRef);
-    return querySnapshot.docs.map(doc => {
+    const firestoreHof = querySnapshot.docs.map(doc => {
         return {
             id: doc.id,
             ...doc.data()
         };
     });
+
+    if (firestoreHof.length > 0) {
+        return firestoreHof;
+    }
+
+    // Fallback if not seeded yet
+    return INITIAL_HALL_OF_FAME;
 };
 /**
  * Fetches an applicant by their registration/invitation key (Pass Key)
