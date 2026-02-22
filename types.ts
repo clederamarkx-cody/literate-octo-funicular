@@ -44,6 +44,9 @@ export interface Applicant {
   stage1PassedByReu?: boolean;
   stage2TriggeredByScd?: boolean;
   stage3TriggeredByScd?: boolean;
+  stage1Verdict?: 'Pass' | 'Fail';
+  stage2Verdict?: 'Pass' | 'Fail';
+  stage3Verdict?: 'Pass' | 'Fail';
   details?: {
     nomineeCategory?: 'private' | 'government' | 'micro' | 'individual';
     employees?: string;

@@ -584,6 +584,7 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
                 <div id="documents-section" className="space-y-8">
                   <div>
                     <h3 className="text-2xl font-serif font-bold text-gkk-navy uppercase tracking-widest">Stage 1 Submission</h3>
+                    <p className="text-sm border-l-4 border-gkk-gold pl-3 py-1 font-bold italic mt-4 text-gkk-navy/80 bg-gold-50/50 inline-block pr-6">Each specific requirement must be uploaded as a single PDF file.</p>
                   </div>
                   <div className="space-y-4">{renderDocumentGrid(1)}</div>
                   <div className="space-y-4">
@@ -591,7 +592,12 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
                       <button onClick={() => applicantData?.round2Unlocked && setRound2Open(!round2Open)} disabled={!applicantData?.round2Unlocked} className={`w-full p-8 flex items-center justify-between group transition-colors ${applicantData?.round2Unlocked ? 'cursor-pointer hover:bg-blue-50/20' : 'cursor-not-allowed'}`}>
                         <div className="flex items-center space-x-6">
                           <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all ${applicantData?.round2Unlocked ? 'bg-blue-600 text-white shadow-lg' : 'bg-gray-200 text-gray-400'}`}>{applicantData?.round2Unlocked ? <Unlock size={24} /> : <Lock size={24} />}</div>
-                          <div className="text-left"><div className="flex items-center gap-3"><div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${applicantData?.round2Unlocked ? 'bg-gkk-navy text-white' : 'bg-gray-300 text-white'}`}>2</div><h4 className="font-bold text-gkk-navy text-xl leading-none">Stage 2 Submission</h4></div><p className="text-xs text-gray-500 mt-2 font-bold uppercase tracking-widest">{applicantData?.round2Unlocked ? 'Unlocked - Technical Board' : 'Locked'}</p></div>
+                          <div className="text-left"><div className="flex items-center gap-3"><div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${applicantData?.round2Unlocked ? 'bg-gkk-navy text-white' : 'bg-gray-300 text-white'}`}>2</div><h4 className="font-bold text-gkk-navy text-xl leading-none">Stage 2 Submission</h4></div>
+                            <p className="text-xs text-gray-500 mt-2 font-bold uppercase tracking-widest">{applicantData?.round2Unlocked ? 'Unlocked - Technical Board' : 'Locked'}</p>
+                            {applicantData?.round2Unlocked && (
+                              <p className="text-[10px] border-l-2 border-blue-400 pl-2 py-0.5 font-bold italic mt-2 text-blue-800 bg-blue-50 inline-block pr-3">Each specific requirement must be uploaded as a single PDF file.</p>
+                            )}
+                          </div>
                         </div>
                         {applicantData?.round2Unlocked && (
                           <div className="flex items-center space-x-3 text-blue-600 bg-blue-50 px-5 py-2 rounded-2xl font-bold uppercase tracking-widest text-[10px] group-hover:bg-blue-600 group-hover:text-white transition-all"><span>{round2Open ? 'Hide' : 'Review'}</span>{round2Open ? <ChevronUp size={16} /> : <ChevronDown size={16} />}</div>
@@ -621,6 +627,9 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
                             <p className="text-xs text-gray-500 mt-2 font-bold uppercase tracking-widest">
                               {applicantData?.round3Unlocked ? 'Unlocked - National Board' : 'Locked - National Level'}
                             </p>
+                            {applicantData?.round3Unlocked && (
+                              <p className="text-[10px] border-l-2 border-gkk-gold pl-2 py-0.5 font-bold italic mt-2 text-gkk-navy bg-gold-50 inline-block pr-3">Each specific requirement must be uploaded as a single PDF file.</p>
+                            )}
                           </div>
                         </div>
                         {applicantData?.round3Unlocked && (

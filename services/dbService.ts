@@ -145,6 +145,28 @@ export const getUserRole = async (uid: string): Promise<UserRole | null> => {
 };
 
 /**
+ * Updates the evaluation verdict for a specific stage
+ */
+export const updateStageVerdict = async (applicantId: string, stage: 1 | 2 | 3, verdict: 'Pass' | 'Fail') => {
+    try {
+        const applicantRef = doc(db, APPLICANTS_COLLECTION, applicantId);
+        const updateData: Partial<Applicant> = {};
+
+        switch (stage) {
+            case 1: updateData.stage1Verdict = verdict; break;
+            case 2: updateData.stage2Verdict = verdict; break;
+            case 3: updateData.stage3Verdict = verdict; break;
+        }
+
+        await updateDoc(applicantRef, updateData);
+        return true;
+    } catch (error) {
+        console.error(`Error updating stage ${stage} verdict:`, error);
+        return false;
+    }
+};
+
+/**
  * Simulates authentication by finding a user by email
  */
 export const getUserByEmail = async (email: string): Promise<{ uid: string, role: UserRole } | null> => {
