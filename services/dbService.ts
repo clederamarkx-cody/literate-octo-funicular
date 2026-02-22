@@ -256,6 +256,11 @@ export const seedFirebase = async () => {
             // Create applicant record
             const applicantRef = doc(db, APPLICANTS_COLLECTION, applicant.id);
             await setDoc(applicantRef, applicant);
+
+            // Create access key for applicant using their regId
+            const keysRef = collection(db, 'access_keys');
+            await setDoc(doc(keysRef, `key_${applicant.id}`), { key: applicant.regId, uid: applicant.id, role });
+
             count++;
         }
 
