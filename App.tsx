@@ -36,8 +36,8 @@ function App() {
   const [isLoadingSession, setIsLoadingSession] = useState(true);
 
   useEffect(() => {
-    // Temporary seed execution triggered by HMR
-    seedFirebase().then(() => console.log('Successfully published seeded collections to Firebase!'));
+    // Temporary seed execution triggered by HMR - Commented out to prevent database reset
+    // seedFirebase().then(() => console.log('Successfully published seeded collections to Firebase!'));
 
     const restoreSession = async () => {
       const savedView = sessionStorage.getItem('gkk_last_view') as ViewState;
