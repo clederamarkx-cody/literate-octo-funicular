@@ -476,7 +476,7 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
 
       <main className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
-        <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-8 z-20">
+        <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-8 z-40">
           <div className="flex items-center text-xs text-gray-500 font-bold uppercase tracking-wider">
             <span>Nomination Portal</span>
             <ChevronRight size={14} className="mx-2" />

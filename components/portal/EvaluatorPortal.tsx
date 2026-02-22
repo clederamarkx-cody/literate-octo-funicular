@@ -465,7 +465,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
         </nav>
       </aside>
       <main className="flex-1 flex flex-col overflow-hidden">
-        <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-8 z-20">
+        <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-8 z-40">
           <div className="flex items-center text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em]">
             <span>Validator Portal</span>
             <ChevronRight size={14} className="mx-2" />
