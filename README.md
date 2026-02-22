@@ -1,4 +1,4 @@
-# 🏆 14th Gawad Kaligtasan at Kalusugan (GKK) Awards Portal
+# 14th Gawad Kaligtasan at Kalusugan (GKK) Awards Portal
 
 Welcome to the official repository for the **14th Gawad Kaligtasan at Kalusugan (GKK) Awards Landing Page & Portal**. This application serves as the digital gateway for nominees, evaluators, and the public to participate in the prestigious GKK Awards, recognizing outstanding achievements in Occupational Safety and Health (OSH) in the Philippines.
 
@@ -6,7 +6,7 @@ Welcome to the official repository for the **14th Gawad Kaligtasan at Kalusugan 
 
 ---
 
-## ✨ Features
+## Features
 
 *   **Public Landing Page**: Showcase of award categories, timeline, submission guidelines, and past champions.
 *   **Role-Based Portals**:
@@ -19,7 +19,7 @@ Welcome to the official repository for the **14th Gawad Kaligtasan at Kalusugan 
 *   **Cloud Integration**: Real-time database sync and secure cloud storage for documents using Google Firebase.
 *   **Interactive UI**: Smooth animations, responsive design, and intuitive navigation built on modern web standards.
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 *   **Frontend**: [React 18](https://react.dev/) + [Vite](https://vitejs.dev/)
 *   **Styling**: [Tailwind CSS](https://tailwindcss.com/)
@@ -30,7 +30,7 @@ Welcome to the official repository for the **14th Gawad Kaligtasan at Kalusugan 
 
 ---
 
-## 👥 User Roles & Permissions
+## User Roles & Permissions
 
 The application restricts features based on the `role` property in the user's session:
 
@@ -42,7 +42,7 @@ The application restricts features based on the `role` property in the user's se
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 Follow these steps to set up the project locally.
 
@@ -85,7 +85,7 @@ Follow these steps to set up the project locally.
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 
 ```text
 oshc-gkk-awards-main/
@@ -106,7 +106,7 @@ oshc-gkk-awards-main/
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 Contributions are welcome! If you find any bugs or have feature requests, please open an issue or submit a Pull Request. 
 
