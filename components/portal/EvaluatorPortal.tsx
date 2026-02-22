@@ -394,10 +394,10 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                   setSelectedApplicant(updated);
                   setLocalApplicants(prev => prev.map(a => a.id === updated.id ? updated : a));
                 }}
-                className={`px-10 py-4 rounded-2xl font-bold uppercase tracking-widest text-xs transition-all shadow-lg ${selectedApplicant.stage1PassedByReu ? 'bg-green-100 text-green-600 cursor-default' : 'bg-gkk-gold text-gkk-navy hover:bg-gkk-navy hover:text-white'}`}
-                disabled={selectedApplicant.stage1PassedByReu}
+                className={`px-10 py-4 rounded-2xl font-bold uppercase tracking-widest text-xs transition-all shadow-lg ${selectedApplicant.stage1PassedByReu ? 'bg-green-100 text-green-600 cursor-default' : (selectedApplicant.region === 'NCR' ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-gkk-gold text-gkk-navy hover:bg-gkk-navy hover:text-white')}`}
+                disabled={selectedApplicant.stage1PassedByReu || selectedApplicant.region === 'NCR'}
               >
-                {selectedApplicant.stage1PassedByReu ? 'Passed' : 'Mark as Passed'}
+                {selectedApplicant.stage1PassedByReu ? 'Passed' : (selectedApplicant.region === 'NCR' ? 'NCR Restriction' : 'Mark as Passed')}
               </button>
             </div>
           )}
