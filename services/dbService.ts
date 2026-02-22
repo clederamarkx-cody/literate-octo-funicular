@@ -85,8 +85,18 @@ export const updateApplicant = async (uid: string, updates: Partial<Applicant>) 
  */
 export const addApplicantDocument = async (uid: string, document: ApplicantDocument) => {
     const applicantRef = doc(db, APPLICANTS_COLLECTION, uid);
+    const applicantSnap = await getDoc(applicantRef);
+    if (!applicantSnap.exists()) return;
+
+    const applicant = applicantSnap.data() as Applicant;
+    const existingDocs = applicant.documents || [];
+
+    // Filter out previous version of this slot if it exists to avoid duplicates
+    const updatedDocs = existingDocs.filter(d => d.slotId !== document.slotId);
+    updatedDocs.push(document);
+
     await updateDoc(applicantRef, {
-        documents: arrayUnion(document)
+        documents: updatedDocs
     });
 };
 
@@ -95,21 +105,16 @@ export const addApplicantDocument = async (uid: string, document: ApplicantDocum
  * We store this directly in Firestore to bypass disabled/unconfigured Firebase Storage buckets.
  */
 export const uploadApplicantFile = async (uid: string, documentId: string, file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-            if (typeof reader.result === 'string') {
-                if (reader.result.length > 800000) {
-                    console.warn("Artifact size is large. Firestore may reject documents over 1MB.");
-                }
-                resolve(reader.result);
-            } else {
-                reject(new Error("Failed to encode file array"));
-            }
-        };
-        reader.onerror = () => reject(new Error("File read interrupted"));
-        reader.readAsDataURL(file);
-    });
+    const fileExtension = file.name.split('.').pop() || 'pdf';
+    const filePath = `applicants/${uid}/${documentId}.${fileExtension}`;
+    const storageRef = ref(storage, filePath);
+
+    // Upload the file to Firebase Storage
+    await uploadBytes(storageRef, file);
+
+    // Get and return the verified download URL
+    const downloadUrl = await getDownloadURL(storageRef);
+    return downloadUrl;
 };
 
 /**
