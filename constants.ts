@@ -50,6 +50,27 @@ export const PARTNERS = [
 
 export const INITIAL_APPLICANTS: Applicant[] = [
   {
+    id: 'nominee_feu_new',
+    regId: 'NOM-2024-FEU',
+    name: 'Far Eastern University',
+    industry: 'Education',
+    region: 'NCR',
+    status: 'pending',
+    submittedDate: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+    round2Unlocked: false,
+    documents: [],
+    details: {
+      nomineeCategory: 'private',
+      employees: '1500',
+      address: 'Nicanor Reyes St, Sampaloc, Manila',
+      representative: 'Juan Dela Cruz',
+      designation: 'Safety Director',
+      email: 'safety@feu.edu.ph',
+      phone: '+63 2 8281 3159',
+      safetyOfficer: 'Engr. Maria Clara'
+    }
+  },
+  {
     id: 'nominee_1_new',
     regId: 'NOM-2024-001',
     name: 'Pioneer Builders Inc.',
