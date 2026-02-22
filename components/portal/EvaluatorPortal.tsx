@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
   LayoutDashboard,
   Users,
@@ -79,8 +79,18 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
   const [previewDoc, setPreviewDoc] = useState<{ name: string, url: string | null, type: string } | null>(null);
   const [isExporting, setIsExporting] = useState<number | null>(null);
 
-  const applicants = localApplicants || [];
+  const sortedApplicants = useMemo(() => {
+    return [...(localApplicants || [])].sort((a, b) => {
+      const getLatest = (app: Applicant) => {
+        const docDates = (app.documents || []).map(d => new Date(d.date || 0).getTime()).filter(t => !isNaN(t));
+        const subDate = new Date(app.submittedDate || 0).getTime();
+        return Math.max(isNaN(subDate) ? 0 : subDate, ...docDates, 0);
+      };
+      return getLatest(b) - getLatest(a);
+    });
+  }, [localApplicants]);
 
+  const applicants = sortedApplicants;
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) setIsProfileDropdownOpen(false);
