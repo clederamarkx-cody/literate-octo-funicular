@@ -3,7 +3,7 @@ import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { signInAnonymously } from 'firebase/auth';
 import { db, storage, auth } from './firebase';
 import { Applicant, ApplicantDocument, UserRole } from '../types';
-import { INITIAL_APPLICANTS, INITIAL_HALL_OF_FAME } from '../constants';
+import { INITIAL_HALL_OF_FAME } from '../constants';
 
 // Collection references
 export const USERS_COLLECTION = 'users';
@@ -64,10 +64,6 @@ export const getApplicant = async (uid: string): Promise<Applicant | null> => {
         return applicantSnap.data() as Applicant;
     }
 
-    // Fallback for mock users
-    const mockApplicant = INITIAL_APPLICANTS.find(a => a.id === uid);
-    if (mockApplicant) return mockApplicant;
-
     return null;
 };
 
@@ -79,11 +75,8 @@ export const updateApplicant = async (uid: string, updates: Partial<Applicant>) 
     const applicantSnap = await getDoc(applicantRef);
 
     if (!applicantSnap.exists()) {
-        // Fallback: If it's a mock user not in Firebase, create it on the fly
-        const mockApplicant = INITIAL_APPLICANTS.find(a => a.id === uid);
-        if (mockApplicant) {
-            await setDoc(applicantRef, mockApplicant);
-        }
+        // In a real app we might throw an error here, but for now we just proceed
+        // to let updateDoc fail if the document doesn't exist
     }
 
     await updateDoc(applicantRef, {
@@ -100,14 +93,8 @@ export const addApplicantDocument = async (uid: string, document: ApplicantDocum
 
     let applicant: Applicant;
     if (!applicantSnap.exists()) {
-        // Fallback: If it's a mock user not in Firebase, create it on the fly
-        const mockApplicant = INITIAL_APPLICANTS.find(a => a.id === uid);
-        if (mockApplicant) {
-            await setDoc(applicantRef, mockApplicant);
-            applicant = mockApplicant;
-        } else {
-            return;
-        }
+        // In a real flow, this shouldn't happen without a parent doc, but just return early
+        return;
     } else {
         applicant = applicantSnap.data() as Applicant;
     }
@@ -248,15 +235,7 @@ export const getAllApplicants = async (): Promise<Applicant[]> => {
     const querySnapshot = await getDocs(applicantsRef);
     const firestoreApplicants = querySnapshot.docs.map(doc => doc.data() as Applicant);
 
-    // Merge with initial applicants (ensuring no duplicates by ID)
-    const allApplicants = [...firestoreApplicants];
-    INITIAL_APPLICANTS.forEach(mock => {
-        if (!allApplicants.some(a => a.id === mock.id)) {
-            allApplicants.push(mock);
-        }
-    });
-
-    return allApplicants;
+    return firestoreApplicants;
 };
 
 /**
@@ -353,10 +332,6 @@ export const getApplicantByPassKey = async (passKey: string): Promise<Applicant 
         console.error("Error querying applicant by pass key", error);
     }
 
-    // Fallback for mock users
-    const mockApplicant = INITIAL_APPLICANTS.find(a => a.regId === passKey);
-    if (mockApplicant) return mockApplicant;
-
     return null;
 };
 
@@ -430,24 +405,7 @@ export const seedFirebase = async () => {
         await clearCollection('access_keys');
         await clearCollection('hall_of_fame');
 
-        console.log("Seeding Firebase database...");
-        let count = 0;
-
-        for (const applicant of INITIAL_APPLICANTS) {
-            // Create user profile
-            const role = applicant.id.includes('mock') ? 'evaluator' : 'applicant';
-            await createUserProfile(applicant.id, applicant.details.email.toLowerCase(), role as UserRole);
-
-            // Create applicant record
-            const applicantRef = doc(db, APPLICANTS_COLLECTION, applicant.id);
-            await setDoc(applicantRef, applicant);
-
-            // Create access key for applicant using their regId
-            const keysRef = collection(db, 'access_keys');
-            await setDoc(doc(keysRef, `key_${applicant.id}`), { key: applicant.regId, uid: applicant.id, role });
-
-            count++;
-        }
+        console.log("Seeding Firebase database user roles only...");
 
         // Seed Specific Role Profiles
         await createUserProfile('user_reu_mock', 'reu@oshe.gov.ph', 'reu');
@@ -485,7 +443,7 @@ export const seedFirebase = async () => {
             await setDoc(newDocRef, winner);
         }
 
-        console.log(`Successfully seeded ${count} applicants, evaluators, and hall of fame.`);
+        console.log(`Successfully seeded evaluators and hall of fame.`);
         return true;
     } catch (err) {
         console.error("Failed to seed database:", err);
