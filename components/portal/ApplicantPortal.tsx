@@ -43,7 +43,7 @@ import StageProgress from './applicant/StageProgress';
 import DocumentGrid from './applicant/DocumentGrid';
 import UploadModal from './applicant/UploadModal';
 import TermsModal from './applicant/TermsModal';
-
+import ApplicantProfileEdit from './applicant/ApplicantProfileEdit';
 interface ApplicantPortalProps {
   onLogout: () => void;
   onUnderDev: () => void;
@@ -65,7 +65,7 @@ interface DocumentSlot {
 }
 
 const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev, applicantData, onDocumentUpload, onUpdateApplicant }) => {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'entry'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'entry' | 'profile'>('dashboard');
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const cancelTokenRef = useRef<{ cancel?: () => void }>({});
@@ -630,9 +630,19 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
                       </div>
                     </div>
                   </div>
-
                 </div>
               </div>
+            ) : activeTab === 'profile' ? (
+              <ApplicantProfileEdit
+                profileData={profileData}
+                onUpdateProfile={(updatedData) => {
+                  setToast({ message: "Profile updated successfully.", type: 'success' });
+                  if (onUpdateApplicant) {
+                    onUpdateApplicant(updatedData);
+                  }
+                }}
+                onUnderDev={onUnderDev}
+              />
             ) : (
               <div className="text-center p-20 bg-white rounded-3xl shadow-xl border border-gray-200 space-y-8 animate-in zoom-in-95 duration-500">
                 <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mx-auto text-gray-300"><Building2 size={48} /></div>
@@ -660,24 +670,26 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
       />
 
       {/* Preview Modal */}
-      {previewModalOpen && previewDoc && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-gkk-navy/90 backdrop-blur-md p-4 animate-in fade-in duration-500">
-          <div className="bg-white rounded-[40px] shadow-2xl w-full max-w-5xl h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-300">
-            <div className="p-8 border-b border-gray-100 flex justify-between items-center bg-white shadow-sm z-10">
-              <div className="flex items-center space-x-5">
-                <div className="p-3 bg-gkk-navy text-white rounded-2xl"><FileText size={24} /></div>
-                <div><h3 className="text-xl font-bold text-gkk-navy uppercase tracking-wider">{previewDoc.name}</h3><p className="text-[10px] text-gray-400 uppercase font-bold mt-1 tracking-widest">Verified Evidence Record</p></div>
+      {
+        previewModalOpen && previewDoc && (
+          <div className="fixed inset-0 z-[110] flex items-center justify-center bg-gkk-navy/90 backdrop-blur-md p-4 animate-in fade-in duration-500">
+            <div className="bg-white rounded-[40px] shadow-2xl w-full max-w-5xl h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-300">
+              <div className="p-8 border-b border-gray-100 flex justify-between items-center bg-white shadow-sm z-10">
+                <div className="flex items-center space-x-5">
+                  <div className="p-3 bg-gkk-navy text-white rounded-2xl"><FileText size={24} /></div>
+                  <div><h3 className="text-xl font-bold text-gkk-navy uppercase tracking-wider">{previewDoc.name}</h3><p className="text-[10px] text-gray-400 uppercase font-bold mt-1 tracking-widest">Verified Evidence Record</p></div>
+                </div>
+                <button onClick={() => setPreviewModalOpen(false)} className="p-3 text-gray-400 hover:text-red-500 transition-colors"><X size={32} /></button>
               </div>
-              <button onClick={() => setPreviewModalOpen(false)} className="p-3 text-gray-400 hover:text-red-500 transition-colors"><X size={32} /></button>
-            </div>
-            <div className="flex-1 bg-gray-50 p-10 flex items-center justify-center">
-              {previewDoc.url ? (
-                (previewDoc.type && previewDoc.type.includes('image')) ? <img src={previewDoc.url} alt="Evidence" className="max-w-full max-h-full rounded-3xl shadow-2xl border-8 border-white" /> : <iframe src={previewDoc.url} title="Reader" className="w-full h-full rounded-3xl shadow-2xl bg-white border-0" />
-              ) : <div className="text-center p-20 bg-white rounded-[40px] shadow-2xl max-w-md"><div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-8 text-gray-200"><FileIcon size={48} /></div><h4 className="text-2xl font-bold text-gkk-navy uppercase tracking-widest">Rendering...</h4></div>}
+              <div className="flex-1 bg-gray-50 p-10 flex items-center justify-center">
+                {previewDoc.url ? (
+                  (previewDoc.type && previewDoc.type.includes('image')) ? <img src={previewDoc.url} alt="Evidence" className="max-w-full max-h-full rounded-3xl shadow-2xl border-8 border-white" /> : <iframe src={previewDoc.url} title="Reader" className="w-full h-full rounded-3xl shadow-2xl bg-white border-0" />
+                ) : <div className="text-center p-20 bg-white rounded-[40px] shadow-2xl max-w-md"><div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-8 text-gray-200"><FileIcon size={48} /></div><h4 className="text-2xl font-bold text-gkk-navy uppercase tracking-widest">Rendering...</h4></div>}
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )
+      }
 
       <TermsModal
         showTermsModal={showTermsModal}
@@ -698,14 +710,16 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
       />
 
       {/* Toast Notification */}
-      {toast && (
-        <Toast
-          message={toast.message}
-          type={toast.type}
-          onClose={() => setToast(null)}
-        />
-      )}
-    </div>
+      {
+        toast && (
+          <Toast
+            message={toast.message}
+            type={toast.type}
+            onClose={() => setToast(null)}
+          />
+        )
+      }
+    </div >
   );
 };
 

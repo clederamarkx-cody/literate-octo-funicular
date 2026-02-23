@@ -1,9 +1,10 @@
+
 import React from 'react';
 import { LayoutDashboard, FileCheck, Download, ShieldCheck } from 'lucide-react';
 
 interface ApplicantSidebarProps {
-    activeTab: 'dashboard' | 'entry';
-    setActiveTab: (tab: 'dashboard' | 'entry') => void;
+    activeTab: 'dashboard' | 'entry' | 'profile';
+    setActiveTab: (tab: 'dashboard' | 'entry' | 'profile') => void;
     onUnderDev: () => void;
 }
 
@@ -26,6 +27,10 @@ const ApplicantSidebar: React.FC<ApplicantSidebarProps> = ({ activeTab, setActiv
                 <button onClick={() => setActiveTab('entry')} className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'entry' ? 'bg-gkk-gold text-gkk-navy font-bold shadow-lg shadow-yellow-500/10' : 'text-gray-400 hover:bg-white/5 hover:text-white'}`}>
                     <FileCheck size={20} />
                     <span className="text-sm font-medium">Verify Records</span>
+                </button>
+                <button onClick={() => setActiveTab('profile')} className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'profile' ? 'bg-gkk-gold text-gkk-navy font-bold shadow-lg shadow-yellow-500/10' : 'text-gray-400 hover:bg-white/5 hover:text-white'}`}>
+                    <LayoutDashboard size={20} />
+                    <span className="text-sm font-medium">Edit Profile</span>
                 </button>
                 <div className="pt-6 mt-6 border-t border-white/5">
                     <p className="px-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4">GKK Support</p>
