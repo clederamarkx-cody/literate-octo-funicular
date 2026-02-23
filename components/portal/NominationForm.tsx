@@ -124,7 +124,7 @@ const NominationForm: React.FC<NominationFormProps> = ({ onBack }) => {
 
             <div className="space-y-6">
               <div>
-                <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-3 ml-1">DOLE Invitation Key</label>
+                <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-3 ml-1">GKK Access Key</label>
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
                     <Lock className="h-5 w-5 text-gray-300 group-focus-within:text-gkk-gold transition-colors" />
