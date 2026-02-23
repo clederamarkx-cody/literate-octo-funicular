@@ -2,8 +2,6 @@
 
 Welcome to the official repository for the **14th Gawad Kaligtasan at Kalusugan (GKK) Awards Landing Page & Portal**. This application serves as the digital gateway for nominees, evaluators, and the public to participate in the prestigious GKK Awards, recognizing outstanding achievements in Occupational Safety and Health (OSH) in the Philippines.
 
-![GKK Landing Page Preview](https://oshc.dole.gov.ph/wp-content/uploads/2023/07/OSHC-Logo.png) <!-- Replace with actual screenshot of your app -->
-
 ---
 
 ## Features
