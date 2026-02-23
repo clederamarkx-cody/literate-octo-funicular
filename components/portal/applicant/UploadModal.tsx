@@ -56,7 +56,7 @@ const UploadModal: React.FC<UploadModalProps> = ({
                     ) : (
                         <div className="space-y-8">
                             <div className="relative group border-4 border-dashed border-gray-200 rounded-[35px] p-12 text-center hover:border-gkk-gold transition-all cursor-pointer">
-                                <input type="file" onChange={handleFileSelect} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" accept={documents.find(d => d.id === selectedDocId)?.round === 3 ? ".pdf" : ".pdf,.png,.jpg"} />
+                                <input type="file" onChange={handleFileSelect} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" accept=".pdf" />
                                 <div className="space-y-4">
                                     <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center mx-auto text-gray-400 group-hover:text-gkk-gold transition-colors"><Upload size={32} /></div>
                                     <p className="text-sm font-bold text-gkk-navy uppercase tracking-widest">{selectedFile ? selectedFile.name : 'Select Artifact'}</p>

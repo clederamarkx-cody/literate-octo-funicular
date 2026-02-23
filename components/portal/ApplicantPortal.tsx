@@ -377,7 +377,14 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
   };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) setSelectedFile(e.target.files[0]);
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
+        setToast({ message: "Only PDF files are accepted. Please select a valid document.", type: 'error' });
+        return;
+      }
+      setSelectedFile(file);
+    }
   };
 
   const handleUpload = async () => {
