@@ -62,6 +62,8 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
   const [activeTab, setActiveTab] = useState<'dashboard' | 'entry'>('dashboard');
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const cancelTokenRef = useRef<{ cancel?: () => void }>({});
+  const isCancelledRef = useRef(false);
 
   // Accordion State
   const [round2Open, setRound2Open] = useState(false);
@@ -280,16 +282,22 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
         return;
       }
     }
+    isCancelledRef.current = false;
+    cancelTokenRef.current = {};
     setSelectedDocId(id);
     setUploadStatus('idle');
     setUploadProgress(0);
-    setSelectedFile(null);
     setSelectedFile(null);
     setIsUploadModalOpen(true);
   };
 
   const handleCloseUpload = () => {
-    if (uploadStatus === 'uploading') return;
+    isCancelledRef.current = true;
+    if (cancelTokenRef.current.cancel) {
+      cancelTokenRef.current.cancel();
+    }
+    setUploadStatus('idle');
+    setUploadProgress(0);
     setIsUploadModalOpen(false);
     setSelectedDocId(null);
   };
@@ -302,12 +310,16 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
     if (!selectedFile || !applicantData) return;
     setUploadStatus('encrypting');
     setUploadProgress(0);
+    isCancelledRef.current = false;
+    cancelTokenRef.current = {};
 
     // Simulate encryption before uploading
     for (let i = 0; i <= 100; i += 5) {
+      if (isCancelledRef.current) return;
       await new Promise(res => setTimeout(res, 50));
       setUploadProgress(i);
     }
+    if (isCancelledRef.current) return;
 
     setUploadStatus('uploading');
     setUploadProgress(0);
@@ -322,8 +334,11 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
           // Normalize to [10, 99] range during the upload phase so it never resets to 0
           const displayProgress = Math.max(10, Math.min(99, progress));
           setUploadProgress(displayProgress);
-        }
+        },
+        cancelTokenRef.current
       );
+
+      if (isCancelledRef.current) return;
 
       setUploadProgress(100);
       setUploadStatus('success');
@@ -341,10 +356,14 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
 
       if (onDocumentUpload) onDocumentUpload(updatedDoc);
       setTimeout(() => handleCloseUpload(), 1500);
-    } catch (e) {
-      console.error("Firebase Storage Upload Failed", e);
-      setUploadStatus('idle');
-      setToast({ message: "Upload failed. Try again.", type: 'error' });
+    } catch (e: any) {
+      if (e.message !== "Upload cancelled by user") {
+        console.error("Firebase Storage Upload Failed", e);
+        if (!isCancelledRef.current) {
+          setUploadStatus('idle');
+          setToast({ message: "Upload failed. Try again.", type: 'error' });
+        }
+      }
     }
   };
 
@@ -747,7 +766,7 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
             <div className="p-8 bg-gray-50 flex justify-end gap-4">
               {uploadStatus !== 'success' && (
                 <>
-                  <button onClick={handleCloseUpload} className="px-8 py-3 text-xs font-bold text-gray-400 uppercase tracking-widest">Cancel</button>
+                  <button onClick={handleCloseUpload} className="px-8 py-3 text-xs font-bold text-gray-400 uppercase tracking-widest hover:text-red-500 transition-colors">Cancel</button>
                   <button onClick={handleUpload} disabled={!selectedFile || uploadStatus === 'uploading' || uploadStatus === 'encrypting'} className="px-10 py-3 bg-gkk-navy text-white rounded-2xl font-bold uppercase tracking-widest text-xs shadow-xl disabled:opacity-20">{(uploadStatus === 'uploading' || uploadStatus === 'encrypting') ? '...' : 'Upload'}</button>
                 </>
               )}

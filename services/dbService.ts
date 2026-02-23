@@ -125,13 +125,26 @@ export const addApplicantDocument = async (uid: string, document: ApplicantDocum
 /**
  * Uploads a file directly to Firebase Cloud Storage with streaming progress.
  */
-export const uploadApplicantFile = async (uid: string, documentId: string, file: File, onProgress?: (progress: number) => void): Promise<string> => {
+export const uploadApplicantFile = async (
+    uid: string,
+    documentId: string,
+    file: File,
+    onProgress?: (progress: number) => void,
+    cancelToken?: { cancel?: () => void }
+): Promise<string> => {
     return new Promise((resolve, reject) => {
         const fileExtension = file.name.split('.').pop() || 'pdf';
         const filePath = `applicants/${uid}/${documentId}_${Date.now()}.${fileExtension}`;
         const storageRef = ref(storage, filePath);
 
         const uploadTask = uploadBytesResumable(storageRef, file);
+
+        if (cancelToken) {
+            cancelToken.cancel = () => {
+                uploadTask.cancel();
+                reject(new Error("Upload cancelled by user"));
+            };
+        }
 
         uploadTask.on('state_changed',
             (snapshot) => {
