@@ -95,7 +95,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onRegisterClick, onQuickRegister
                         <Shield className="text-gkk-gold" size={32} />
                     </div>
                     <h2 className="mt-6 text-3xl font-serif font-bold text-gkk-navy">
-                        Nominee Portal
+                        GKK Portal
                     </h2>
                     <p className="mt-2 text-sm text-gray-600 font-medium">
                         Secure access for 14<sup>th</sup> GKK Nominees

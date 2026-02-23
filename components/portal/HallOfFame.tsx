@@ -295,7 +295,7 @@ const HallOfFame: React.FC<HallOfFameProps> = ({ onBack }) => {
             The Search for the <br /> 14<sup>th</sup> Cycle is Active
           </h2>
           <p className="text-lg text-gray-500 mb-12 font-medium leading-relaxed">
-            Continuing a decade-long tradition of safety excellence. Your establishment could be the next to join this prestigious hall of fame.
+            Continuing a decade-long tradition of safety excellence. Your establishment could be the next to join this prestigious GKK Winners list.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <button
