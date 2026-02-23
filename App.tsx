@@ -37,7 +37,7 @@ function App() {
 
   useEffect(() => {
     // Temporary seed execution triggered by HMR - Commented out to prevent database reset
-    seedFirebase().then(() => alert('Database Refactored & Seeded! Collections: admins, reu, scd, evaluators, invites, nominees.'));
+    // seedFirebase().then(() => alert('Database Refactored & Seeded! Collections: admins, reu, scd, evaluators, invites, nominees.'));
 
     const restoreSession = async () => {
       const savedView = sessionStorage.getItem('gkk_last_view') as ViewState;
