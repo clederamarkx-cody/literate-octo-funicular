@@ -69,17 +69,9 @@ const UploadModal: React.FC<UploadModalProps> = ({
                                         {selectedFile ? selectedFile.name : 'No file selected.'}
                                     </div>
 
-                                    {selectedFile && (
-                                        <div className="mt-4 text-left">
-                                            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 block px-1">Reviewer Remarks (Optional)</label>
-                                            <textarea
-                                                value={uploadRemarks}
-                                                onChange={(e) => setUploadRemarks(e.target.value)}
-                                                placeholder="Add any notes here regarding this submission..."
-                                                className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl text-sm text-gkk-navy font-medium focus:outline-none focus:ring-2 focus:ring-gkk-gold/50 resize-none h-24"
-                                            />
-                                        </div>
-                                    )}
+                                    <div className="mt-4 text-left">
+                                        {/* Remarks section removed as per UI request */}
+                                    </div>
                                 </div>
                             )}
                             {(uploadStatus === 'uploading' || uploadStatus === 'encrypting') && (

@@ -549,7 +549,6 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
                         <div className="mt-4 space-y-2">
                           <p className="text-sm border-l-4 border-gkk-gold pl-3 py-1 font-bold italic text-gkk-navy/80 bg-gold-50/50">1. Each specific requirement must be uploaded as a single PDF file.</p>
                           <p className="text-sm border-l-4 border-gkk-gold pl-3 py-1 font-bold italic text-gkk-navy/80 bg-gold-50/50">2. This stage focuses on the completeness of the submissions.</p>
-                          <p className="text-sm border-l-4 border-gkk-gold pl-3 py-1 font-bold italic text-gkk-navy/80 bg-gold-50/50">3. A remarks section must be included per file upload to capture feedback or reviewer notes.</p>
                         </div>
                       </div>
                       <button onClick={() => handleStageSubmit(1)} disabled={stage1Progress === 0} className="flex items-center justify-center px-8 py-3 bg-gradient-to-r from-gkk-navy to-gkk-royalBlue text-white font-bold rounded-2xl shadow-xl hover:shadow-gkk-navy/40 hover:-translate-y-1 transition-all disabled:opacity-30 disabled:cursor-not-allowed group text-xs uppercase tracking-widest shrink-0"><Send size={16} className="mr-2 group-hover:translate-x-1 transition-transform" />Submit Stage 1</button>
@@ -568,7 +567,6 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
                             {applicantData?.round2Unlocked && (
                               <div className="mt-4 space-y-2 max-w-lg">
                                 <p className="text-sm border-l-4 border-blue-400 pl-3 py-1 font-bold italic text-blue-800 bg-blue-50">1. This stage focuses on the correctness and consistency of data and validity.</p>
-                                <p className="text-sm border-l-4 border-blue-400 pl-3 py-1 font-bold italic text-blue-800 bg-blue-50">2. A remarks section must be included per file upload to capture feedback or reviewer notes.</p>
                               </div>
                             )}
                           </div>
@@ -610,7 +608,6 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
                               <div className="mt-4 space-y-2 max-w-lg">
                                 <p className="text-sm border-l-4 border-gkk-gold pl-3 py-1 font-bold italic text-gkk-navy bg-gold-50">1. Only upload requirements that are for re-submission.</p>
                                 <p className="text-sm border-l-4 border-gkk-gold pl-3 py-1 font-bold italic text-gkk-navy bg-gold-50">2. Only PDF files are accepted as the required file type.</p>
-                                <p className="text-sm border-l-4 border-gkk-gold pl-3 py-1 font-bold italic text-gkk-navy bg-gold-50">3. A remarks section must be included per file upload to capture feedback or reviewer notes.</p>
                               </div>
                             )}
                           </div>
