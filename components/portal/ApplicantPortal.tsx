@@ -163,34 +163,95 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
     philhealthNo: "00-123456789-0"
   };
 
-  const round1Requirements = [
-    { category: 'Reportorial Compliance', label: 'WAIR (Work Accident Report)' },
-    { category: 'Reportorial Compliance', label: 'AEDR (Annual Exposure Data)' },
-    { category: 'Reportorial Compliance', label: 'AMR (Annual Medical Report)' },
-    { category: 'Legal & Administrative', label: 'Rule 1020 Registration' },
-    { category: 'Legal & Administrative', label: 'FSIC (Fire Safety)' },
-    { category: 'OSH Systems', label: 'Signed OSH Policy' }
-  ];
-
-  const round2Requirements = [
-    { category: 'Reportorial Compliance', label: 'Minutes of OSH Committee Meeting' },
-    { category: 'Reportorial Compliance', label: 'OSH Training Records' },
-    { category: 'Legal & Administrative', label: 'DOLE Clearance / Regional Certification' },
-    { category: 'Legal & Administrative', label: 'LGU Business Permit (Current Year)' },
-    { category: 'OSH Systems', label: 'HIRAC (Hazard Identification Risk Assessment)' },
-    { category: 'OSH Systems', label: 'Emergency Response Preparedness Plan' }
-  ];
-
-  const round3Requirements = [
-    { category: 'OSH Systems', label: 'Innovative OSH Programs (Documentation)' },
-    { category: 'OSH Systems', label: 'OSH Best Practices (Case Study)' },
-    { category: 'OSH Systems', label: 'CSR Safety Initiatives' },
-    { category: 'OSH Systems', label: 'Final Board Presentation (Slide Deck)' }
-  ];
+  const REQUIREMENTS_MAP: Record<string, { round1: { category: string, label: string }[], round2: { category: string, label: string }[], round3: { category: string, label: string }[] }> = {
+    private: {
+      round1: [
+        { category: 'Reportorial Compliance', label: 'WAIR (Work Accident Report)' },
+        { category: 'Reportorial Compliance', label: 'AEDR (Annual Exposure Data)' },
+        { category: 'Reportorial Compliance', label: 'AMR (Annual Medical Report)' },
+        { category: 'Legal & Administrative', label: 'Rule 1020 Registration' },
+        { category: 'Legal & Administrative', label: 'FSIC (Fire Safety)' },
+        { category: 'OSH Systems', label: 'Signed OSH Policy' }
+      ],
+      round2: [
+        { category: 'Reportorial Compliance', label: 'Minutes of OSH Committee Meeting' },
+        { category: 'Reportorial Compliance', label: 'OSH Training Records' },
+        { category: 'Legal & Administrative', label: 'DOLE Clearance / Regional Certification' },
+        { category: 'Legal & Administrative', label: 'LGU Business Permit (Current Year)' },
+        { category: 'OSH Systems', label: 'HIRAC (Hazard Identification Risk Assessment)' },
+        { category: 'OSH Systems', label: 'Emergency Response Preparedness Plan' }
+      ],
+      round3: [
+        { category: 'OSH Systems', label: 'Innovative OSH Programs (Documentation)' },
+        { category: 'OSH Systems', label: 'OSH Best Practices (Case Study)' },
+        { category: 'OSH Systems', label: 'CSR Safety Initiatives' },
+        { category: 'OSH Systems', label: 'Final Board Presentation (Slide Deck)' }
+      ]
+    },
+    government: {
+      round1: [
+        { category: 'Reportorial Compliance', label: 'CSC Resolution Compliance' },
+        { category: 'Reportorial Compliance', label: 'AEDR (Annual Exposure Data)' },
+        { category: 'Reportorial Compliance', label: 'AMR (Annual Medical Report)' },
+        { category: 'Legal & Administrative', label: 'Agency Profile' },
+        { category: 'Legal & Administrative', label: 'FSIC (Fire Safety)' },
+        { category: 'OSH Systems', label: 'Signed OSH Policy' }
+      ],
+      round2: [
+        { category: 'Reportorial Compliance', label: 'Minutes of Safety Health Committee Meeting' },
+        { category: 'Reportorial Compliance', label: 'OSH Training Records' },
+        { category: 'Legal & Administrative', label: 'CSC Clearance' },
+        { category: 'OSH Systems', label: 'HIRAC (Hazard Identification Risk Assessment)' },
+        { category: 'OSH Systems', label: 'Emergency Preparedness Plan' }
+      ],
+      round3: [
+        { category: 'OSH Systems', label: 'Innovative Public Service OSH Programs' },
+        { category: 'OSH Systems', label: 'OSH Best Practices (Case Study)' },
+        { category: 'OSH Systems', label: 'Final Board Presentation (Slide Deck)' }
+      ]
+    },
+    micro: {
+      round1: [
+        { category: 'Reportorial Compliance', label: 'WAIR (Work Accident Report)' },
+        { category: 'Legal & Administrative', label: 'Rule 1020 Registration' },
+        { category: 'Legal & Administrative', label: 'BMBE Certificate' },
+        { category: 'OSH Systems', label: 'Signed OSH Policy' }
+      ],
+      round2: [
+        { category: 'Reportorial Compliance', label: 'Basic OSH Training Certificate (BOSH/COSH)' },
+        { category: 'Legal & Administrative', label: 'LGU Business Permit (Current Year)' },
+        { category: 'OSH Systems', label: 'Simplified HIRAC' },
+        { category: 'OSH Systems', label: 'Emergency Response Plan' }
+      ],
+      round3: [
+        { category: 'OSH Systems', label: 'OSH Implementation Report' },
+        { category: 'OSH Systems', label: 'Final Board Presentation (Slide Deck)' }
+      ]
+    },
+    individual: {
+      round1: [
+        { category: 'Legal & Administrative', label: 'Professional PRC ID / DOLE Accreditation' },
+        { category: 'Legal & Administrative', label: 'Resume / Curriculum Vitae' },
+        { category: 'Reportorial Compliance', label: 'Certificate of Employment' }
+      ],
+      round2: [
+        { category: 'Reportorial Compliance', label: 'OSH Training Certificates' },
+        { category: 'OSH Systems', label: 'Portfolio of OSH Projects' },
+        { category: 'Legal & Administrative', label: 'Recommendation Letters' }
+      ],
+      round3: [
+        { category: 'OSH Systems', label: 'Significant OSH Contributions' },
+        { category: 'OSH Systems', label: 'Final Panel Interview Slide Deck' }
+      ]
+    }
+  };
 
   const [documents, setDocuments] = useState<DocumentSlot[]>(() => {
+    const currentCategory = applicantData?.details?.nomineeCategory || 'private';
+    const activeRequirements = REQUIREMENTS_MAP[currentCategory] || REQUIREMENTS_MAP['private'];
     const initialDocs: DocumentSlot[] = [];
-    round1Requirements.forEach((req, idx) => {
+
+    activeRequirements.round1.forEach((req, idx) => {
       const slotId = `r1-${idx}`;
       const savedDoc = applicantData?.documents?.find((d: any) => d.slotId === slotId);
       initialDocs.push({
@@ -205,7 +266,8 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
         round: 1
       });
     });
-    round2Requirements.forEach((req, idx) => {
+
+    activeRequirements.round2.forEach((req, idx) => {
       const slotId = `r2-${idx}`;
       const savedDoc = applicantData?.documents?.find((d: any) => d.slotId === slotId);
       initialDocs.push({
@@ -220,7 +282,8 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
         round: 2
       });
     });
-    round3Requirements.forEach((req, idx) => {
+
+    activeRequirements.round3.forEach((req, idx) => {
       const slotId = `r3-${idx}`;
       const savedDoc = applicantData?.documents?.find((d: any) => d.slotId === slotId);
       initialDocs.push({
@@ -235,6 +298,7 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
         round: 3
       });
     });
+
     return initialDocs;
   });
 
