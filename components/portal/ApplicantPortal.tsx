@@ -313,11 +313,16 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
     setUploadProgress(0);
 
     try {
+      setUploadProgress(1); // Give an initial tiny boost so it's not sitting at 0%
       const fileUrl = await uploadApplicantFile(
         applicantData.id,
         selectedDocId || 'unknown_slot',
         selectedFile,
-        (progress) => setUploadProgress(progress)
+        (progress) => {
+          // Normalize to [10, 99] range during the upload phase so it never resets to 0
+          const displayProgress = Math.max(10, Math.min(99, progress));
+          setUploadProgress(displayProgress);
+        }
       );
 
       setUploadProgress(100);
