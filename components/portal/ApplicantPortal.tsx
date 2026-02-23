@@ -606,7 +606,7 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
                             </p>
                             {applicantData?.round3Unlocked && (
                               <div className="mt-4 space-y-2 max-w-lg">
-                                <p className="text-sm border-l-4 border-gkk-gold pl-3 py-1 font-bold italic text-gkk-navy bg-gold-50">1. Only upload requirements that are for re-submission.</p>
+                                <p className="text-sm border-l-4 border-gkk-gold pl-3 py-1 font-bold italic text-gkk-navy bg-gold-50">1. Requirements for re-submission must be uploaded as a single PDF file.</p>
                                 <p className="text-sm border-l-4 border-gkk-gold pl-3 py-1 font-bold italic text-gkk-navy bg-gold-50">2. Only PDF files are accepted as the required file type.</p>
                               </div>
                             )}
