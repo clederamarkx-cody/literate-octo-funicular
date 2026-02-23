@@ -461,8 +461,8 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
 
   const handleStageSubmit = (stage: number) => {
     const progress = getProgress(stage);
-    if (progress < 100) {
-      setToast({ message: `Incomplete Submission. Please upload all required documents for Stage ${stage}.`, type: 'warning' });
+    if (progress === 0) {
+      setToast({ message: `Incomplete Submission. Please upload at least one required document for Stage ${stage}.`, type: 'warning' });
       return;
     }
     setTargetSubmitStage(stage);
