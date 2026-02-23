@@ -4,6 +4,7 @@ import { signInAnonymously } from 'firebase/auth';
 import { db, storage, auth } from './firebase';
 import { Nominee, NomineeDocument, UserRole } from '../types';
 import { INITIAL_GKK_WINNERS } from '../constants';
+export const TEST_MODE = false; // Set to true to bypass DB lookups for UI testing
 
 // Collection references
 export const NOMINEES_COLLECTION = 'nominees';
@@ -15,6 +16,13 @@ export const INVITES_COLLECTION = 'invites';
 export const APPLICATIONS_COLLECTION = 'applications';
 export const WINNERS_COLLECTION = 'gkk_winners';
 export const FILES_COLLECTION = 'gkk_files';
+
+// New Collections for Extended Schema
+export const EVALUATIONS_REVIEWS_COLLECTION = 'evaluations'; // Individual evaluator responses
+export const REQUIREMENTS_COLLECTION = 'requirements';
+export const AWARD_CATEGORIES_COLLECTION = 'categories';
+export const SYSTEM_LOGS_COLLECTION = 'systemLogs';
+export const SETTINGS_COLLECTION = 'settings';
 
 /**
  * Helper to get collection name from role
@@ -351,7 +359,12 @@ export const seedFirebase = async () => {
             EVALUATORS_COLLECTION,
             INVITES_COLLECTION,
             APPLICATIONS_COLLECTION,
-            WINNERS_COLLECTION
+            WINNERS_COLLECTION,
+            EVALUATIONS_REVIEWS_COLLECTION,
+            REQUIREMENTS_COLLECTION,
+            AWARD_CATEGORIES_COLLECTION,
+            SYSTEM_LOGS_COLLECTION,
+            SETTINGS_COLLECTION
         ];
 
         for (const collName of collectionsToClear) {
@@ -426,7 +439,50 @@ export const seedFirebase = async () => {
             await setDoc(doc(collection(db, WINNERS_COLLECTION)), winner);
         }
 
-        console.log(`Successfully seeded system accounts and winners.`);
+        // ============================================
+        // Seed Extended Schema (Compatibility Test)
+        // ============================================
+
+        // Seed Categories
+        await setDoc(doc(db, AWARD_CATEGORIES_COLLECTION, 'cat_industry'), { categoryId: 'industry', name: 'Private Sector', description: 'Industry Sector Awards' });
+        await setDoc(doc(db, AWARD_CATEGORIES_COLLECTION, 'cat_micro'), { categoryId: 'microEnterprises', name: 'Micro Enterprises', description: 'Small business awards' });
+
+        // Seed Requirements
+        await setDoc(doc(db, REQUIREMENTS_COLLECTION, 'req_industry_r1'), {
+            categoryId: 'industry',
+            requiredFiles: ['WAIR', 'AEDR', 'AMR', 'Rule 1020 Registration', 'FSIC', 'Signed OSH Policy'],
+            optionalFiles: []
+        });
+
+        // Seed Settings
+        await setDoc(doc(db, SETTINGS_COLLECTION, 'system_config'), {
+            key: 'maintenance_mode',
+            value: false
+        });
+
+        // Seed System Logs
+        await setDoc(doc(db, SYSTEM_LOGS_COLLECTION, 'log_1'), {
+            logId: 'log_1',
+            userId: 'system',
+            action: 'database_seed',
+            details: 'Initial database structure generated.',
+            timestamp: new Date().toISOString()
+        });
+
+        // Seed dummy evaluation for the demo app
+        await setDoc(doc(db, EVALUATIONS_REVIEWS_COLLECTION, 'eval_demo_1'), {
+            evaluationId: 'eval_demo_1',
+            applicationId: demoUid,
+            evaluatorId: 'user_reu_mock',
+            role: 'reu',
+            decision: 'Pass',
+            remarks: 'Looks good',
+            visibility: true,
+            evaluatedAt: new Date().toISOString(),
+            status: 'completed'
+        });
+
+        console.log(`Successfully seeded system accounts, winners, and extended schema.`);
         return true;
     } catch (err) {
         console.error("Failed to seed database:", err);
