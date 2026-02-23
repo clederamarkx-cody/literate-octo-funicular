@@ -16,7 +16,7 @@ const NominationForm: React.FC<NominationFormProps> = ({ onBack }) => {
   const [email, setEmail] = useState('');
   const [accessKey, setAccessKey] = useState('');
   const [companyName, setCompanyName] = useState('Nominated Establishment');
-  const [category, setCategory] = useState<Nominee['details']['nomineeCategory']>('private');
+  const [category, setCategory] = useState<Nominee['details']['nomineeCategory']>('Industry');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -166,10 +166,10 @@ const NominationForm: React.FC<NominationFormProps> = ({ onBack }) => {
                     onChange={(e) => setCategory(e.target.value as Nominee['details']['nomineeCategory'])}
                     className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-gkk-gold/10 focus:border-gkk-gold focus:bg-white outline-none transition-all font-medium text-gkk-navy appearance-none"
                   >
-                    <option value="private">Private Establishment</option>
-                    <option value="government">Government Office</option>
-                    <option value="micro">Micro Enterprise</option>
-                    <option value="individual">Individual Professional</option>
+                    <option value="Industry">Industry</option>
+                    <option value="Individual">Individual</option>
+                    <option value="Micro Enterprise">Micro Enterprise</option>
+                    <option value="Government">Government</option>
                   </select>
                 </div>
               </div>

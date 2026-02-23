@@ -37,7 +37,7 @@ function App() {
 
   useEffect(() => {
     // Temporary seed execution triggered by HMR - Commented out to prevent database reset
-    // seedFirebase().then(() => console.log('Successfully published seeded collections to Firebase!'));
+    seedFirebase().then(() => alert('Database Refactored & Seeded! Collections: admins, reu, scd, evaluators, invites, nominees.'));
 
     const restoreSession = async () => {
       const savedView = sessionStorage.getItem('gkk_last_view') as ViewState;
@@ -90,7 +90,7 @@ function App() {
     try {
       const email = `contact@${companyName.replace(/[^a-zA-Z]/g, '').toLowerCase()}.demo`;
       await createUserProfile(newId, email, 'nominee');
-      const newApp = await createNominee(newId, regId, companyName, 'private', email);
+      const newApp = await createNominee(newId, regId, companyName, 'Industry', email);
 
       sessionStorage.setItem('gkk_session', JSON.stringify({ role: 'nominee', uid: newId }));
       setNominees(prev => [newApp, ...prev]);
@@ -238,7 +238,7 @@ function App() {
                     setCurrentNomineeId(uid);
                     navigateTo('nominee-portal');
                   }
-                } else if (['evaluator', 'scd', 'reu', 'admin'].includes(role)) {
+                } else if (['evaluator', 'scd_team_leader', 'reu', 'admin'].includes(role)) {
                   navigateTo('evaluator-portal');
                 }
               }}

@@ -380,12 +380,12 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
               <div className="w-32 bg-gray-50 rounded-[20px] p-4 text-center border border-gray-100">
                 {renderProgressBar(selectedNominee, 1)}
               </div>
-              {userRole !== 'reu' && (selectedNominee.round2Unlocked || userRole === 'admin' || userRole === 'scd') && (
+              {userRole !== 'reu' && (selectedNominee.round2Unlocked || userRole === 'admin' || userRole === 'scd_team_leader') && (
                 <div className="w-32 bg-gray-50 rounded-[20px] p-4 text-center border border-gray-100">
                   {renderProgressBar(selectedNominee, 2)}
                 </div>
               )}
-              {userRole !== 'reu' && (selectedNominee.round3Unlocked || userRole === 'admin' || userRole === 'scd') && (
+              {userRole !== 'reu' && (selectedNominee.round3Unlocked || userRole === 'admin' || userRole === 'scd_team_leader') && (
                 <div className="w-32 bg-gray-50 rounded-[20px] p-4 text-center border border-gray-100">
                   {renderProgressBar(selectedNominee, 3)}
                 </div>
@@ -430,7 +430,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
             </div>
           )}
 
-          {(userRole === 'admin' || userRole === 'scd') && (
+          {(userRole === 'admin' || userRole === 'scd_team_leader') && (
             <div className="bg-white rounded-[30px] p-8 border border-gkk-navy/10 shadow-xl flex items-center justify-between mt-4">
               <div>
                 <h4 className="font-bold text-gkk-navy text-lg uppercase">Stage 1 Verdict</h4>
@@ -453,14 +453,14 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
             </div>
           )}
 
-          {userRole !== 'reu' && userRole !== 'dole' && (
+          {userRole !== 'reu' && (
             <>
               <div className="space-y-4">
                 <div className={`rounded-[40px] border transition-all duration-300 overflow-hidden ${(selectedNominee.round2Unlocked || ['admin', 'scd', 'evaluator'].includes(userRole || '')) ? 'bg-white border-gray-200 shadow-xl' : 'bg-gray-50 border-gray-100 opacity-60'}`}>
                   <div className="p-10 flex flex-col md:flex-row items-center justify-between gap-8">
                     <div className="flex items-center space-x-8">
                       <div className={`w-16 h-16 rounded-3xl flex items-center justify-center transition-all ${(selectedNominee.round2Unlocked || ['admin', 'scd', 'evaluator'].includes(userRole || '')) ? 'bg-blue-600 text-white shadow-xl' : 'bg-gray-200 text-gray-400'}`}>{(selectedNominee.round2Unlocked || ['admin', 'scd', 'evaluator'].includes(userRole || '')) ? <Unlock size={28} /> : <Lock size={28} />}</div>
-                      <div className="text-left"><h4 className="font-bold text-gkk-navy text-xl uppercase tracking-tighter leading-none">Stage 2 Verification</h4><p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-3">{selectedNominee.round2Unlocked ? 'Reviewing national shortlist' : (['admin', 'evaluator', 'scd'].includes(userRole || '')) ? 'Action Required: Trigger Stage 2' : 'Locked'}</p></div>
+                      <div className="text-left"><h4 className="font-bold text-gkk-navy text-xl uppercase tracking-tighter leading-none">Stage 2 Verification</h4><p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-3">{selectedNominee.round2Unlocked ? 'Reviewing national shortlist' : (['admin', 'evaluator', 'scd_team_leader'].includes(userRole || '')) ? 'Action Required: Trigger Stage 2' : 'Locked'}</p></div>
                     </div>
                     <div className="flex items-center gap-4">
                       {(selectedNominee.round2Unlocked || ['admin', 'scd', 'evaluator'].includes(userRole || '')) && (
@@ -472,7 +472,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                           <Download size={16} /> {isExporting === 2 ? "Export..." : "Export PDFs"}
                         </button>
                       )}
-                      {(['admin', 'evaluator', 'scd'].includes(userRole || '')) && (
+                      {(['admin', 'evaluator', 'scd_team_leader'].includes(userRole || '')) && (
                         <button onClick={() => {
                           const newStatus = !selectedNominee.round2Unlocked;
                           if (onToggleRound2) onToggleRound2(selectedNominee.id, newStatus);
@@ -482,7 +482,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                         }} className={`px-10 py-4 rounded-[20px] font-bold transition-all shadow-xl text-[10px] tracking-widest uppercase ${selectedNominee.round2Unlocked ? 'bg-red-50 text-red-600 border border-red-100 hover:bg-red-100' : 'bg-gkk-gold text-gkk-navy hover:bg-gkk-navy hover:text-white'}`}>{selectedNominee.round2Unlocked ? 'Deactivate Stage 2' : 'Activate Stage 2'}</button>
                       )}
 
-                      {(userRole === 'admin' || userRole === 'scd') && (
+                      {(userRole === 'admin' || userRole === 'scd_team_leader') && (
                         <div className="flex items-center gap-2 border-l border-gray-200 pl-4 ml-2">
                           <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mr-2">Verdict:</p>
                           <button
@@ -503,22 +503,22 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                   </div>
                   {(selectedNominee.round2Unlocked || ['admin', 'scd', 'evaluator'].includes(userRole || '')) && (
                     <div className="border-t border-gray-100">
-                      <button onClick={() => setRound2Open(!round2Open)} className="w-full py-5 bg-gray-50/50 hover:bg-gray-100 transition-colors flex items-center justify-center text-[10px] font-bold text-gray-400 uppercase tracking-[0.4em]">{(round2Open || ['admin', 'scd', 'evaluator'].includes(userRole || '')) ? 'Collapse Records' : 'Review Records'}{(round2Open || ['admin', 'scd', 'evaluator'].includes(userRole || '')) ? <ChevronUp size={16} className="ml-2" /> : <ChevronDown size={16} className="ml-2" />}</button>
-                      <div className={`transition-all duration-700 ease-in-out ${(round2Open || ['admin', 'scd', 'evaluator'].includes(userRole || '')) ? 'max-h-[2000px] p-10 bg-white' : 'max-h-0 overflow-hidden'}`}>{renderDocumentGrid(2)}</div>
+                      <button onClick={() => setRound2Open(!round2Open)} className="w-full py-5 bg-gray-50/50 hover:bg-gray-100 transition-colors flex items-center justify-center text-[10px] font-bold text-gray-400 uppercase tracking-[0.4em]">{(round2Open || ['admin', 'scd_team_leader', 'evaluator'].includes(userRole || '')) ? 'Collapse Records' : 'Review Records'}{(round2Open || ['admin', 'scd_team_leader', 'evaluator'].includes(userRole || '')) ? <ChevronUp size={16} className="ml-2" /> : <ChevronDown size={16} className="ml-2" />}</button>
+                      <div className={`transition-all duration-700 ease-in-out ${(round2Open || ['admin', 'scd_team_leader', 'evaluator'].includes(userRole || '')) ? 'max-h-[2000px] p-10 bg-white' : 'max-h-0 overflow-hidden'}`}>{renderDocumentGrid(2)}</div>
                     </div>
                   )}
                 </div>
               </div>
 
               <div className="space-y-4">
-                <div className={`rounded-[40px] border transition-all duration-300 overflow-hidden ${(selectedNominee.round3Unlocked || userRole === 'admin' || userRole === 'scd') ? 'bg-white border-gray-200 shadow-xl' : 'bg-gray-50 border-gray-100 opacity-60'}`}>
+                <div className={`rounded-[40px] border transition-all duration-300 overflow-hidden ${(selectedNominee.round3Unlocked || userRole === 'admin' || userRole === 'scd_team_leader') ? 'bg-white border-gray-200 shadow-xl' : 'bg-gray-50 border-gray-100 opacity-60'}`}>
                   <div className="p-10 flex flex-col md:flex-row items-center justify-between gap-8">
                     <div className="flex items-center space-x-8">
-                      <div className={`w-16 h-16 rounded-3xl flex items-center justify-center transition-all ${(selectedNominee.round3Unlocked || userRole === 'admin' || userRole === 'scd') ? 'bg-gkk-gold text-gkk-navy shadow-xl' : 'bg-gray-200 text-gray-400'}`}>{(selectedNominee.round3Unlocked || userRole === 'admin' || userRole === 'scd') ? <Unlock size={28} /> : <Lock size={28} />}</div>
-                      <div className="text-left"><h4 className="font-bold text-gkk-navy text-xl uppercase tracking-tighter leading-none">Stage 3 Verification</h4><p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-3">{selectedNominee.round3Unlocked ? 'National Board Final Evaluation' : (userRole === 'admin' || userRole === 'scd') ? 'SCD Trigger Required' : 'Locked'}</p></div>
+                      <div className={`w-16 h-16 rounded-3xl flex items-center justify-center transition-all ${(selectedNominee.round3Unlocked || userRole === 'admin' || userRole === 'scd_team_leader') ? 'bg-gkk-gold text-gkk-navy shadow-xl' : 'bg-gray-200 text-gray-400'}`}>{(selectedNominee.round3Unlocked || userRole === 'admin' || userRole === 'scd_team_leader') ? <Unlock size={28} /> : <Lock size={28} />}</div>
+                      <div className="text-left"><h4 className="font-bold text-gkk-navy text-xl uppercase tracking-tighter leading-none">Stage 3 Verification</h4><p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-3">{selectedNominee.round3Unlocked ? 'National Board Final Evaluation' : (userRole === 'admin' || userRole === 'scd_team_leader') ? 'SCD Trigger Required' : 'Locked'}</p></div>
                     </div>
                     <div className="flex items-center gap-4">
-                      {(selectedNominee.round3Unlocked || userRole === 'admin' || userRole === 'scd') && (
+                      {(selectedNominee.round3Unlocked || userRole === 'admin' || userRole === 'scd_team_leader') && (
                         <button
                           onClick={() => handleExportStage(3)}
                           disabled={isExporting === 3}
@@ -537,7 +537,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                         }} className={`px-10 py-4 rounded-[20px] font-bold transition-all shadow-xl text-[10px] tracking-widest uppercase ${selectedNominee.round3Unlocked ? 'bg-red-50 text-red-600 border border-red-100 hover:bg-red-100' : 'bg-gkk-navy text-white hover:bg-gkk-royalBlue'}`}>{selectedNominee.round3Unlocked ? 'Deactivate Stage 3' : 'Activate Stage 3'}</button>
                       )}
 
-                      {(userRole === 'admin' || userRole === 'scd') && (
+                      {(userRole === 'admin' || userRole === 'scd_team_leader') && (
                         <div className="flex items-center gap-2 border-l border-gray-200 pl-4 ml-2">
                           <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mr-2">Verdict:</p>
                           <button
@@ -556,7 +556,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                       )}
                     </div>
                   </div>
-                  {(selectedNominee.round3Unlocked || userRole === 'admin' || userRole === 'scd') && (
+                  {(selectedNominee.round3Unlocked || userRole === 'admin' || userRole === 'scd_team_leader') && (
                     <div className="border-t border-gray-100">
                       <div className="p-10 bg-white">{renderDocumentGrid(3)}</div>
                     </div>
@@ -574,7 +574,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
     <div className="flex h-screen bg-gray-50 font-sans overflow-hidden page-transition">
       <aside className="w-64 bg-gkk-navy text-white flex flex-col flex-shrink-0 border-r border-white/5">
         <div className="p-6 border-b border-white/5"><div className="flex items-center space-x-3"><div className="w-8 h-8 bg-gradient-to-tr from-gkk-gold to-yellow-200 rounded-lg flex items-center justify-center"><span className="text-gkk-navy font-bold text-sm">14<sup>th</sup></span></div><span className="font-serif font-bold tracking-widest text-lg uppercase">
-          {userRole === 'admin' ? 'Admin' : userRole === 'scd' ? 'SCD Team' : userRole === 'reu' ? 'REU' : userRole === 'dole' ? 'DOLE' : 'Validator'}
+          {userRole === 'admin' ? 'Admin' : userRole === 'scd_team_leader' ? 'SCD Team' : userRole === 'reu' ? 'REU' : 'Validator'}
         </span></div></div>
         <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
           <button onClick={() => { setActiveTab('dashboard'); setView('list'); }} className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'dashboard' ? 'bg-gkk-gold text-gkk-navy font-bold shadow-lg shadow-yellow-500/10' : 'text-gray-400 hover:bg-white/5 hover:text-white'}`}><LayoutDashboard size={20} /><span className="text-sm font-medium">Dashboard</span></button>
@@ -617,7 +617,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                 <div className="absolute right-0 mt-3 w-64 bg-white rounded-2xl shadow-2xl border border-gray-100 py-3 animate-in slide-in-from-top-2 duration-300 overflow-hidden ring-4 ring-black/5">
                   <div className="px-5 py-3 border-b border-gray-50 mb-2 bg-gray-50/50">
                     <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                      {userRole === 'admin' ? 'System Admin' : userRole === 'scd' ? 'SCD Team Leader' : userRole === 'reu' ? 'Regional Evaluation Unit' : userRole === 'dole' ? 'DOLE Representative' : 'Evaluator'}
+                      {userRole === 'admin' ? 'System Admin' : userRole === 'scd_team_leader' ? 'SCD Team Leader' : userRole === 'reu' ? 'Regional Evaluation Unit' : 'Evaluator'}
                     </p>
                     <p className="text-sm font-bold text-gkk-navy mt-1 truncate">Current User</p>
                   </div>

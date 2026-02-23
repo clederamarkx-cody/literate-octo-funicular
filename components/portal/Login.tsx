@@ -53,7 +53,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onRegisterClick, onQuickRegister
             } else {
                 // Email/Password login logic
                 if (email === 'abyguel@scd.com' && password === 'scd123') {
-                    if (onLogin) onLogin('scd', 'user_scd_mock');
+                    if (onLogin) onLogin('scd_team_leader', 'user_scd_mock');
                     return;
                 }
                 if (email === 'reu@oshe.gov.ph' && password === 'reu123') {
@@ -62,15 +62,10 @@ const Login: React.FC<LoginProps> = ({ onLogin, onRegisterClick, onQuickRegister
                 }
 
                 const user = await getUserByEmail(email);
-                if (!user) {
-                    setError("No account found with this email.");
-                    return;
-                }
-
-                if (user.role === 'nominee') {
-                    if (onLogin) onLogin('nominee', user.uid);
+                if (user) {
+                    if (onLogin) onLogin(user.role, user.uid);
                 } else {
-                    setError("Access restricted to Nominee accounts only.");
+                    setError("Access restricted. No account found with this email.");
                 }
             }
         } catch (err) {

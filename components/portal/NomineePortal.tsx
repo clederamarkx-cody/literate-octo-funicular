@@ -170,7 +170,7 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
   };
 
   const REQUIREMENTS_MAP: Record<string, { round1: { category: string, label: string }[], round2: { category: string, label: string }[], round3: { category: string, label: string }[] }> = {
-    private: {
+    Industry: {
       round1: [
         { category: 'Reportorial Compliance', label: 'WAIR (Work Accident Report)' },
         { category: 'Reportorial Compliance', label: 'AEDR (Annual Exposure Data)' },
@@ -194,7 +194,7 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
         { category: 'OSH Systems', label: 'Final Board Presentation (Slide Deck)' }
       ]
     },
-    government: {
+    Government: {
       round1: [
         { category: 'Reportorial Compliance', label: 'CSC Resolution Compliance' },
         { category: 'Reportorial Compliance', label: 'AEDR (Annual Exposure Data)' },
@@ -216,7 +216,7 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
         { category: 'OSH Systems', label: 'Final Board Presentation (Slide Deck)' }
       ]
     },
-    micro: {
+    "Micro Enterprise": {
       round1: [
         { category: 'Reportorial Compliance', label: 'WAIR (Work Accident Report)' },
         { category: 'Legal & Administrative', label: 'Rule 1020 Registration' },
@@ -234,7 +234,7 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
         { category: 'OSH Systems', label: 'Final Board Presentation (Slide Deck)' }
       ]
     },
-    individual: {
+    Individual: {
       round1: [
         { category: 'Legal & Administrative', label: 'Professional PRC ID / DOLE Accreditation' },
         { category: 'Legal & Administrative', label: 'Resume / Curriculum Vitae' },
@@ -253,8 +253,8 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
   };
 
   const [documents, setDocuments] = useState<DocumentSlot[]>(() => {
-    const currentCategory = nomineeData?.details?.nomineeCategory || 'private';
-    const activeRequirements = REQUIREMENTS_MAP[currentCategory] || REQUIREMENTS_MAP['private'];
+    const currentCategory = nomineeData?.details?.nomineeCategory || 'Industry';
+    const activeRequirements = REQUIREMENTS_MAP[currentCategory] || REQUIREMENTS_MAP['Industry'];
     const initialDocs: DocumentSlot[] = [];
 
     activeRequirements.round1.forEach((req, idx) => {

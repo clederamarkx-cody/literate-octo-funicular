@@ -5,7 +5,7 @@ export interface ChatMessage {
   isLoading?: boolean;
 }
 
-export type UserRole = 'nominee' | 'reu' | 'dole' | 'evaluator' | 'scd' | 'admin';
+export type UserRole = 'nominee' | 'reu' | 'evaluator' | 'scd_team_leader' | 'admin';
 
 export interface Category {
   title: string;
@@ -50,7 +50,7 @@ export interface Nominee {
   stage2Verdict?: 'Pass' | 'Fail';
   stage3Verdict?: 'Pass' | 'Fail';
   details?: {
-    nomineeCategory?: 'private' | 'government' | 'micro' | 'individual';
+    nomineeCategory?: 'Industry' | 'Individual' | 'Micro Enterprise' | 'Government';
     employees?: string;
     address?: string;
     representative?: string;
