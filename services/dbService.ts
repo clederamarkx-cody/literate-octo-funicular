@@ -1,6 +1,7 @@
-import { collection, doc, setDoc, getDoc, updateDoc, query, where, getDocs, arrayUnion, deleteDoc } from 'firebase/firestore';
+import { collection, doc, setDoc, getDoc, updateDoc, query, where, getDocs, deleteDoc } from 'firebase/firestore';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
-import { db, storage } from './firebase';
+import { signInAnonymously } from 'firebase/auth';
+import { db, storage, auth } from './firebase';
 import { Applicant, ApplicantDocument, UserRole } from '../types';
 import { INITIAL_APPLICANTS, INITIAL_HALL_OF_FAME } from '../constants';
 
@@ -132,6 +133,12 @@ export const uploadApplicantFile = async (
     onProgress?: (progress: number) => void,
     cancelToken?: { cancel?: () => void }
 ): Promise<string> => {
+    try {
+        await signInAnonymously(auth);
+    } catch (e) {
+        console.warn("Anonymous sign-in failed. Proceeding without auth.", e);
+    }
+
     return new Promise((resolve, reject) => {
         const fileExtension = file.name.split('.').pop() || 'pdf';
         const filePath = `applicants/${uid}/${documentId}_${Date.now()}.${fileExtension}`;
