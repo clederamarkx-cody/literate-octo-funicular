@@ -133,53 +133,64 @@ export const uploadApplicantFile = async (
     onProgress?: (progress: number) => void,
     cancelToken?: { cancel?: () => void }
 ): Promise<string> => {
-    try {
-        await signInAnonymously(auth);
-    } catch (e) {
-        console.warn("Anonymous sign-in failed. Proceeding without auth.", e);
-    }
-
     return new Promise((resolve, reject) => {
-        const fileExtension = file.name.split('.').pop() || 'pdf';
-        const filePath = `applicants/${uid}/${documentId}_${Date.now()}.${fileExtension}`;
-        const storageRef = ref(storage, filePath);
-
-        const uploadTask = uploadBytesResumable(storageRef, file);
-
-        let timeoutId = setTimeout(() => {
-            uploadTask.cancel();
-            reject(new Error("Upload timed out (15s). This is usually caused by missing CORS configuration on the Firebase Storage bucket."));
-        }, 15000);
+        let isCancelled = false;
 
         if (cancelToken) {
             cancelToken.cancel = () => {
-                clearTimeout(timeoutId);
-                uploadTask.cancel();
+                isCancelled = true;
                 reject(new Error("Upload cancelled by user"));
             };
         }
 
-        uploadTask.on('state_changed',
-            (snapshot) => {
-                const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                if (onProgress) onProgress(Math.floor(progress));
-            },
-            (error) => {
-                clearTimeout(timeoutId);
-                console.error("Firebase Storage upload failed", error);
-                reject(error);
-            },
-            async () => {
-                try {
-                    clearTimeout(timeoutId);
-                    const downloadUrl = await getDownloadURL(uploadTask.snapshot.ref);
-                    resolve(downloadUrl);
-                } catch (err) {
-                    clearTimeout(timeoutId);
-                    reject(err);
+        const reader = new FileReader();
+
+        reader.onload = async (e) => {
+            if (isCancelled) return;
+            try {
+                const base64String = e.target?.result as string;
+                const fileUid = `${uid}_${documentId}_${Date.now()}`;
+
+                // Firestore chunking
+                // Max document size is 1MB. We chunk safely at ~500KB per document.
+                const chunkSize = 500000;
+                const totalChunks = Math.ceil(base64String.length / chunkSize);
+
+                for (let i = 0; i < totalChunks; i++) {
+                    if (isCancelled) return;
+
+                    const chunk = base64String.slice(i * chunkSize, (i + 1) * chunkSize);
+                    const chunkRef = doc(db, `gkk_files/${fileUid}/chunks`, i.toString());
+                    await setDoc(chunkRef, { data: chunk });
+
+                    if (onProgress) onProgress(Math.floor(((i + 1) / totalChunks) * 100));
                 }
+
+                if (isCancelled) return;
+
+                // Save the file metadata pointer
+                const fileRef = doc(db, 'gkk_files', fileUid);
+                await setDoc(fileRef, {
+                    totalChunks,
+                    type: file.type,
+                    createdAt: new Date().toISOString()
+                });
+
+                // Return URL compatible with resolveFileUrl in this app
+                resolve(`gkk-file://${fileUid}`);
+
+            } catch (err) {
+                console.error("Firestore chunk upload failed", err);
+                reject(err);
             }
-        );
+        };
+
+        reader.onerror = (error) => {
+            console.error("FileReader failed", error);
+            reject(error);
+        };
+
+        reader.readAsDataURL(file);
     });
 };
 
