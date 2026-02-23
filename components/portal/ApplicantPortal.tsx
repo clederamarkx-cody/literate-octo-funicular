@@ -361,7 +361,7 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
         console.error("Firebase Storage Upload Failed", e);
         if (!isCancelledRef.current) {
           setUploadStatus('idle');
-          setToast({ message: "Upload failed. Try again.", type: 'error' });
+          setToast({ message: `Upload failed: ${e.code || e.message || 'Unknown error'}`, type: 'error' });
         }
       }
     }
