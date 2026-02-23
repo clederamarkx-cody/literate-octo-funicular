@@ -33,23 +33,23 @@ import {
   Send,
   ArrowLeft
 } from 'lucide-react';
-import { Applicant, ApplicantDocument } from '../../types';
-import { uploadApplicantFile, resolveFileUrl } from '../../services/dbService';
+import { Nominee, NomineeDocument } from '../../types';
+import { uploadNomineeFile, resolveFileUrl, updateNominee, addNomineeDocument } from '../../services/dbService';
 import OnboardingTour, { TourStep } from './OnboardingTour';
 import Toast, { ToastType } from '../ui/Toast';
-import ApplicantSidebar from './applicant/ApplicantSidebar';
-import ApplicantProfileHeader from './applicant/ApplicantProfileHeader';
-import StageProgress from './applicant/StageProgress';
-import DocumentGrid from './applicant/DocumentGrid';
-import UploadModal from './applicant/UploadModal';
-import TermsModal from './applicant/TermsModal';
-import ApplicantProfileEdit from './applicant/ApplicantProfileEdit';
-interface ApplicantPortalProps {
+import NomineeSidebar from './nominee/NomineeSidebar';
+import NomineeProfileHeader from './nominee/NomineeProfileHeader';
+import StageProgress from './nominee/StageProgress';
+import DocumentGrid from './nominee/DocumentGrid';
+import UploadModal from './nominee/UploadModal';
+import TermsModal from './nominee/TermsModal';
+import NomineeProfileEdit from './nominee/NomineeProfileEdit';
+interface NomineePortalProps {
   onLogout: () => void;
   onUnderDev: () => void;
-  applicantData: Applicant | null;
-  onDocumentUpload?: (doc: ApplicantDocument) => void;
-  onUpdateApplicant?: (updates: Partial<Applicant>) => void;
+  nomineeData: Nominee | null;
+  onDocumentUpload?: (doc: NomineeDocument) => void;
+  onUpdateNominee?: (updates: Partial<Nominee>) => void;
 }
 
 interface DocumentSlot {
@@ -64,7 +64,7 @@ interface DocumentSlot {
   round: number;
 }
 
-const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev, applicantData, onDocumentUpload, onUpdateApplicant }) => {
+const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nomineeData: nomineeData, onDocumentUpload, onUpdateNominee: onUpdateNominee }) => {
   const [activeTab, setActiveTab] = useState<'dashboard' | 'entry' | 'profile'>('dashboard');
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -79,19 +79,19 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
   const [isTourOpen, setIsTourOpen] = useState(false);
 
   useEffect(() => {
-    if (applicantData?.id) {
-      const tourKey = `gkk_tour_completed_${applicantData.id}`;
+    if (nomineeData?.id) {
+      const tourKey = `gkk_tour_completed_${nomineeData.id}`;
       if (!localStorage.getItem(tourKey)) {
         // Add a slight delay to let the UI render first
         setTimeout(() => setIsTourOpen(true), 500);
       }
     }
-  }, [applicantData?.id]);
+  }, [nomineeData?.id]);
 
   const handleTourComplete = () => {
     setIsTourOpen(false);
-    if (applicantData?.id) {
-      localStorage.setItem(`gkk_tour_completed_${applicantData.id}`, 'true');
+    if (nomineeData?.id) {
+      localStorage.setItem(`gkk_tour_completed_${nomineeData.id}`, 'true');
     }
   };
 
@@ -154,17 +154,17 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
   }, []);
 
   const profileData = {
-    companyName: applicantData?.name || "Acme Manufacturing Phils.",
-    regId: applicantData?.regId || "NOM-2024-8821",
-    industry: applicantData?.industry || "Manufacturing",
-    employees: applicantData?.details?.employees || "250",
-    region: applicantData?.region || "Region IV-A",
-    address: applicantData?.details?.address || "Industrial Park, Laguna",
-    representative: applicantData?.details?.representative || "Juan Dela Cruz",
-    designation: applicantData?.details?.designation || "Safety Manager",
-    email: applicantData?.details?.email || "safety@acme.ph",
-    phone: applicantData?.details?.phone || "0917-123-4567",
-    safetyOfficer: applicantData?.details?.safetyOfficer || "Engr. Maria Clara",
+    companyName: nomineeData?.name || "Acme Manufacturing Phils.",
+    regId: nomineeData?.regId || "NOM-2024-8821",
+    industry: nomineeData?.industry || "Manufacturing",
+    employees: nomineeData?.details?.employees || "250",
+    region: nomineeData?.region || "Region IV-A",
+    address: nomineeData?.details?.address || "Industrial Park, Laguna",
+    representative: nomineeData?.details?.representative || "Juan Dela Cruz",
+    designation: nomineeData?.details?.designation || "Safety Manager",
+    email: nomineeData?.details?.email || "safety@acme.ph",
+    phone: nomineeData?.details?.phone || "0917-123-4567",
+    safetyOfficer: nomineeData?.details?.safetyOfficer || "Engr. Maria Clara",
     doleRegNo: "R4A-12345-2020",
     philhealthNo: "00-123456789-0"
   };
@@ -253,13 +253,13 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
   };
 
   const [documents, setDocuments] = useState<DocumentSlot[]>(() => {
-    const currentCategory = applicantData?.details?.nomineeCategory || 'private';
+    const currentCategory = nomineeData?.details?.nomineeCategory || 'private';
     const activeRequirements = REQUIREMENTS_MAP[currentCategory] || REQUIREMENTS_MAP['private'];
     const initialDocs: DocumentSlot[] = [];
 
     activeRequirements.round1.forEach((req, idx) => {
       const slotId = `r1-${idx}`;
-      const savedDoc = applicantData?.documents?.find((d: any) => d.slotId === slotId);
+      const savedDoc = nomineeData?.documents?.find((d: any) => d.slotId === slotId);
       initialDocs.push({
         id: slotId,
         category: req.category as any,
@@ -275,7 +275,7 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
 
     activeRequirements.round2.forEach((req, idx) => {
       const slotId = `r2-${idx}`;
-      const savedDoc = applicantData?.documents?.find((d: any) => d.slotId === slotId);
+      const savedDoc = nomineeData?.documents?.find((d: any) => d.slotId === slotId);
       initialDocs.push({
         id: slotId,
         category: req.category as any,
@@ -291,7 +291,7 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
 
     activeRequirements.round3.forEach((req, idx) => {
       const slotId = `r3-${idx}`;
-      const savedDoc = applicantData?.documents?.find((d: any) => d.slotId === slotId);
+      const savedDoc = nomineeData?.documents?.find((d: any) => d.slotId === slotId);
       initialDocs.push({
         id: slotId,
         category: req.category as any,
@@ -308,11 +308,11 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
     return initialDocs;
   });
 
-  // Re-sync if applicantData changes after mount
+  // Re-sync if nomineeData changes after mount
   useEffect(() => {
-    if (applicantData?.documents) {
+    if (nomineeData?.documents) {
       setDocuments(prev => prev.map(doc => {
-        const savedDoc = applicantData.documents.find((d: any) => d.slotId === doc.id);
+        const savedDoc = nomineeData.documents.find((d: any) => d.slotId === doc.id);
         if (savedDoc) {
           return {
             ...doc,
@@ -327,7 +327,7 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
         return doc;
       }));
     }
-  }, [applicantData?.documents]);
+  }, [nomineeData?.documents]);
 
   const docCategories: { id: string, name: string, icon: React.ElementType }[] = [
     { id: 'Reportorial Compliance', name: 'Compliance Reports', icon: FileCheck },
@@ -349,7 +349,7 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
   const handleOpenUpload = (id: string) => {
     const doc = documents.find(d => d.id === id);
     if (doc?.status === 'uploaded') {
-      const isLocked = (doc.round === 1 && applicantData?.round2Unlocked) || (doc.round === 2 && applicantData?.round3Unlocked);
+      const isLocked = (doc.round === 1 && nomineeData?.round2Unlocked) || (doc.round === 2 && nomineeData?.round3Unlocked);
       if (isLocked) {
         setToast({ message: `Stage ${doc.round} is now locked for board evaluation.`, type: 'info' });
         return;
@@ -388,7 +388,7 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
   };
 
   const handleUpload = async () => {
-    if (!selectedFile || !applicantData) return;
+    if (!selectedFile || !nomineeData) return;
     setUploadStatus('encrypting');
     setUploadProgress(0);
     isCancelledRef.current = false;
@@ -407,8 +407,8 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
 
     try {
       setUploadProgress(1); // Give an initial tiny boost so it's not sitting at 0%
-      const fileUrl = await uploadApplicantFile(
-        applicantData.id,
+      const fileUrl = await uploadNomineeFile(
+        nomineeData.id,
         selectedDocId || 'unknown_slot',
         selectedFile,
         (progress) => {
@@ -425,7 +425,7 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
       setUploadStatus('success');
 
       const today = new Date().toLocaleString();
-      const updatedDoc: ApplicantDocument = {
+      const updatedDoc: NomineeDocument = {
         name: selectedFile.name,
         type: selectedFile.type,
         url: fileUrl,
@@ -436,7 +436,7 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
 
       setDocuments(prev => prev.map(doc => doc.id === selectedDocId ? { ...doc, status: 'uploaded', fileName: selectedFile.name, lastUpdated: today, previewUrl: fileUrl, type: selectedFile.type, remarks: uploadRemarks } : doc));
 
-      if (onDocumentUpload) onDocumentUpload(updatedDoc);
+      await addNomineeDocument(nomineeData.id, updatedDoc);
       setTimeout(() => handleCloseUpload(), 1500);
     } catch (e: any) {
       if (e.message !== "Upload cancelled by user") {
@@ -485,8 +485,8 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
     }
     setToast({ message: `Stage ${targetSubmitStage} records successfully transmitted.`, type: 'success' });
     setShowTermsModal(false);
-    if (onUpdateApplicant && targetSubmitStage === 3) {
-      onUpdateApplicant({ status: 'completed' });
+    if (onUpdateNominee && targetSubmitStage === 3) {
+      onUpdateNominee({ status: 'completed' });
     }
   };
 
@@ -494,10 +494,10 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
 
   return (
     <div className="flex h-screen bg-gray-50 font-sans overflow-hidden page-transition">
-      <ApplicantSidebar activeTab={activeTab} setActiveTab={setActiveTab} onUnderDev={onUnderDev} />
+      <NomineeSidebar activeTab={activeTab} setActiveTab={setActiveTab} onUnderDev={onUnderDev} />
 
       <main className="flex-1 flex flex-col overflow-hidden">
-        <ApplicantProfileHeader
+        <NomineeProfileHeader
           activeTab={activeTab}
           profileData={profileData}
           isProfileDropdownOpen={isProfileDropdownOpen}
@@ -535,7 +535,7 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
                         stage1Progress={stage1Progress}
                         stage2Progress={stage2Progress}
                         stage3Progress={stage3Progress}
-                        applicantData={applicantData}
+                        nomineeData={nomineeData}
                       />
                     </div>
                   </div>
@@ -554,24 +554,24 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
                       <button onClick={() => handleStageSubmit(1)} disabled={stage1Progress === 0} className="flex items-center justify-center px-8 py-3 bg-gradient-to-r from-gkk-navy to-gkk-royalBlue text-white font-bold rounded-2xl shadow-xl hover:shadow-gkk-navy/40 hover:-translate-y-1 transition-all disabled:opacity-30 disabled:cursor-not-allowed group text-xs uppercase tracking-widest shrink-0"><Send size={16} className="mr-2 group-hover:translate-x-1 transition-transform" />Submit Stage 1</button>
                     </div>
                     <div className="space-y-4">
-                      <DocumentGrid round={1} documents={documents} applicantData={applicantData} handleOpenUpload={handleOpenUpload} handlePreview={handlePreview} />
+                      <DocumentGrid round={1} documents={documents} nomineeData={nomineeData} handleOpenUpload={handleOpenUpload} handlePreview={handlePreview} />
                     </div>
                   </div>
                   <div className="space-y-4">
-                    <div id="round-2-lock" className={`rounded-3xl border transition-all duration-300 overflow-hidden ${applicantData?.round2Unlocked ? 'bg-white border-gray-200 shadow-xl' : 'bg-gray-50 border-gray-100 opacity-60'}`}>
-                      <button onClick={() => applicantData?.round2Unlocked && setRound2Open(!round2Open)} disabled={!applicantData?.round2Unlocked} className={`w-full p-8 flex items-center justify-between group transition-colors ${applicantData?.round2Unlocked ? 'cursor-pointer hover:bg-blue-50/20' : 'cursor-not-allowed'}`}>
+                    <div id="round-2-lock" className={`rounded-3xl border transition-all duration-300 overflow-hidden ${nomineeData?.round2Unlocked ? 'bg-white border-gray-200 shadow-xl' : 'bg-gray-50 border-gray-100 opacity-60'}`}>
+                      <button onClick={() => nomineeData?.round2Unlocked && setRound2Open(!round2Open)} disabled={!nomineeData?.round2Unlocked} className={`w-full p-8 flex items-center justify-between group transition-colors ${nomineeData?.round2Unlocked ? 'cursor-pointer hover:bg-blue-50/20' : 'cursor-not-allowed'}`}>
                         <div className="flex items-center space-x-6">
-                          <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all ${applicantData?.round2Unlocked ? 'bg-blue-600 text-white shadow-lg' : 'bg-gray-200 text-gray-400'}`}>{applicantData?.round2Unlocked ? <Unlock size={24} /> : <Lock size={24} />}</div>
-                          <div className="text-left"><div className="flex items-center gap-3"><div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${applicantData?.round2Unlocked ? 'bg-gkk-navy text-white' : 'bg-gray-300 text-white'}`}>2</div><h4 className="font-bold text-gkk-navy text-xl leading-none">Stage 2 Submission</h4></div>
-                            <p className="text-xs text-gray-500 mt-2 font-bold uppercase tracking-widest">{applicantData?.round2Unlocked ? 'Unlocked - Technical Board' : 'Locked'}</p>
-                            {applicantData?.round2Unlocked && (
+                          <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all ${nomineeData?.round2Unlocked ? 'bg-blue-600 text-white shadow-lg' : 'bg-gray-200 text-gray-400'}`}>{nomineeData?.round2Unlocked ? <Unlock size={24} /> : <Lock size={24} />}</div>
+                          <div className="text-left"><div className="flex items-center gap-3"><div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${nomineeData?.round2Unlocked ? 'bg-gkk-navy text-white' : 'bg-gray-300 text-white'}`}>2</div><h4 className="font-bold text-gkk-navy text-xl leading-none">Stage 2 Submission</h4></div>
+                            <p className="text-xs text-gray-500 mt-2 font-bold uppercase tracking-widest">{nomineeData?.round2Unlocked ? 'Unlocked - Technical Board' : 'Locked'}</p>
+                            {nomineeData?.round2Unlocked && (
                               <div className="mt-4 space-y-2 max-w-lg">
                                 <p className="text-sm border-l-4 border-blue-400 pl-3 py-1 font-bold italic text-blue-800 bg-blue-50">1. This stage focuses on the correctness and consistency of data and validity.</p>
                               </div>
                             )}
                           </div>
                         </div>
-                        {applicantData?.round2Unlocked && (
+                        {nomineeData?.round2Unlocked && (
                           <div className="flex items-center space-x-3 text-blue-600 bg-blue-50 px-5 py-2 rounded-2xl font-bold uppercase tracking-widest text-[10px] group-hover:bg-blue-600 group-hover:text-white transition-all"><span>{round2Open ? 'Hide' : 'Review'}</span>{round2Open ? <ChevronUp size={16} /> : <ChevronDown size={16} />}</div>
                         )}
                       </button>
@@ -579,32 +579,32 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
                         <div className="flex justify-end mb-6">
                           <button onClick={() => handleStageSubmit(2)} disabled={stage2Progress === 0} className="flex items-center justify-center px-8 py-3 bg-gradient-to-r from-blue-600 to-blue-500 text-white font-bold rounded-2xl shadow-xl hover:shadow-blue-500/40 hover:-translate-y-1 transition-all disabled:opacity-30 disabled:cursor-not-allowed group text-xs uppercase tracking-widest"><Send size={16} className="mr-2 group-hover:translate-x-1 transition-transform" />Submit Stage 2</button>
                         </div>
-                        <DocumentGrid round={2} documents={documents} applicantData={applicantData} handleOpenUpload={handleOpenUpload} handlePreview={handlePreview} />
+                        <DocumentGrid round={2} documents={documents} nomineeData={nomineeData} handleOpenUpload={handleOpenUpload} handlePreview={handlePreview} />
                       </div>
                     </div>
                   </div>
 
                   {/* Stage 3 Selection */}
                   <div className="space-y-4">
-                    <div className={`rounded-3xl border transition-all duration-300 overflow-hidden ${applicantData?.round3Unlocked ? 'bg-white border-gray-200 shadow-xl' : 'bg-gray-50 border-gray-100 opacity-60'}`}>
+                    <div className={`rounded-3xl border transition-all duration-300 overflow-hidden ${nomineeData?.round3Unlocked ? 'bg-white border-gray-200 shadow-xl' : 'bg-gray-50 border-gray-100 opacity-60'}`}>
                       <button
-                        onClick={() => applicantData?.round3Unlocked && setRound3Open(!round3Open)}
-                        disabled={!applicantData?.round3Unlocked}
-                        className={`w-full p-8 flex items-center justify-between group transition-colors ${applicantData?.round3Unlocked ? 'cursor-pointer hover:bg-gold-50/20' : 'cursor-not-allowed'}`}
+                        onClick={() => nomineeData?.round3Unlocked && setRound3Open(!round3Open)}
+                        disabled={!nomineeData?.round3Unlocked}
+                        className={`w-full p-8 flex items-center justify-between group transition-colors ${nomineeData?.round3Unlocked ? 'cursor-pointer hover:bg-gold-50/20' : 'cursor-not-allowed'}`}
                       >
                         <div className="flex items-center space-x-6">
-                          <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all ${applicantData?.round3Unlocked ? 'bg-gkk-gold text-gkk-navy shadow-lg' : 'bg-gray-200 text-gray-400'}`}>
-                            {applicantData?.round3Unlocked ? <Unlock size={24} /> : <Lock size={24} />}
+                          <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all ${nomineeData?.round3Unlocked ? 'bg-gkk-gold text-gkk-navy shadow-lg' : 'bg-gray-200 text-gray-400'}`}>
+                            {nomineeData?.round3Unlocked ? <Unlock size={24} /> : <Lock size={24} />}
                           </div>
                           <div className="text-left">
                             <div className="flex items-center gap-3">
-                              <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${applicantData?.round3Unlocked ? 'bg-gkk-navy text-white' : 'bg-gray-300 text-white'}`}>3</div>
+                              <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${nomineeData?.round3Unlocked ? 'bg-gkk-navy text-white' : 'bg-gray-300 text-white'}`}>3</div>
                               <h4 className="font-bold text-gkk-navy text-xl leading-none">Stage 3 Submission</h4>
                             </div>
                             <p className="text-xs text-gray-500 mt-2 font-bold uppercase tracking-widest">
-                              {applicantData?.round3Unlocked ? 'Unlocked - National Board' : 'Locked - National Level'}
+                              {nomineeData?.round3Unlocked ? 'Unlocked - National Board' : 'Locked - National Level'}
                             </p>
-                            {applicantData?.round3Unlocked && (
+                            {nomineeData?.round3Unlocked && (
                               <div className="mt-4 space-y-2 max-w-lg">
                                 <p className="text-sm border-l-4 border-gkk-gold pl-3 py-1 font-bold italic text-gkk-navy bg-gold-50">1. Requirements for re-submission must be uploaded as a single PDF file.</p>
                                 <p className="text-sm border-l-4 border-gkk-gold pl-3 py-1 font-bold italic text-gkk-navy bg-gold-50">2. Only PDF files are accepted as the required file type.</p>
@@ -612,31 +612,32 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
                             )}
                           </div>
                         </div>
-                        {applicantData?.round3Unlocked && (
+                        {nomineeData?.round3Unlocked && (
                           <div className="flex items-center space-x-3 text-gkk-gold bg-gold-50 px-5 py-2 rounded-2xl font-bold uppercase tracking-widest text-[10px] group-hover:bg-gkk-gold group-hover:text-gkk-navy transition-all">
                             <span>{round3Open ? 'Hide' : 'Review'}</span>
                             {round3Open ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                           </div>
                         )}
                       </button>
-                      <div className={`transition-all duration-700 ease-in-out ${round3Open && applicantData?.round3Unlocked ? 'max-h-[2000px] border-t border-gray-100 p-8 bg-white' : 'max-h-0 overflow-hidden'}`}>
+                      <div className={`transition-all duration-700 ease-in-out ${round3Open && nomineeData?.round3Unlocked ? 'max-h-[2000px] border-t border-gray-100 p-8 bg-white' : 'max-h-0 overflow-hidden'}`}>
                         <div className="flex justify-end mb-6">
                           <button onClick={() => handleStageSubmit(3)} disabled={stage3Progress === 0} className="flex items-center justify-center px-8 py-3 bg-gradient-to-r from-gkk-gold to-yellow-500 text-gkk-navy font-bold rounded-2xl shadow-xl hover:shadow-yellow-500/40 hover:-translate-y-1 transition-all disabled:opacity-30 disabled:cursor-not-allowed group text-xs uppercase tracking-widest"><Send size={16} className="mr-2 group-hover:translate-x-1 transition-transform" />Submit Stage 3</button>
                         </div>
-                        <DocumentGrid round={3} documents={documents} applicantData={applicantData} handleOpenUpload={handleOpenUpload} handlePreview={handlePreview} />
+                        <DocumentGrid round={3} documents={documents} nomineeData={nomineeData} handleOpenUpload={handleOpenUpload} handlePreview={handlePreview} />
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
             ) : activeTab === 'profile' ? (
-              <ApplicantProfileEdit
+              <NomineeProfileEdit
                 profileData={profileData}
-                onUpdateProfile={(updatedData) => {
+                onUpdateProfile={async (updatedData) => {
                   setToast({ message: "Profile updated successfully.", type: 'success' });
-                  if (onUpdateApplicant) {
-                    onUpdateApplicant(updatedData);
+                  if (onUpdateNominee) {
+                    onUpdateNominee(updatedData);
                   }
+                  await updateNominee(nomineeData.id, updatedData);
                 }}
                 onUnderDev={onUnderDev}
               />
@@ -720,4 +721,4 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
   );
 };
 
-export default ApplicantPortal;
+export default NomineePortal;

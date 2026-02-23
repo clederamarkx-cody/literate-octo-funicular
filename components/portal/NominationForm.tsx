@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowLeft, CheckCircle, Loader2, Mail, Lock, Eye, EyeOff, KeyRound, ShieldCheck, AlertCircle } from 'lucide-react';
-import { createUserProfile, createApplicant, activateAccessKey } from '../../services/dbService';
-import { Applicant } from '../../types';
+import { createUserProfile, createNominee, activateAccessKey } from '../../services/dbService';
+import { Nominee } from '../../types';
 
 interface NominationFormProps {
   onBack: () => void;
@@ -16,7 +16,7 @@ const NominationForm: React.FC<NominationFormProps> = ({ onBack }) => {
   const [email, setEmail] = useState('');
   const [accessKey, setAccessKey] = useState('');
   const [companyName, setCompanyName] = useState('Nominated Establishment');
-  const [category, setCategory] = useState<Applicant['details']['nomineeCategory']>('private');
+  const [category, setCategory] = useState<Nominee['details']['nomineeCategory']>('private');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,8 +38,8 @@ const NominationForm: React.FC<NominationFormProps> = ({ onBack }) => {
       // 3. Create User Profile
       await createUserProfile(newId, email.toLowerCase(), 'nominee');
 
-      // 4. Create Applicant Record
-      await createApplicant(newId, accessKey.trim(), companyName, category);
+      // 4. Create Nominee Record
+      await createNominee(newId, accessKey.trim(), companyName, category, email);
 
       setIsSubmitting(false);
       setIsSuccess(true);
@@ -163,7 +163,7 @@ const NominationForm: React.FC<NominationFormProps> = ({ onBack }) => {
                   <select
                     required
                     value={category}
-                    onChange={(e) => setCategory(e.target.value as Applicant['details']['nomineeCategory'])}
+                    onChange={(e) => setCategory(e.target.value as Nominee['details']['nomineeCategory'])}
                     className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-gkk-gold/10 focus:border-gkk-gold focus:bg-white outline-none transition-all font-medium text-gkk-navy appearance-none"
                   >
                     <option value="private">Private Establishment</option>

@@ -1,8 +1,8 @@
 import React, { useRef, useEffect } from 'react';
 import { ChevronRight, Bell, ChevronDown, User, Building2, LogOut } from 'lucide-react';
 
-interface ApplicantProfileHeaderProps {
-    activeTab: 'dashboard' | 'entry';
+interface NomineeProfileHeaderProps {
+    activeTab: 'dashboard' | 'entry' | 'profile';
     profileData: any;
     isProfileDropdownOpen: boolean;
     setIsProfileDropdownOpen: (open: boolean) => void;
@@ -10,7 +10,7 @@ interface ApplicantProfileHeaderProps {
     onLogout: () => void;
 }
 
-const ApplicantProfileHeader: React.FC<ApplicantProfileHeaderProps> = ({
+const NomineeProfileHeader: React.FC<NomineeProfileHeaderProps> = ({
     activeTab,
     profileData,
     isProfileDropdownOpen,
@@ -35,7 +35,7 @@ const ApplicantProfileHeader: React.FC<ApplicantProfileHeaderProps> = ({
             <div className="flex items-center text-xs text-gray-500 font-bold uppercase tracking-wider">
                 <span>Nomination Portal</span>
                 <ChevronRight size={14} className="mx-2" />
-                <span className="text-gkk-navy">{activeTab === 'dashboard' ? 'Summary' : 'Stage 1 Verification'}</span>
+                <span className="text-gkk-navy">{activeTab === 'dashboard' ? 'Summary' : activeTab === 'profile' ? 'Profile Management' : 'Stage 1 Verification'}</span>
             </div>
 
             <div className="flex items-center space-x-4">
@@ -91,4 +91,4 @@ const ApplicantProfileHeader: React.FC<ApplicantProfileHeaderProps> = ({
     );
 };
 
-export default ApplicantProfileHeader;
+export default NomineeProfileHeader;

@@ -13,26 +13,26 @@ import Contact from './components/landing/Contact';
 import Footer from './components/layout/Footer';
 import ChatWidget from './components/layout/ChatWidget';
 import { FileText, Calendar, Mail } from 'lucide-react';
-import { Applicant, ApplicantDocument } from './types';
-import { getApplicant, addApplicantDocument, updateApplicant, createUserProfile, createApplicant, seedFirebase } from './services/dbService';
+import { Nominee, NomineeDocument } from './types';
+import { getNominee, addNomineeDocument, updateNominee, createUserProfile, createNominee, seedFirebase } from './services/dbService';
 
 // Lazy load components
 const NominationForm = lazy(() => import('./components/portal/NominationForm'));
 const Login = lazy(() => import('./components/portal/Login'));
-const ApplicantPortal = lazy(() => import('./components/portal/ApplicantPortal'));
+const NomineePortal = lazy(() => import('./components/portal/NomineePortal'));
 
 const HallOfFame = lazy(() => import('./components/portal/HallOfFame'));
 const EvaluatorPortal = lazy(() => import('./components/portal/EvaluatorPortal'));
 const UnderDevelopment = lazy(() => import('./components/UnderDevelopment'));
 
 
-type ViewState = 'home' | 'nominate' | 'login' | 'applicant-portal' | 'evaluator-portal' | 'hall-of-fame' | 'under-development';
+type ViewState = 'home' | 'nominate' | 'login' | 'nominee-portal' | 'evaluator-portal' | 'hall-of-fame' | 'under-development';
 
 function App() {
   const [view, setView] = useState<ViewState>('home');
   const [prevView, setPrevView] = useState<ViewState>('home');
-  const [applicants, setApplicants] = useState<Applicant[]>([]);
-  const [currentApplicantId, setCurrentApplicantId] = useState<string | null>(null);
+  const [nominees, setNominees] = useState<Nominee[]>([]);
+  const [currentNomineeId, setCurrentNomineeId] = useState<string | null>(null);
   const [isLoadingSession, setIsLoadingSession] = useState(true);
 
   useEffect(() => {
@@ -49,12 +49,12 @@ function App() {
       if (session) {
         try {
           const { role, uid } = JSON.parse(session);
-          if (role === 'applicant' && uid) {
-            const data = await getApplicant(uid);
+          if (role === 'nominee' && uid) {
+            const data = await getNominee(uid);
             if (data) {
-              setApplicants([data]);
-              setCurrentApplicantId(uid);
-              setView('applicant-portal');
+              setNominees([data]);
+              setCurrentNomineeId(uid);
+              setView('nominee-portal');
             } else {
               sessionStorage.removeItem('gkk_session');
             }
@@ -70,9 +70,9 @@ function App() {
     restoreSession();
   }, []);
 
-  const currentApplicant = useMemo(() =>
-    applicants.find(a => a.id === currentApplicantId) || applicants[0],
-    [applicants, currentApplicantId]
+  const currentNominee = useMemo(() =>
+    nominees.find(a => a.id === currentNomineeId) || nominees[0],
+    [nominees, currentNomineeId]
   );
 
 
@@ -88,63 +88,64 @@ function App() {
     const regId = `REG-2024-${Math.floor(1000 + Math.random() * 9000)}`;
 
     try {
-      await createUserProfile(newId, `contact@${companyName.replace(/[^a-zA-Z]/g, '').toLowerCase()}.demo`, 'nominee');
-      const newApp = await createApplicant(newId, regId, companyName, 'private');
+      const email = `contact@${companyName.replace(/[^a-zA-Z]/g, '').toLowerCase()}.demo`;
+      await createUserProfile(newId, email, 'nominee');
+      const newApp = await createNominee(newId, regId, companyName, 'private', email);
 
-      sessionStorage.setItem('gkk_session', JSON.stringify({ role: 'applicant', uid: newId }));
-      setApplicants(prev => [newApp, ...prev]);
-      setCurrentApplicantId(newId);
-      navigateTo('applicant-portal');
+      sessionStorage.setItem('gkk_session', JSON.stringify({ role: 'nominee', uid: newId }));
+      setNominees(prev => [newApp, ...prev]);
+      setCurrentNomineeId(newId);
+      navigateTo('nominee-portal');
     } catch (err) {
       console.error("Failed to quick register to Firebase", err);
     }
   }, [navigateTo]);
 
-  const handleDocumentUpload = useCallback(async (doc: ApplicantDocument) => {
-    if (!currentApplicant) return;
+  const handleDocumentUpload = useCallback(async (doc: NomineeDocument) => {
+    if (!currentNominee) return;
     try {
-      await addApplicantDocument(currentApplicant.id, doc);
+      await addNomineeDocument(currentNominee.id, doc);
     } catch (err) {
       console.error("Failed to save document to Firebase", err);
     }
-    setApplicants(prev => prev.map(app => app.id === currentApplicant.id ? { ...app, documents: [...app.documents, doc] } : app));
-  }, [currentApplicant]);
+    setNominees(prev => prev.map(app => app.id === currentNominee.id ? { ...app, documents: [...app.documents, doc] } : app));
+  }, [currentNominee]);
 
-  const handleUpdateApplicant = useCallback(async (updates: Partial<Applicant>) => {
-    if (!currentApplicant) return;
+  const handleUpdateNominee = useCallback(async (updates: Partial<Nominee>) => {
+    if (!currentNominee) return;
     try {
-      await updateApplicant(currentApplicant.id, updates);
+      await updateNominee(currentNominee.id, updates);
     } catch (err) {
       console.error("Failed to save details to Firebase", err);
     }
-    setApplicants(prev => prev.map(app => app.id === currentApplicant.id ? { ...app, ...updates } : app));
-  }, [currentApplicant]);
+    setNominees(prev => prev.map(app => app.id === currentNominee.id ? { ...app, ...updates } : app));
+  }, [currentNominee]);
 
-  const handleToggleRound2 = useCallback(async (applicantId: string, unlocked: boolean) => {
+  const handleToggleRound2 = useCallback(async (nomineeId: string, unlocked: boolean) => {
     try {
-      await updateApplicant(applicantId, { round2Unlocked: unlocked });
+      await updateNominee(nomineeId, { round2Unlocked: unlocked });
     } catch (err) {
       console.error("Failed to toggle round 2 details to Firebase", err);
     }
-    setApplicants(prev => prev.map(app => app.id === applicantId ? { ...app, round2Unlocked: unlocked } : app));
+    setNominees(prev => prev.map(app => app.id === nomineeId ? { ...app, round2Unlocked: unlocked } : app));
   }, []);
 
-  const handleToggleRound3 = useCallback(async (applicantId: string, unlocked: boolean) => {
+  const handleToggleRound3 = useCallback(async (nomineeId: string, unlocked: boolean) => {
     try {
-      await updateApplicant(applicantId, { round3Unlocked: unlocked });
+      await updateNominee(nomineeId, { round3Unlocked: unlocked });
     } catch (err) {
       console.error("Failed to toggle round 3 details to Firebase", err);
     }
-    setApplicants(prev => prev.map(app => app.id === applicantId ? { ...app, round3Unlocked: unlocked } : app));
+    setNominees(prev => prev.map(app => app.id === nomineeId ? { ...app, round3Unlocked: unlocked } : app));
   }, []);
 
-  const isPortalView = useMemo(() => view === 'applicant-portal' || view === 'evaluator-portal', [view]);
+  const isPortalView = useMemo(() => view === 'nominee-portal' || view === 'evaluator-portal', [view]);
   const isSpecialView = useMemo(() => view === 'nominate' || view === 'login' || view === 'hall-of-fame' || view === 'under-development', [view]);
 
   const handleLogout = useCallback(() => {
     sessionStorage.removeItem('gkk_session');
-    setApplicants([]);
-    setCurrentApplicantId(null);
+    setNominees([]);
+    setCurrentNomineeId(null);
     navigateTo('home');
   }, [navigateTo]);
 
@@ -230,12 +231,12 @@ function App() {
               onQuickRegister={handleQuickRegister}
               onLogin={async (role, uid) => {
                 sessionStorage.setItem('gkk_session', JSON.stringify({ role, uid }));
-                if (role === 'applicant' && uid) {
-                  const data = await getApplicant(uid);
+                if (role === 'nominee' && uid) {
+                  const data = await getNominee(uid);
                   if (data) {
-                    setApplicants([data]);
-                    setCurrentApplicantId(uid);
-                    navigateTo('applicant-portal');
+                    setNominees([data]);
+                    setCurrentNomineeId(uid);
+                    navigateTo('nominee-portal');
                   }
                 } else if (['evaluator', 'scd', 'reu', 'admin'].includes(role)) {
                   navigateTo('evaluator-portal');
@@ -245,14 +246,14 @@ function App() {
           </Suspense>
         )}
 
-        {view === 'applicant-portal' && (
-          <Suspense fallback={<div className="flex justify-center items-center h-screen">Loading...</div>}>
-            <ApplicantPortal
+        {view === 'nominee-portal' && (
+          <Suspense fallback={<div className="flex justify-center items-center h-screen">Loading Portal...</div>}>
+            <NomineePortal
               onLogout={handleLogout}
               onUnderDev={() => navigateTo('under-development')}
-              applicantData={currentApplicant}
+              nomineeData={currentNominee}
               onDocumentUpload={handleDocumentUpload}
-              onUpdateApplicant={handleUpdateApplicant}
+              onUpdateNominee={handleUpdateNominee}
             />
           </Suspense>
         )}
@@ -262,7 +263,7 @@ function App() {
             <EvaluatorPortal
               onLogout={handleLogout}
               onUnderDev={() => navigateTo('under-development')}
-              applicants={applicants}
+              nomineesData={nominees}
               userRole={JSON.parse(sessionStorage.getItem('gkk_session') || '{}').role}
               onToggleRound2={handleToggleRound2}
               onToggleRound3={handleToggleRound3}

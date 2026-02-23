@@ -157,7 +157,7 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate, isNominationPage = false })
                 onClick={() => { if (onNavigate) onNavigate('hall-of-fame'); setIsMobileMenuOpen(false); }}
                 className="w-full flex items-center space-x-4 px-5 py-4 text-gkk-gold hover:text-white font-bold uppercase tracking-widest text-xs transition-colors"
               >
-                <Trophy size={18} /> <span>Hall of Fame</span>
+                <Trophy size={18} /> <span>GKK Winners</span>
               </button>
             </div>
           </div>

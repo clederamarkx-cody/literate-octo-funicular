@@ -20,7 +20,7 @@ export interface TimelineEvent {
   description: string;
 }
 
-export interface ApplicantDocument {
+export interface NomineeDocument {
   name: string;
   type: string;
   url?: string;
@@ -29,16 +29,18 @@ export interface ApplicantDocument {
   remarks?: string;
 }
 
-export interface Applicant {
+export interface Nominee {
   id: string;
   regId: string;
   name: string;
+  email: string;
+  role: UserRole;
   industry: string;
   region: string;
   status: 'pending' | 'in_progress' | 'completed';
   verdict?: 'Pass' | 'Fail';
   submittedDate: string;
-  documents: ApplicantDocument[];
+  documents: NomineeDocument[];
   round2Unlocked?: boolean;
   round3Unlocked?: boolean;
   stage1PassedByReu?: boolean;

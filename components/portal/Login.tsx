@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 /* Added missing Loader2 to the lucide-react import list */
 import { Eye, EyeOff, Shield, User, Lock, ArrowRight, LayoutDashboard, KeyRound, Zap, Loader2, Building2, AlertCircle, Mail } from 'lucide-react';
-import { getUserByEmail, getApplicantByPassKey, seedFirebase, verifyAccessKey } from '../../services/dbService';
+import { getUserByEmail, getNomineeByPassKey, seedFirebase, verifyAccessKey } from '../../services/dbService';
 interface LoginProps {
     onLogin?: (role: string, email?: string) => void;
     onRegisterClick?: () => void;
@@ -21,8 +21,8 @@ const Login: React.FC<LoginProps> = ({ onLogin, onRegisterClick, onQuickRegister
     const handleDemoFill = () => {
         setError(null);
         if (loginMethod === 'email') {
-            setEmail('applicant@applicant.com');
-            setPassword('applicant');
+            setEmail('nominee@gkk.gov.ph');
+            setPassword('nominee');
         } else {
             setAccessCode('NOM-2024-8821');
         }
@@ -43,10 +43,10 @@ const Login: React.FC<LoginProps> = ({ onLogin, onRegisterClick, onQuickRegister
                     return;
                 }
 
-                // Fallback to checking applicant passkey
-                const applicant = await getApplicantByPassKey(cleanAccessCode);
-                if (applicant) {
-                    if (onLogin) onLogin('applicant', applicant.id);
+                // Fallback to checking nominee passkey
+                const nominee = await getNomineeByPassKey(cleanAccessCode);
+                if (nominee) {
+                    if (onLogin) onLogin('nominee', nominee.id);
                 } else {
                     setError("Invalid Invitation/Access Key. Please check your credentials.");
                 }
@@ -68,7 +68,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onRegisterClick, onQuickRegister
                 }
 
                 if (user.role === 'nominee') {
-                    if (onLogin) onLogin('applicant', user.uid);
+                    if (onLogin) onLogin('nominee', user.uid);
                 } else {
                     setError("Access restricted to Nominee accounts only.");
                 }

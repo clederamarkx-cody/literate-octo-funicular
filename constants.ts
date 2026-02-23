@@ -1,4 +1,4 @@
-import { Applicant } from './types';
+import { Nominee } from './types';
 
 export const GKK_INFO = `
   The 14th Gawad Kaligtasan at Kalusugan (GKK) is the highest national award for Occupational Safety and Health in the Philippines. 
@@ -48,9 +48,9 @@ export const PARTNERS = [
   "Occupational Safety and Health Center"
 ];
 
-export const INITIAL_APPLICANTS: Applicant[] = [];
+export const INITIAL_NOMINEES: Nominee[] = [];
 
-export const INITIAL_HALL_OF_FAME = [
+export const INITIAL_GKK_WINNERS = [
   {
     category: 'Manufacturing',
     company: 'Toyota Motor Philippines Corp.',

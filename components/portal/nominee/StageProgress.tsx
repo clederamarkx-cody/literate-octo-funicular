@@ -4,10 +4,10 @@ interface StageProgressProps {
     stage1Progress: number;
     stage2Progress: number;
     stage3Progress: number;
-    applicantData: any;
+    nomineeData: any;
 }
 
-const StageProgress: React.FC<StageProgressProps> = ({ stage1Progress, stage2Progress, stage3Progress, applicantData }) => {
+const StageProgress: React.FC<StageProgressProps> = ({ stage1Progress, stage2Progress, stage3Progress, nomineeData }) => {
     const circumference = 226.2;
 
     const getProgress = (round: number) => {
@@ -20,7 +20,7 @@ const StageProgress: React.FC<StageProgressProps> = ({ stage1Progress, stage2Pro
         const progress = getProgress(round);
         const label = round === 1 ? 'Technical' : round === 2 ? 'Shortlist' : 'Final Board';
         const colorClass = round === 1 ? 'bg-gkk-gold' : round === 2 ? 'bg-blue-600' : 'bg-gkk-navy';
-        const locked = round === 2 ? !applicantData?.round2Unlocked : round === 3 ? !applicantData?.round3Unlocked : false;
+        const locked = round === 2 ? !nomineeData?.round2Unlocked : round === 3 ? !nomineeData?.round3Unlocked : false;
 
         return (
             <div className={`w-full ${locked ? 'opacity-40' : ''}`}>

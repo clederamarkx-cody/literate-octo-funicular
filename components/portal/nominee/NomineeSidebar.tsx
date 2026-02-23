@@ -2,13 +2,14 @@
 import React from 'react';
 import { LayoutDashboard, FileCheck, Download, ShieldCheck } from 'lucide-react';
 
-interface ApplicantSidebarProps {
+interface NomineeSidebarProps {
     activeTab: 'dashboard' | 'entry' | 'profile';
     setActiveTab: (tab: 'dashboard' | 'entry' | 'profile') => void;
     onUnderDev: () => void;
+    onLogout: () => void;
 }
 
-const ApplicantSidebar: React.FC<ApplicantSidebarProps> = ({ activeTab, setActiveTab, onUnderDev }) => {
+const NomineeSidebar: React.FC<NomineeSidebarProps> = ({ activeTab, setActiveTab, onUnderDev }) => {
     return (
         <aside className="w-64 bg-gkk-navy text-white flex flex-col flex-shrink-0 border-r border-white/5">
             <div className="p-6 border-b border-white/5">
@@ -48,4 +49,4 @@ const ApplicantSidebar: React.FC<ApplicantSidebarProps> = ({ activeTab, setActiv
     );
 };
 
-export default ApplicantSidebar;
+export default NomineeSidebar;

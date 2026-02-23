@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { Save, User, Building2, MapPin, Briefcase, Mail, Phone, Users } from 'lucide-react';
 
-interface ApplicantProfileEditProps {
+interface NomineeProfileEditProps {
     profileData: any;
     onUpdateProfile: (updatedData: any) => void;
     onUnderDev: () => void;
 }
 
-const ApplicantProfileEdit: React.FC<ApplicantProfileEditProps> = ({ profileData, onUpdateProfile, onUnderDev }) => {
+const NomineeProfileEdit: React.FC<NomineeProfileEditProps> = ({ profileData, onUpdateProfile, onUnderDev }) => {
     const [formData, setFormData] = useState({
         details: {
             companyName: profileData?.details?.companyName || '',
@@ -253,4 +253,4 @@ const ApplicantProfileEdit: React.FC<ApplicantProfileEditProps> = ({ profileData
     );
 };
 
-export default ApplicantProfileEdit;
+export default NomineeProfileEdit;

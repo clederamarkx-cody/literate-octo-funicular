@@ -40,40 +40,40 @@ import {
   Zap,
   Upload
 } from 'lucide-react';
-import { Applicant, ApplicantDocument } from '../../types';
-import { getAllApplicants, updateStageVerdict, resolveFileUrl } from '../../services/dbService';
+import { Nominee, NomineeDocument, UserRole } from '../../types';
+import { getAllNominees, updateStageVerdict, resolveFileUrl } from '../../services/dbService';
 
 interface EvaluatorPortalProps {
   onLogout: () => void;
   onUnderDev: () => void;
-  applicants: Applicant[];
+  nomineesData: Nominee[];
   userRole?: string | null;
-  onToggleRound2?: (applicantId: string, unlocked: boolean) => void;
-  onToggleRound3?: (applicantId: string, unlocked: boolean) => void;
+  onToggleRound2?: (nomineeId: string, unlocked: boolean) => void;
+  onToggleRound3?: (nomineeId: string, unlocked: boolean) => void;
 }
 
-const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev, applicants: propApplicants, userRole, onToggleRound2, onToggleRound3 }) => {
+const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev, nomineesData: propNominees, userRole, onToggleRound2, onToggleRound3 }) => {
   const [activeTab, setActiveTab] = useState<'dashboard' | 'entries'>('dashboard');
   const [view, setView] = useState<'list' | 'review'>('list');
-  const [selectedApplicant, setSelectedApplicant] = useState<Applicant | null>(null);
+  const [selectedNominee, setSelectedNominee] = useState<Nominee | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const [localApplicants, setLocalApplicants] = useState<Applicant[]>(propApplicants);
+  const [localNominees, setLocalNominees] = useState<Nominee[]>(propNominees);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchApplicants = async () => {
+    const fetchNominees = async () => {
       try {
-        const data = await getAllApplicants();
-        setLocalApplicants(data);
+        const data = await getAllNominees();
+        setLocalNominees(data);
       } catch (error) {
-        console.error("Failed to load applicants", error);
+        console.error("Failed to load nominees", error);
       } finally {
         setIsLoading(false);
       }
     };
-    fetchApplicants();
+    fetchNominees();
   }, []);
   const [round2Open, setRound2Open] = useState(false);
   const [docEvaluations, setDocEvaluations] = useState<Record<string, 'pass' | 'fail'>>({});
@@ -83,17 +83,17 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
   const [isExporting, setIsExporting] = useState<number | null>(null);
 
   const sortedApplicants = useMemo(() => {
-    return [...(localApplicants || [])].sort((a, b) => {
-      const getLatest = (app: Applicant) => {
+    return [...(localNominees || [])].sort((a, b) => {
+      const getLatest = (app: Nominee) => {
         const docDates = (app.documents || []).map(d => new Date(d.date || 0).getTime()).filter(t => !isNaN(t));
         const subDate = new Date(app.submittedDate || 0).getTime();
         return Math.max(isNaN(subDate) ? 0 : subDate, ...docDates, 0);
       };
       return getLatest(b) - getLatest(a);
     });
-  }, [localApplicants]);
+  }, [localNominees]);
 
-  const applicants = sortedApplicants;
+  const nominees = sortedApplicants;
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) setIsProfileDropdownOpen(false);
@@ -102,34 +102,34 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleReview = (applicant: Applicant) => {
-    setSelectedApplicant(applicant);
+  const handleReview = (nominee: Nominee) => {
+    setSelectedNominee(nominee);
     setView('review');
     setDocEvaluations({});
     setRound2Open(false);
   };
 
   const handleVerdictUpdate = async (stage: 1 | 2 | 3, verdict: 'Pass' | 'Fail') => {
-    if (!selectedApplicant) return;
+    if (!selectedNominee) return;
 
-    const success = await updateStageVerdict(selectedApplicant.id, stage, verdict);
+    const success = await updateStageVerdict(selectedNominee.id, stage, verdict);
     if (success) {
-      const updatedApplicant = { ...selectedApplicant };
+      const updatedApplicant = { ...selectedNominee };
       if (stage === 1) updatedApplicant.stage1Verdict = verdict;
       if (stage === 2) updatedApplicant.stage2Verdict = verdict;
       if (stage === 3) updatedApplicant.stage3Verdict = verdict;
 
-      setSelectedApplicant(updatedApplicant);
-      setLocalApplicants(prev => prev.map(a => a.id === updatedApplicant.id ? updatedApplicant : a));
+      setSelectedNominee(updatedApplicant);
+      setLocalNominees(prev => prev.map(a => a.id === updatedApplicant.id ? updatedApplicant : a));
     }
   };
 
   const handleBackToList = () => {
-    setSelectedApplicant(null);
+    setSelectedNominee(null);
     setView('list');
   };
 
-  const handlePreview = async (doc: ApplicantDocument) => {
+  const handlePreview = async (doc: NomineeDocument) => {
     setIsResolvingUrl(true);
     setPreviewDoc({ name: doc.name, url: null, type: doc.type });
     setPreviewModalOpen(true);
@@ -147,11 +147,11 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
   };
 
   const handleExportStage = async (round: number) => {
-    if (!selectedApplicant || !selectedApplicant.documents) return;
+    if (!selectedNominee || !selectedNominee.documents) return;
     setIsExporting(round);
 
     const stagePrefix = round === 1 ? 'r1' : round === 2 ? 'r2' : 'r3';
-    const docsToExport = selectedApplicant.documents.filter(doc => doc.slotId?.startsWith(stagePrefix) && doc.url);
+    const docsToExport = selectedNominee.documents.filter(doc => doc.slotId?.startsWith(stagePrefix) && doc.url);
 
     if (docsToExport.length === 0) {
       alert("No documents uploaded for this stage yet.");
@@ -219,7 +219,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
   ];
 
   const renderDocumentGrid = (round: number) => {
-    if (!selectedApplicant) return null;
+    if (!selectedNominee) return null;
     const activeRequirements = round === 1 ? round1Requirements : round === 2 ? round2Requirements : round3Requirements;
 
     return (
@@ -237,9 +237,9 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                   const globalIdx = activeRequirements.findIndex(r => r.label === req.label);
                   const stagePrefix = round === 1 ? 'r1' : round === 2 ? 'r2' : 'r3';
                   const slotId = `${stagePrefix}-${globalIdx}`;
-                  const evalKey = `${selectedApplicant.id}-${round}-${req.label}`;
+                  const evalKey = `${selectedNominee.id}-${round}-${req.label}`;
                   const docStatus = docEvaluations[evalKey];
-                  const doc = selectedApplicant.documents?.find(d => d.slotId === slotId);
+                  const doc = selectedNominee.documents?.find(d => d.slotId === slotId);
                   return (
                     <div key={localIdx} className={`p-4 border rounded-2xl transition-all ${docStatus === 'pass' ? 'bg-green-50 border-green-200 shadow-inner' : docStatus === 'fail' ? 'bg-red-50 border-red-200 shadow-inner' : doc ? 'bg-white border-gray-100 shadow-sm' : 'bg-gray-50/50 border-gray-100'}`}>
                       <div className="flex justify-between items-start mb-2">
@@ -274,23 +274,23 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
     );
   };
 
-  const calculateProgress = (applicant: Applicant, round: number) => {
+  const calculateProgress = (nominee: Nominee, round: number) => {
     const requirements = round === 1 ? round1Requirements : round === 2 ? round2Requirements : round3Requirements;
     const stagePrefix = round === 1 ? 'r1' : round === 2 ? 'r2' : 'r3';
 
-    if (!applicant.documents) return 0;
+    if (!nominee.documents) return 0;
 
     const uploadedCount = requirements.filter(req => {
       const globalIdx = requirements.findIndex(r => r.label === req.label);
       const slotId = `${stagePrefix}-${globalIdx}`;
-      return applicant.documents.some(d => d.slotId === slotId);
+      return nominee.documents.some(d => d.slotId === slotId);
     }).length;
 
     return Math.round((uploadedCount / requirements.length) * 100);
   };
 
-  const renderProgressBar = (applicant: Applicant, round: number) => {
-    const progress = calculateProgress(applicant, round);
+  const renderProgressBar = (nominee: Nominee, round: number) => {
+    const progress = calculateProgress(nominee, round);
     const colorClass = round === 1 ? 'bg-gkk-navy' : round === 2 ? 'bg-blue-600' : 'bg-gkk-gold';
 
     return (
@@ -313,15 +313,15 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
     <div className="space-y-8 animate-in fade-in duration-500">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         <div className="bg-white p-8 rounded-[35px] border border-gray-200 shadow-sm flex items-center justify-between group hover:border-gkk-gold/30 transition-all">
-          <div><p className="text-gray-400 text-[10px] font-bold uppercase tracking-[0.2em] mb-2">My Nominees</p><h3 className="text-4xl font-serif font-bold text-gkk-navy">{applicants.length}</h3></div>
+          <div><p className="text-gray-400 text-[10px] font-bold uppercase tracking-[0.2em] mb-2">My Nominees</p><h3 className="text-4xl font-serif font-bold text-gkk-navy">{nominees.length}</h3></div>
           <div className="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform"><ClipboardCheck size={28} /></div>
         </div>
         <div className="bg-white p-8 rounded-[35px] border border-gray-200 shadow-sm flex items-center justify-between group hover:border-gkk-gold/30 transition-all">
-          <div><p className="text-gray-400 text-[10px] font-bold uppercase tracking-[0.2em] mb-2">Pending Validation</p><h3 className="text-4xl font-serif font-bold text-gkk-navy">{localApplicants.filter(a => a.status !== 'completed').length}</h3></div>
+          <div><p className="text-gray-400 text-[10px] font-bold uppercase tracking-[0.2em] mb-2">Pending Validation</p><h3 className="text-4xl font-serif font-bold text-gkk-navy">{localNominees.filter(a => a.status !== 'completed').length}</h3></div>
           <div className="w-14 h-14 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform"><Clock size={28} /></div>
         </div>
         <div className="bg-white p-8 rounded-[35px] border border-gray-200 shadow-sm flex items-center justify-between group hover:border-gkk-gold/30 transition-all">
-          <div><p className="text-gray-400 text-[10px] font-bold uppercase tracking-[0.2em] mb-2">Cycle Verified</p><h3 className="text-4xl font-serif font-bold text-gkk-navy">{localApplicants.filter(a => a.status === 'completed').length}</h3></div>
+          <div><p className="text-gray-400 text-[10px] font-bold uppercase tracking-[0.2em] mb-2">Cycle Verified</p><h3 className="text-4xl font-serif font-bold text-gkk-navy">{localNominees.filter(a => a.status === 'completed').length}</h3></div>
           <div className="w-14 h-14 bg-green-50 text-green-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform"><CheckCircle size={28} /></div>
         </div>
       </div>
@@ -329,10 +329,10 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
         <div className="lg:col-span-2 bg-white rounded-[40px] border border-gray-200 shadow-sm overflow-hidden">
           <div className="p-8 border-b border-gray-100 flex justify-between items-center bg-gray-50/30"><h3 className="font-serif font-bold text-xl text-gkk-navy uppercase tracking-wider">Assigned Queue</h3><button onClick={() => setActiveTab('entries')} className="text-xs font-bold text-gkk-gold hover:text-gkk-navy uppercase tracking-widest">Full Pipeline</button></div>
           <div className="divide-y divide-gray-50 overflow-y-auto max-h-[500px]">
-            {sortedApplicants.map(applicant => (
-              <div key={applicant.id} className="p-6 hover:bg-gray-50/50 transition-all flex items-center justify-between group">
-                <div className="flex items-center gap-5"><div className="w-12 h-12 bg-gkk-navy/5 text-gkk-navy rounded-2xl flex items-center justify-center font-bold border border-gkk-navy/5 group-hover:bg-gkk-navy group-hover:text-white transition-all">{(applicant.name || '?').charAt(0)}</div><div><h4 className="font-bold text-gkk-navy uppercase tracking-tighter text-sm">{applicant.name || 'Unknown'}</h4><p className="text-[9px] text-gray-400 font-bold uppercase tracking-[0.2em] mt-1">{applicant.industry || 'Unknown'}</p></div></div>
-                <div className="flex items-center gap-6"><span className={`px-4 py-1.5 rounded-full text-[10px] font-bold border tracking-widest uppercase ${getStatusColor(applicant.status || 'in_progress')}`}>{(applicant.status || 'in_progress').replace('_', ' ')}</span><button onClick={() => handleReview(applicant)} className="p-3 bg-gray-100 text-gray-400 hover:bg-gkk-navy hover:text-white rounded-2xl transition-all"><ChevronRight size={20} /></button></div>
+            {sortedApplicants.map(nominee => (
+              <div key={nominee.id} className="p-6 hover:bg-gray-50/50 transition-all flex items-center justify-between group">
+                <div className="flex items-center gap-5"><div className="w-12 h-12 bg-gkk-navy/5 text-gkk-navy rounded-2xl flex items-center justify-center font-bold border border-gkk-navy/5 group-hover:bg-gkk-navy group-hover:text-white transition-all">{(nominee.name || '?').charAt(0)}</div><div><h4 className="font-bold text-gkk-navy uppercase tracking-tighter text-sm">{nominee.name || 'Unknown'}</h4><p className="text-[9px] text-gray-400 font-bold uppercase tracking-[0.2em] mt-1">{nominee.industry || 'Unknown'}</p></div></div>
+                <div className="flex items-center gap-6"><span className={`px-4 py-1.5 rounded-full text-[10px] font-bold border tracking-widest uppercase ${getStatusColor(nominee.status || 'in_progress')}`}>{(nominee.status || 'in_progress').replace('_', ' ')}</span><button onClick={() => handleReview(nominee)} className="p-3 bg-gray-100 text-gray-400 hover:bg-gkk-navy hover:text-white rounded-2xl transition-all"><ChevronRight size={20} /></button></div>
               </div>
             ))}
           </div>
@@ -359,35 +359,35 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
           <button onClick={onUnderDev} className="flex-1 lg:flex-none px-6 py-4 bg-gkk-navy text-white font-bold rounded-2xl text-[10px] uppercase tracking-[0.2em] shadow-xl hover:bg-gkk-royalBlue transition-all"><Download size={18} className="mr-2" /> Export</button>
         </div>
       </div>
-      <div className="bg-white rounded-[40px] border border-gray-200 shadow-sm overflow-hidden"><table className="w-full text-left border-collapse"><thead className="bg-gray-50/50 text-[10px] font-black text-gray-400 uppercase tracking-[0.25em]"><tr className="border-b border-gray-100"><th className="px-8 py-6">Establishment Identity</th><th className="px-8 py-6">Sector</th><th className="px-8 py-6">Artifacts</th><th className="px-8 py-6">Status</th><th className="px-8 py-6 text-right">Action</th></tr></thead><tbody className="divide-y divide-gray-50">{sortedApplicants.filter(a => (a.name || '').toLowerCase().includes(searchTerm.toLowerCase())).map(applicant => (<tr key={applicant.id} className="hover:bg-gray-50/50 transition-all group cursor-pointer" onClick={() => handleReview(applicant)}><td className="px-8 py-6"><div className="flex items-center gap-4"><div className="w-12 h-12 bg-gkk-navy/5 text-gkk-navy rounded-2xl flex items-center justify-center font-bold border border-gkk-navy/5 group-hover:bg-gkk-navy group-hover:text-white transition-all">{(applicant.name || '?').charAt(0)}</div><div><p className="font-bold text-gkk-navy text-sm uppercase tracking-tight leading-none">{applicant.name}</p><p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-2">{applicant.regId}</p></div></div></td><td className="px-8 py-6"><p className="text-xs font-bold text-gray-700 uppercase tracking-wider">{applicant.industry}</p><p className="text-[10px] text-gray-400 font-bold uppercase mt-1">{applicant.region}</p></td><td className="px-8 py-6"><div className="flex items-center gap-2 text-[10px] font-bold text-gray-500 uppercase tracking-widest"><FileText size={16} className="text-gray-300" /> {applicant.documents?.length || 0} Records</div></td><td className="px-8 py-6"><span className={`px-4 py-1.5 rounded-full text-[9px] font-bold border tracking-widest uppercase ${getStatusColor(applicant.status || 'in_progress')}`}>{(applicant.status || 'in_progress').replace('_', ' ')}</span></td><td className="px-8 py-6 text-right"><button className="p-3 bg-gray-50 text-gray-400 group-hover:bg-gkk-gold group-hover:text-gkk-navy rounded-2xl transition-all"><ChevronRight size={20} /></button></td></tr>))}</tbody></table></div>\n    </div>
+      <div className="bg-white rounded-[40px] border border-gray-200 shadow-sm overflow-hidden"><table className="w-full text-left border-collapse"><thead className="bg-gray-50/50 text-[10px] font-black text-gray-400 uppercase tracking-[0.25em]"><tr className="border-b border-gray-100"><th className="px-8 py-6">Establishment Identity</th><th className="px-8 py-6">Sector</th><th className="px-8 py-6">Artifacts</th><th className="px-8 py-6">Status</th><th className="px-8 py-6 text-right">Action</th></tr></thead><tbody className="divide-y divide-gray-50">{sortedApplicants.filter(a => (a.name || '').toLowerCase().includes(searchTerm.toLowerCase())).map(nominee => (<tr key={nominee.id} className="hover:bg-gray-50/50 transition-all group cursor-pointer" onClick={() => handleReview(nominee)}><td className="px-8 py-6"><div className="flex items-center gap-4"><div className="w-12 h-12 bg-gkk-navy/5 text-gkk-navy rounded-2xl flex items-center justify-center font-bold border border-gkk-navy/5 group-hover:bg-gkk-navy group-hover:text-white transition-all">{(nominee.name || '?').charAt(0)}</div><div><p className="font-bold text-gkk-navy text-sm uppercase tracking-tight leading-none">{nominee.name}</p><p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-2">{nominee.regId}</p></div></div></td><td className="px-8 py-6"><p className="text-xs font-bold text-gray-700 uppercase tracking-wider">{nominee.industry}</p><p className="text-[10px] text-gray-400 font-bold uppercase mt-1">{nominee.region}</p></td><td className="px-8 py-6"><div className="flex items-center gap-2 text-[10px] font-bold text-gray-500 uppercase tracking-widest"><FileText size={16} className="text-gray-300" /> {nominee.documents?.length || 0} Records</div></td><td className="px-8 py-6"><span className={`px-4 py-1.5 rounded-full text-[9px] font-bold border tracking-widest uppercase ${getStatusColor(nominee.status || 'in_progress')}`}>{(nominee.status || 'in_progress').replace('_', ' ')}</span></td><td className="px-8 py-6 text-right"><button className="p-3 bg-gray-50 text-gray-400 group-hover:bg-gkk-gold group-hover:text-gkk-navy rounded-2xl transition-all"><ChevronRight size={20} /></button></td></tr>))}</tbody></table></div>\n    </div>
   );
 
   const renderReview = () => {
-    if (!selectedApplicant) return null;
+    if (!selectedNominee) return null;
     return (
       <div className="animate-in fade-in duration-500 space-y-8 pb-20">
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 bg-white p-6 rounded-[35px] border border-gray-200 shadow-sm sticky top-0 z-30"><div className="flex items-center gap-5"><button onClick={handleBackToList} className="p-3 bg-gray-50 text-gray-500 hover:bg-gkk-navy hover:text-white rounded-2xl transition-all border border-gray-100"><ChevronLeft size={24} /></button><div><h2 className="text-2xl font-serif font-bold text-gkk-navy leading-none uppercase tracking-tight">Review Profile</h2><div className="flex items-center gap-3 mt-3"><span className="bg-gray-100 px-3 py-0.5 rounded-full font-bold text-[9px] text-gray-500 uppercase tracking-widest">ID: {selectedApplicant.regId}</span><span className={`px-3 py-0.5 rounded-full text-[9px] font-bold border uppercase tracking-widest ${getStatusColor(selectedApplicant.status)}`}>{selectedApplicant.status.replace('_', ' ')}</span></div></div></div><div className="flex items-center gap-3 w-full lg:w-auto"><button onClick={onUnderDev} className="flex-1 lg:flex-none flex items-center justify-center px-6 py-3 bg-white border border-gray-200 text-gray-400 font-bold rounded-2xl hover:bg-gray-50 transition-all text-xs uppercase tracking-widest"><Save size={18} className="mr-2" /> Draft</button><button onClick={onUnderDev} className="flex-1 lg:flex-none flex items-center justify-center px-8 py-3 bg-gkk-navy text-white font-bold rounded-2xl hover:bg-gkk-royalBlue transition-all text-xs uppercase tracking-widest shadow-xl shadow-gkk-navy/20">Finalize</button></div></div>
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 bg-white p-6 rounded-[35px] border border-gray-200 shadow-sm sticky top-0 z-30"><div className="flex items-center gap-5"><button onClick={handleBackToList} className="p-3 bg-gray-50 text-gray-500 hover:bg-gkk-navy hover:text-white rounded-2xl transition-all border border-gray-100"><ChevronLeft size={24} /></button><div><h2 className="text-2xl font-serif font-bold text-gkk-navy leading-none uppercase tracking-tight">Review Profile</h2><div className="flex items-center gap-3 mt-3"><span className="bg-gray-100 px-3 py-0.5 rounded-full font-bold text-[9px] text-gray-500 uppercase tracking-widest">ID: {selectedNominee.regId}</span><span className={`px-3 py-0.5 rounded-full text-[9px] font-bold border uppercase tracking-widest ${getStatusColor(selectedNominee.status)}`}>{selectedNominee.status.replace('_', ' ')}</span></div></div></div><div className="flex items-center gap-3 w-full lg:w-auto"><button onClick={onUnderDev} className="flex-1 lg:flex-none flex items-center justify-center px-6 py-3 bg-white border border-gray-200 text-gray-400 font-bold rounded-2xl hover:bg-gray-50 transition-all text-xs uppercase tracking-widest"><Save size={18} className="mr-2" /> Draft</button><button onClick={onUnderDev} className="flex-1 lg:flex-none flex items-center justify-center px-8 py-3 bg-gkk-navy text-white font-bold rounded-2xl hover:bg-gkk-royalBlue transition-all text-xs uppercase tracking-widest shadow-xl shadow-gkk-navy/20">Finalize</button></div></div>
         <div className="bg-white rounded-[40px] border border-gray-200 shadow-sm overflow-hidden p-8">
           <div className="flex flex-col md:flex-row justify-between gap-10 items-start md:items-center">
             <div className="flex items-center space-x-6">
               <div className="p-4 bg-gkk-navy/5 rounded-[25px] text-gkk-navy ring-1 ring-gkk-navy/10"><Building2 size={36} /></div>
               <div>
-                <h2 className="text-3xl font-serif font-bold text-gkk-navy leading-tight uppercase tracking-tight">{selectedApplicant.name}</h2>
-                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em] mt-2 flex items-center gap-2"><MapPin size={12} className="text-gkk-gold" /> {selectedApplicant.region}, Philippines</p>
+                <h2 className="text-3xl font-serif font-bold text-gkk-navy leading-tight uppercase tracking-tight">{selectedNominee.name}</h2>
+                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em] mt-2 flex items-center gap-2"><MapPin size={12} className="text-gkk-gold" /> {selectedNominee.region}, Philippines</p>
               </div>
             </div>
             <div className="flex gap-4 items-center">
               <div className="w-32 bg-gray-50 rounded-[20px] p-4 text-center border border-gray-100">
-                {renderProgressBar(selectedApplicant, 1)}
+                {renderProgressBar(selectedNominee, 1)}
               </div>
-              {userRole !== 'reu' && (selectedApplicant.round2Unlocked || userRole === 'admin' || userRole === 'scd') && (
+              {userRole !== 'reu' && (selectedNominee.round2Unlocked || userRole === 'admin' || userRole === 'scd') && (
                 <div className="w-32 bg-gray-50 rounded-[20px] p-4 text-center border border-gray-100">
-                  {renderProgressBar(selectedApplicant, 2)}
+                  {renderProgressBar(selectedNominee, 2)}
                 </div>
               )}
-              {userRole !== 'reu' && (selectedApplicant.round3Unlocked || userRole === 'admin' || userRole === 'scd') && (
+              {userRole !== 'reu' && (selectedNominee.round3Unlocked || userRole === 'admin' || userRole === 'scd') && (
                 <div className="w-32 bg-gray-50 rounded-[20px] p-4 text-center border border-gray-100">
-                  {renderProgressBar(selectedApplicant, 3)}
+                  {renderProgressBar(selectedNominee, 3)}
                 </div>
               )}
             </div>
@@ -418,14 +418,14 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
               </div>
               <button
                 onClick={() => {
-                  const updated = { ...selectedApplicant, stage1PassedByReu: true };
-                  setSelectedApplicant(updated);
-                  setLocalApplicants(prev => prev.map(a => a.id === updated.id ? updated : a));
+                  const updated = { ...selectedNominee, stage1PassedByReu: true };
+                  setSelectedNominee(updated);
+                  setLocalNominees(prev => prev.map(a => a.id === updated.id ? updated : a));
                 }}
-                className={`px-10 py-4 rounded-2xl font-bold uppercase tracking-widest text-xs transition-all shadow-lg ${selectedApplicant.stage1PassedByReu ? 'bg-green-100 text-green-600 cursor-default' : (selectedApplicant.region === 'NCR' ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-gkk-gold text-gkk-navy hover:bg-gkk-navy hover:text-white')}`}
-                disabled={selectedApplicant.stage1PassedByReu || selectedApplicant.region === 'NCR'}
+                className={`px-10 py-4 rounded-2xl font-bold uppercase tracking-widest text-xs transition-all shadow-lg ${selectedNominee.stage1PassedByReu ? 'bg-green-100 text-green-600 cursor-default' : (selectedNominee.region === 'NCR' ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-gkk-gold text-gkk-navy hover:bg-gkk-navy hover:text-white')}`}
+                disabled={selectedNominee.stage1PassedByReu || selectedNominee.region === 'NCR'}
               >
-                {selectedApplicant.stage1PassedByReu ? 'Passed' : (selectedApplicant.region === 'NCR' ? 'NCR Restriction' : 'Mark as Passed')}
+                {selectedNominee.stage1PassedByReu ? 'Passed' : (selectedNominee.region === 'NCR' ? 'NCR Restriction' : 'Mark as Passed')}
               </button>
             </div>
           )}
@@ -439,13 +439,13 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
               <div className="flex items-center gap-4">
                 <button
                   onClick={() => handleVerdictUpdate(1, 'Pass')}
-                  className={`px-8 py-4 font-bold rounded-2xl transition-all text-[10px] uppercase tracking-widest flex items-center gap-2 shadow-lg ${selectedApplicant.stage1Verdict === 'Pass' ? 'bg-green-600 text-white shadow-green-600/20' : 'bg-gray-100 text-gray-400 hover:bg-green-50 hover:text-green-600'}`}
+                  className={`px-8 py-4 font-bold rounded-2xl transition-all text-[10px] uppercase tracking-widest flex items-center gap-2 shadow-lg ${selectedNominee.stage1Verdict === 'Pass' ? 'bg-green-600 text-white shadow-green-600/20' : 'bg-gray-100 text-gray-400 hover:bg-green-50 hover:text-green-600'}`}
                 >
                   <ThumbsUp size={16} /> Pass
                 </button>
                 <button
                   onClick={() => handleVerdictUpdate(1, 'Fail')}
-                  className={`px-8 py-4 font-bold rounded-2xl transition-all text-[10px] uppercase tracking-widest flex items-center gap-2 shadow-lg ${selectedApplicant.stage1Verdict === 'Fail' ? 'bg-red-600 text-white shadow-red-600/20' : 'bg-gray-100 text-gray-400 hover:bg-red-50 hover:text-red-600'}`}
+                  className={`px-8 py-4 font-bold rounded-2xl transition-all text-[10px] uppercase tracking-widest flex items-center gap-2 shadow-lg ${selectedNominee.stage1Verdict === 'Fail' ? 'bg-red-600 text-white shadow-red-600/20' : 'bg-gray-100 text-gray-400 hover:bg-red-50 hover:text-red-600'}`}
                 >
                   <ThumbsDown size={16} /> Fail
                 </button>
@@ -456,14 +456,14 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
           {userRole !== 'reu' && userRole !== 'dole' && (
             <>
               <div className="space-y-4">
-                <div className={`rounded-[40px] border transition-all duration-300 overflow-hidden ${(selectedApplicant.round2Unlocked || ['admin', 'scd', 'evaluator'].includes(userRole || '')) ? 'bg-white border-gray-200 shadow-xl' : 'bg-gray-50 border-gray-100 opacity-60'}`}>
+                <div className={`rounded-[40px] border transition-all duration-300 overflow-hidden ${(selectedNominee.round2Unlocked || ['admin', 'scd', 'evaluator'].includes(userRole || '')) ? 'bg-white border-gray-200 shadow-xl' : 'bg-gray-50 border-gray-100 opacity-60'}`}>
                   <div className="p-10 flex flex-col md:flex-row items-center justify-between gap-8">
                     <div className="flex items-center space-x-8">
-                      <div className={`w-16 h-16 rounded-3xl flex items-center justify-center transition-all ${(selectedApplicant.round2Unlocked || ['admin', 'scd', 'evaluator'].includes(userRole || '')) ? 'bg-blue-600 text-white shadow-xl' : 'bg-gray-200 text-gray-400'}`}>{(selectedApplicant.round2Unlocked || ['admin', 'scd', 'evaluator'].includes(userRole || '')) ? <Unlock size={28} /> : <Lock size={28} />}</div>
-                      <div className="text-left"><h4 className="font-bold text-gkk-navy text-xl uppercase tracking-tighter leading-none">Stage 2 Verification</h4><p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-3">{selectedApplicant.round2Unlocked ? 'Reviewing national shortlist' : (['admin', 'evaluator', 'scd'].includes(userRole || '')) ? 'Action Required: Trigger Stage 2' : 'Locked'}</p></div>
+                      <div className={`w-16 h-16 rounded-3xl flex items-center justify-center transition-all ${(selectedNominee.round2Unlocked || ['admin', 'scd', 'evaluator'].includes(userRole || '')) ? 'bg-blue-600 text-white shadow-xl' : 'bg-gray-200 text-gray-400'}`}>{(selectedNominee.round2Unlocked || ['admin', 'scd', 'evaluator'].includes(userRole || '')) ? <Unlock size={28} /> : <Lock size={28} />}</div>
+                      <div className="text-left"><h4 className="font-bold text-gkk-navy text-xl uppercase tracking-tighter leading-none">Stage 2 Verification</h4><p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-3">{selectedNominee.round2Unlocked ? 'Reviewing national shortlist' : (['admin', 'evaluator', 'scd'].includes(userRole || '')) ? 'Action Required: Trigger Stage 2' : 'Locked'}</p></div>
                     </div>
                     <div className="flex items-center gap-4">
-                      {(selectedApplicant.round2Unlocked || ['admin', 'scd', 'evaluator'].includes(userRole || '')) && (
+                      {(selectedNominee.round2Unlocked || ['admin', 'scd', 'evaluator'].includes(userRole || '')) && (
                         <button
                           onClick={() => handleExportStage(2)}
                           disabled={isExporting === 2}
@@ -474,12 +474,12 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                       )}
                       {(['admin', 'evaluator', 'scd'].includes(userRole || '')) && (
                         <button onClick={() => {
-                          const newStatus = !selectedApplicant.round2Unlocked;
-                          if (onToggleRound2) onToggleRound2(selectedApplicant.id, newStatus);
-                          const updated = { ...selectedApplicant, round2Unlocked: newStatus };
-                          setSelectedApplicant(updated);
-                          setLocalApplicants(prev => prev.map(a => a.id === updated.id ? updated : a));
-                        }} className={`px-10 py-4 rounded-[20px] font-bold transition-all shadow-xl text-[10px] tracking-widest uppercase ${selectedApplicant.round2Unlocked ? 'bg-red-50 text-red-600 border border-red-100 hover:bg-red-100' : 'bg-gkk-gold text-gkk-navy hover:bg-gkk-navy hover:text-white'}`}>{selectedApplicant.round2Unlocked ? 'Deactivate Stage 2' : 'Activate Stage 2'}</button>
+                          const newStatus = !selectedNominee.round2Unlocked;
+                          if (onToggleRound2) onToggleRound2(selectedNominee.id, newStatus);
+                          const updated = { ...selectedNominee, round2Unlocked: newStatus };
+                          setSelectedNominee(updated);
+                          setLocalNominees(prev => prev.map(a => a.id === updated.id ? updated : a));
+                        }} className={`px-10 py-4 rounded-[20px] font-bold transition-all shadow-xl text-[10px] tracking-widest uppercase ${selectedNominee.round2Unlocked ? 'bg-red-50 text-red-600 border border-red-100 hover:bg-red-100' : 'bg-gkk-gold text-gkk-navy hover:bg-gkk-navy hover:text-white'}`}>{selectedNominee.round2Unlocked ? 'Deactivate Stage 2' : 'Activate Stage 2'}</button>
                       )}
 
                       {(userRole === 'admin' || userRole === 'scd') && (
@@ -487,13 +487,13 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                           <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mr-2">Verdict:</p>
                           <button
                             onClick={() => handleVerdictUpdate(2, 'Pass')}
-                            className={`px-6 py-3 font-bold rounded-2xl transition-all text-[10px] uppercase tracking-widest flex items-center gap-2 ${selectedApplicant.stage2Verdict === 'Pass' ? 'bg-green-600 text-white shadow-lg shadow-green-600/20' : 'bg-gray-100 text-gray-400 hover:bg-green-50 hover:text-green-600'}`}
+                            className={`px-6 py-3 font-bold rounded-2xl transition-all text-[10px] uppercase tracking-widest flex items-center gap-2 ${selectedNominee.stage2Verdict === 'Pass' ? 'bg-green-600 text-white shadow-lg shadow-green-600/20' : 'bg-gray-100 text-gray-400 hover:bg-green-50 hover:text-green-600'}`}
                           >
                             <ThumbsUp size={14} /> Pass
                           </button>
                           <button
                             onClick={() => handleVerdictUpdate(2, 'Fail')}
-                            className={`px-6 py-3 font-bold rounded-2xl transition-all text-[10px] uppercase tracking-widest flex items-center gap-2 ${selectedApplicant.stage2Verdict === 'Fail' ? 'bg-red-600 text-white shadow-lg shadow-red-600/20' : 'bg-gray-100 text-gray-400 hover:bg-red-50 hover:text-red-600'}`}
+                            className={`px-6 py-3 font-bold rounded-2xl transition-all text-[10px] uppercase tracking-widest flex items-center gap-2 ${selectedNominee.stage2Verdict === 'Fail' ? 'bg-red-600 text-white shadow-lg shadow-red-600/20' : 'bg-gray-100 text-gray-400 hover:bg-red-50 hover:text-red-600'}`}
                           >
                             <ThumbsDown size={14} /> Fail
                           </button>
@@ -501,7 +501,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                       )}
                     </div>
                   </div>
-                  {(selectedApplicant.round2Unlocked || ['admin', 'scd', 'evaluator'].includes(userRole || '')) && (
+                  {(selectedNominee.round2Unlocked || ['admin', 'scd', 'evaluator'].includes(userRole || '')) && (
                     <div className="border-t border-gray-100">
                       <button onClick={() => setRound2Open(!round2Open)} className="w-full py-5 bg-gray-50/50 hover:bg-gray-100 transition-colors flex items-center justify-center text-[10px] font-bold text-gray-400 uppercase tracking-[0.4em]">{(round2Open || ['admin', 'scd', 'evaluator'].includes(userRole || '')) ? 'Collapse Records' : 'Review Records'}{(round2Open || ['admin', 'scd', 'evaluator'].includes(userRole || '')) ? <ChevronUp size={16} className="ml-2" /> : <ChevronDown size={16} className="ml-2" />}</button>
                       <div className={`transition-all duration-700 ease-in-out ${(round2Open || ['admin', 'scd', 'evaluator'].includes(userRole || '')) ? 'max-h-[2000px] p-10 bg-white' : 'max-h-0 overflow-hidden'}`}>{renderDocumentGrid(2)}</div>
@@ -511,14 +511,14 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
               </div>
 
               <div className="space-y-4">
-                <div className={`rounded-[40px] border transition-all duration-300 overflow-hidden ${(selectedApplicant.round3Unlocked || userRole === 'admin' || userRole === 'scd') ? 'bg-white border-gray-200 shadow-xl' : 'bg-gray-50 border-gray-100 opacity-60'}`}>
+                <div className={`rounded-[40px] border transition-all duration-300 overflow-hidden ${(selectedNominee.round3Unlocked || userRole === 'admin' || userRole === 'scd') ? 'bg-white border-gray-200 shadow-xl' : 'bg-gray-50 border-gray-100 opacity-60'}`}>
                   <div className="p-10 flex flex-col md:flex-row items-center justify-between gap-8">
                     <div className="flex items-center space-x-8">
-                      <div className={`w-16 h-16 rounded-3xl flex items-center justify-center transition-all ${(selectedApplicant.round3Unlocked || userRole === 'admin' || userRole === 'scd') ? 'bg-gkk-gold text-gkk-navy shadow-xl' : 'bg-gray-200 text-gray-400'}`}>{(selectedApplicant.round3Unlocked || userRole === 'admin' || userRole === 'scd') ? <Unlock size={28} /> : <Lock size={28} />}</div>
-                      <div className="text-left"><h4 className="font-bold text-gkk-navy text-xl uppercase tracking-tighter leading-none">Stage 3 Verification</h4><p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-3">{selectedApplicant.round3Unlocked ? 'National Board Final Evaluation' : (userRole === 'admin' || userRole === 'scd') ? 'SCD Trigger Required' : 'Locked'}</p></div>
+                      <div className={`w-16 h-16 rounded-3xl flex items-center justify-center transition-all ${(selectedNominee.round3Unlocked || userRole === 'admin' || userRole === 'scd') ? 'bg-gkk-gold text-gkk-navy shadow-xl' : 'bg-gray-200 text-gray-400'}`}>{(selectedNominee.round3Unlocked || userRole === 'admin' || userRole === 'scd') ? <Unlock size={28} /> : <Lock size={28} />}</div>
+                      <div className="text-left"><h4 className="font-bold text-gkk-navy text-xl uppercase tracking-tighter leading-none">Stage 3 Verification</h4><p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-3">{selectedNominee.round3Unlocked ? 'National Board Final Evaluation' : (userRole === 'admin' || userRole === 'scd') ? 'SCD Trigger Required' : 'Locked'}</p></div>
                     </div>
                     <div className="flex items-center gap-4">
-                      {(selectedApplicant.round3Unlocked || userRole === 'admin' || userRole === 'scd') && (
+                      {(selectedNominee.round3Unlocked || userRole === 'admin' || userRole === 'scd') && (
                         <button
                           onClick={() => handleExportStage(3)}
                           disabled={isExporting === 3}
@@ -529,12 +529,12 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                       )}
                       {(userRole === 'admin' || userRole === 'scd') && (
                         <button onClick={() => {
-                          const newStatus = !selectedApplicant.round3Unlocked;
-                          if (onToggleRound3) onToggleRound3(selectedApplicant.id, newStatus);
-                          const updated = { ...selectedApplicant, round3Unlocked: newStatus };
-                          setSelectedApplicant(updated);
-                          setLocalApplicants(prev => prev.map(a => a.id === updated.id ? updated : a));
-                        }} className={`px-10 py-4 rounded-[20px] font-bold transition-all shadow-xl text-[10px] tracking-widest uppercase ${selectedApplicant.round3Unlocked ? 'bg-red-50 text-red-600 border border-red-100 hover:bg-red-100' : 'bg-gkk-navy text-white hover:bg-gkk-royalBlue'}`}>{selectedApplicant.round3Unlocked ? 'Deactivate Stage 3' : 'Activate Stage 3'}</button>
+                          const newStatus = !selectedNominee.round3Unlocked;
+                          if (onToggleRound3) onToggleRound3(selectedNominee.id, newStatus);
+                          const updated = { ...selectedNominee, round3Unlocked: newStatus };
+                          setSelectedNominee(updated);
+                          setLocalNominees(prev => prev.map(a => a.id === updated.id ? updated : a));
+                        }} className={`px-10 py-4 rounded-[20px] font-bold transition-all shadow-xl text-[10px] tracking-widest uppercase ${selectedNominee.round3Unlocked ? 'bg-red-50 text-red-600 border border-red-100 hover:bg-red-100' : 'bg-gkk-navy text-white hover:bg-gkk-royalBlue'}`}>{selectedNominee.round3Unlocked ? 'Deactivate Stage 3' : 'Activate Stage 3'}</button>
                       )}
 
                       {(userRole === 'admin' || userRole === 'scd') && (
@@ -542,13 +542,13 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                           <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mr-2">Verdict:</p>
                           <button
                             onClick={() => handleVerdictUpdate(3, 'Pass')}
-                            className={`px-6 py-3 font-bold rounded-2xl transition-all text-[10px] uppercase tracking-widest flex items-center gap-2 ${selectedApplicant.stage3Verdict === 'Pass' ? 'bg-green-600 text-white shadow-lg shadow-green-600/20' : 'bg-gray-100 text-gray-400 hover:bg-green-50 hover:text-green-600'}`}
+                            className={`px-6 py-3 font-bold rounded-2xl transition-all text-[10px] uppercase tracking-widest flex items-center gap-2 ${selectedNominee.stage3Verdict === 'Pass' ? 'bg-green-600 text-white shadow-lg shadow-green-600/20' : 'bg-gray-100 text-gray-400 hover:bg-green-50 hover:text-green-600'}`}
                           >
                             <ThumbsUp size={14} /> Pass
                           </button>
                           <button
                             onClick={() => handleVerdictUpdate(3, 'Fail')}
-                            className={`px-6 py-3 font-bold rounded-2xl transition-all text-[10px] uppercase tracking-widest flex items-center gap-2 ${selectedApplicant.stage3Verdict === 'Fail' ? 'bg-red-600 text-white shadow-lg shadow-red-600/20' : 'bg-gray-100 text-gray-400 hover:bg-red-50 hover:text-red-600'}`}
+                            className={`px-6 py-3 font-bold rounded-2xl transition-all text-[10px] uppercase tracking-widest flex items-center gap-2 ${selectedNominee.stage3Verdict === 'Fail' ? 'bg-red-600 text-white shadow-lg shadow-red-600/20' : 'bg-gray-100 text-gray-400 hover:bg-red-50 hover:text-red-600'}`}
                           >
                             <ThumbsDown size={14} /> Fail
                           </button>
@@ -556,7 +556,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                       )}
                     </div>
                   </div>
-                  {(selectedApplicant.round3Unlocked || userRole === 'admin' || userRole === 'scd') && (
+                  {(selectedNominee.round3Unlocked || userRole === 'admin' || userRole === 'scd') && (
                     <div className="border-t border-gray-100">
                       <div className="p-10 bg-white">{renderDocumentGrid(3)}</div>
                     </div>

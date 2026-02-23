@@ -15,7 +15,7 @@ import {
   ExternalLink,
   ShieldCheck
 } from 'lucide-react';
-import { getHallOfFame } from '../../services/dbService';
+import { getGKKWinners } from '../../services/dbService';
 
 interface Winner {
   id?: string;
@@ -43,11 +43,11 @@ const HallOfFame: React.FC<HallOfFameProps> = ({ onBack }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await getHallOfFame();
+        const data = await getGKKWinners();
         // Sort by year descending implicitly via UI requirement if not sorted in query
         setHallOfFameData(data.sort((a, b) => parseInt(b.year) - parseInt(a.year)) as Winner[]);
       } catch (error) {
-        console.error("Failed to fetch Hall of Fame:", error);
+        console.error("Failed to fetch GKK Winners:", error);
       } finally {
         setIsLoading(false);
       }

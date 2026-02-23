@@ -19,7 +19,7 @@ interface DocumentSlot {
 interface DocumentGridProps {
     round: number;
     documents: DocumentSlot[];
-    applicantData: any;
+    nomineeData: any;
     handleOpenUpload: (id: string) => void;
     handlePreview: (doc: any) => void;
 }
@@ -33,7 +33,7 @@ const docCategories = [
 const DocumentGrid: React.FC<DocumentGridProps> = ({
     round,
     documents,
-    applicantData,
+    nomineeData,
     handleOpenUpload,
     handlePreview
 }) => {
@@ -65,7 +65,7 @@ const DocumentGrid: React.FC<DocumentGridProps> = ({
                                     {doc.fileName && <p className="text-[11px] text-blue-600 truncate mb-3">{doc.fileName}</p>}
 
                                     <div className="flex gap-2 mt-3">
-                                        {((round === 1 && applicantData?.round2Unlocked) || (round === 2 && applicantData?.round3Unlocked)) ? (
+                                        {((round === 1 && nomineeData?.round2Unlocked) || (round === 2 && nomineeData?.round3Unlocked)) ? (
                                             <div className="flex-1 flex items-center justify-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-500 rounded text-xs font-bold cursor-not-allowed border border-gray-200">
                                                 <Lock size={12} />
                                                 <span>Locked</span>
