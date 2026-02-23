@@ -41,7 +41,7 @@ import {
   Upload
 } from 'lucide-react';
 import { Nominee, NomineeDocument, UserRole } from '../../types';
-import { getAllNominees, updateStageVerdict, resolveFileUrl } from '../../services/dbService';
+import { getAllNominees, updateStageVerdict, resolveFileUrl, updateDocumentEvaluation, getRequirementsByCategory } from '../../services/dbService';
 
 interface EvaluatorPortalProps {
   onLogout: () => void;
@@ -81,6 +81,21 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
   const [isResolvingUrl, setIsResolvingUrl] = useState(false);
   const [previewDoc, setPreviewDoc] = useState<{ name: string, url: string | null, type: string } | null>(null);
   const [isExporting, setIsExporting] = useState<number | null>(null);
+  const [isLoadingRequirements, setIsLoadingRequirements] = useState(false);
+  const [dynamicRequirements, setDynamicRequirements] = useState<any>(null);
+
+  useEffect(() => {
+    if (selectedNominee && view === 'review') {
+      const fetchReqs = async () => {
+        setIsLoadingRequirements(true);
+        const category = selectedNominee.details?.nomineeCategory || 'Industry';
+        const reqs = await getRequirementsByCategory(category);
+        setDynamicRequirements(reqs);
+        setIsLoadingRequirements(false);
+      };
+      fetchReqs();
+    }
+  }, [selectedNominee?.id, view]);
 
   const sortedApplicants = useMemo(() => {
     return [...(localNominees || [])].sort((a, b) => {
@@ -193,53 +208,45 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
     }
   };
 
-  const round1Requirements = [
-    { category: 'Reportorial Compliance', label: 'WAIR (Work Accident Report)', icon: FileCheck },
-    { category: 'Reportorial Compliance', label: 'AEDR (Annual Exposure Data)', icon: FileCheck },
-    { category: 'Reportorial Compliance', label: 'AMR (Annual Medical Report)', icon: FileCheck },
-    { category: 'Legal & Administrative', label: 'Rule 1020 Registration', icon: Hash },
-    { category: 'Legal & Administrative', label: 'FSIC (Fire Safety)', icon: Hash },
-    { category: 'OSH Systems', label: 'Signed OSH Policy', icon: ShieldCheck }
-  ];
-
-  const round2Requirements = [
-    { category: 'Reportorial Compliance', label: 'Minutes of OSH Committee Meeting', icon: FileCheck },
-    { category: 'Reportorial Compliance', label: 'OSH Training Records', icon: FileCheck },
-    { category: 'Legal & Administrative', label: 'DOLE Clearance / Regional Certification', icon: Hash },
-    { category: 'Legal & Administrative', label: 'LGU Business Permit (Current Year)', icon: Hash },
-    { category: 'OSH Systems', label: 'HIRAC (Hazard Identification Risk Assessment)', icon: ShieldCheck },
-    { category: 'OSH Systems', label: 'Emergency Response Preparedness Plan', icon: ShieldCheck }
-  ];
-
-  const round3Requirements = [
-    { category: 'OSH Systems', label: 'Innovative OSH Programs (Documentation)', icon: Star },
-    { category: 'OSH Systems', label: 'OSH Best Practices (Case Study)', icon: Star },
-    { category: 'OSH Systems', label: 'CSR Safety Initiatives', icon: Star },
-    { category: 'OSH Systems', label: 'Final Board Presentation (Slide Deck)', icon: FileText }
-  ];
 
   const renderDocumentGrid = (round: number) => {
-    if (!selectedNominee) return null;
-    const activeRequirements = round === 1 ? round1Requirements : round === 2 ? round2Requirements : round3Requirements;
+    if (!selectedNominee || !dynamicRequirements) return <div className="p-10 text-center text-gray-400 font-bold uppercase tracking-widest text-xs">Loading Requirements...</div>;
+
+    const stageKey = round === 1 ? 'stage1' : round === 2 ? 'stage2' : 'stage3';
+    const activeRequirements = dynamicRequirements[stageKey] || [];
 
     return (
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {['Reportorial Compliance', 'Legal & Administrative', 'OSH Systems'].map(cat => {
-          const catReqs = activeRequirements.filter(r => r.category === cat);
+        {['Compliance', 'Legal', 'Systems', 'Training', 'Designation', 'Safety', 'Health', 'Construction', 'Excellence', 'Management', 'Other', 'General'].map(cat => {
+          const catReqs = activeRequirements.filter((r: any) => (r.category === cat) || (!r.category && cat === 'General'));
+          if (catReqs.length === 0) return null;
+
           return (
             <div key={cat} className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm flex flex-col">
               <div className="p-4 bg-gray-50 border-b border-gray-100 flex items-center">
                 <h4 className="font-bold text-gkk-navy text-[10px] uppercase tracking-[0.2em]">{cat}</h4>
               </div>
               <div className="p-4 flex-1 space-y-4">
-                {catReqs.map((req, localIdx) => {
-                  // Reconstruct the global index for the slotId to match how ApplicantPortal saves it
-                  const globalIdx = activeRequirements.findIndex(r => r.label === req.label);
+                {catReqs.map((req: any, localIdx: number) => {
+                  const globalIdx = activeRequirements.findIndex((r: any) => r.label === req.label);
                   const stagePrefix = round === 1 ? 'r1' : round === 2 ? 'r2' : 'r3';
                   const slotId = `${stagePrefix}-${globalIdx}`;
-                  const evalKey = `${selectedNominee.id}-${round}-${req.label}`;
-                  const docStatus = docEvaluations[evalKey];
+
                   const doc = selectedNominee.documents?.find(d => d.slotId === slotId);
+                  const docStatus = doc?.verdict;
+
+                  const handleDocVerdict = async (verdict: 'pass' | 'fail') => {
+                    const success = await updateDocumentEvaluation(selectedNominee.id, slotId, verdict);
+                    if (success) {
+                      const updatedDocs = (selectedNominee.documents || []).map(d =>
+                        d.slotId === slotId ? { ...d, verdict } : d
+                      );
+                      const updatedNominee = { ...selectedNominee, documents: updatedDocs };
+                      setSelectedNominee(updatedNominee);
+                      setLocalNominees(prev => prev.map(a => a.id === selectedNominee.id ? updatedNominee : a));
+                    }
+                  };
+
                   return (
                     <div key={localIdx} className={`p-4 border rounded-2xl transition-all ${docStatus === 'pass' ? 'bg-green-50 border-green-200 shadow-inner' : docStatus === 'fail' ? 'bg-red-50 border-red-200 shadow-inner' : doc ? 'bg-white border-gray-100 shadow-sm' : 'bg-gray-50/50 border-gray-100'}`}>
                       <div className="flex justify-between items-start mb-2">
@@ -257,8 +264,8 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                           <>
                             <button onClick={() => handlePreview(doc)} className="w-full py-2 bg-gkk-navy text-white hover:bg-gkk-royalBlue rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all shadow-md flex items-center justify-center gap-2"><Eye size={12} /> Verify Record</button>
                             <div className="flex gap-2">
-                              <button onClick={() => setDocEvaluations({ ...docEvaluations, [evalKey]: 'pass' })} className={`flex-1 py-1.5 rounded-xl text-[10px] font-bold border transition-all ${docStatus === 'pass' ? 'bg-green-600 text-white border-green-600 shadow-lg' : 'bg-white text-gray-400 border-gray-200 hover:text-green-600'}`}>PASS</button>
-                              <button onClick={() => setDocEvaluations({ ...docEvaluations, [evalKey]: 'fail' })} className={`flex-1 py-1.5 rounded-xl text-[10px] font-bold border transition-all ${docStatus === 'fail' ? 'bg-red-600 text-white border-red-600 shadow-lg' : 'bg-white text-gray-400 border-gray-200 hover:text-red-600'}`}>FAIL</button>
+                              <button onClick={() => handleDocVerdict('pass')} className={`flex-1 py-1.5 rounded-xl text-[10px] font-bold border transition-all ${docStatus === 'pass' ? 'bg-green-600 text-white border-green-600 shadow-lg' : 'bg-white text-gray-400 border-gray-200 hover:text-green-600'}`}>PASS</button>
+                              <button onClick={() => handleDocVerdict('fail')} className={`flex-1 py-1.5 rounded-xl text-[10px] font-bold border transition-all ${docStatus === 'fail' ? 'bg-red-600 text-white border-red-600 shadow-lg' : 'bg-white text-gray-400 border-gray-200 hover:text-red-600'}`}>FAIL</button>
                             </div>
                           </>
                         ) : <div className="w-full py-2 bg-gray-100 text-gray-400 rounded-xl text-[10px] font-bold uppercase tracking-widest text-center cursor-not-allowed italic">Awaiting</div>}
@@ -275,18 +282,20 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
   };
 
   const calculateProgress = (nominee: Nominee, round: number) => {
-    const requirements = round === 1 ? round1Requirements : round === 2 ? round2Requirements : round3Requirements;
+    if (!dynamicRequirements) return 0;
+    const stageKey = round === 1 ? 'stage1' : round === 2 ? 'stage2' : 'stage3';
+    const stageReqs = dynamicRequirements[stageKey] || [];
+    if (stageReqs.length === 0) return 0;
+
+    const roundDocs = nominee.documents || [];
     const stagePrefix = round === 1 ? 'r1' : round === 2 ? 'r2' : 'r3';
 
-    if (!nominee.documents) return 0;
-
-    const uploadedCount = requirements.filter(req => {
-      const globalIdx = requirements.findIndex(r => r.label === req.label);
-      const slotId = `${stagePrefix}-${globalIdx}`;
-      return nominee.documents.some(d => d.slotId === slotId);
+    const uploadedCount = stageReqs.filter((req: any, idx: number) => {
+      const slotId = `${stagePrefix}-${idx}`;
+      return roundDocs.some(d => d.slotId === slotId);
     }).length;
 
-    return Math.round((uploadedCount / requirements.length) * 100);
+    return Math.round((uploadedCount / stageReqs.length) * 100);
   };
 
   const renderProgressBar = (nominee: Nominee, round: number) => {

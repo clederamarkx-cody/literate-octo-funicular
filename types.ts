@@ -27,97 +27,51 @@ export interface NomineeDocument {
   date?: string;
   slotId?: string;
   remarks?: string;
+  verdict?: 'pass' | 'fail'; // Added for persistent evaluation feedback
 }
 
-// 1. Users
+// 1. Users (Consolidated Staff & Nominees)
 export interface User {
-  userId: string; // Maps to Firebase Auth UID / uid
+  userId: string; // Firebase Auth UID
   name: string;
   email: string;
   role: UserRole;
-  status: 'active' | 'inactive' | 'suspended' | 'pending' | 'completed';
-  createdAt: string; // timestamp string
+  status: 'active' | 'inactive' | 'suspended';
+  createdAt: string; // ISO string
   region?: string;
-  nomineeCategory?: 'Industry' | 'Individual' | 'Micro Enterprise' | 'Government';
 }
 
 // 2. Access Keys
 export interface AccessKey {
-  keyId: string;
-  userId?: string; // Reference to users.userId
+  keyId: string; // The physical pass key string
+  userId?: string; // If activated
   role: string;
-  status: 'issued' | 'activated' | 'revoked' | 'expired' | 'unused';
+  status: 'issued' | 'activated' | 'revoked' | 'expired';
   issuedAt?: string;
   activatedAt?: string;
-  regId: string; // The physical string key
   email?: string;
-  industry?: string;
   region?: string;
   name?: string;
 }
 
-// 4. Evaluations
-export interface Evaluation {
-  evaluationId: string;
-  applicationId: string; // reference to applications.applicationId
-  evaluatorId: string; // reference to users.userId
-  role: 'evaluator' | 'reu' | 'scd_team_leader';
-  decision: 'Pass' | 'Fail';
-  remarks: string;
-  visibility: boolean; // true if nominee can see remarks
-  evaluatedAt: string; // timestamp string
-  status: 'pending' | 'completed' | 'approvedBySCD';
-}
-
-// 5. GKK Winners
+// 4. GKK Winners (Hall of Fame)
 export interface GKKWinner {
   winnerId: string;
-  applicationId?: string; // reference to applications.applicationId
-  nomineeId?: string; // reference to users.userId
+  applicationId?: string;
+  nomineeId?: string;
   category: string;
   year: number;
   title: string;
-  remarks: string;
-  announcedAt: string; // timestamp string
+  remarks?: string;
+  announcedAt?: string;
 }
 
-// 6. Requirements
-export interface Requirement {
-  categoryId: 'industry' | 'microEnterprises' | 'individual' | 'publicSector';
-  requiredFiles: string[]; // array of strings: checklist of required attachments
-  optionalFiles: string[]; // array of strings: additional documents if applicable
-}
-
-// Supporting: Categories
-export interface AwardCategory {
-  categoryId: string;
-  name: string;
-  description: string;
-}
-
-// Supporting: System Logs
-export interface SystemLog {
-  logId: string;
-  userId: string;
-  action: string;
-  details: string;
-  timestamp: string;
-}
-
-// Supporting: Settings
-export interface Setting {
-  key: string;
-  value: any;
-}
-
-
-// 3. Applications (Nominee extends this fundamentally in current UI)
-// Overloading for backwards compatibility with the existing UI expectations
+// 3. Applications (Core Data Model)
 export interface Nominee {
-  id: string; // applicationId / userId overlap
+  id: string; // applicationId / userId overlapping logic in UI
   applicationId?: string;
-  nomineeId?: string; // reference to users.userId
-  regId: string;
+  nomineeId?: string;
+  regId: string; // The Access Key used
 
   // Extension Fields
   category?: string;
@@ -131,16 +85,16 @@ export interface Nominee {
   focalPhone?: string;
   addressObj?: { street: string; city: string; province: string; };
 
-  // Legacy/UI Fields
-  name: string; // maps to organizationName conceptually
-  email: string; // maps to focalEmail conceptually
+  // Legacy Content
+  name: string;
+  email: string;
   role: UserRole;
-  industry: string; // maps to industrySector conceptually
+  industry: string;
   region: string;
   status: 'draft' | 'submitted' | 'under_review' | 'approved' | 'rejected' | 'pending' | 'in_progress' | 'completed';
   verdict?: 'Pass' | 'Fail';
-  submittedDate: string; // equivalent to submittedAt
-  documents: NomineeDocument[]; // equivalent to attachments
+  submittedDate: string;
+  documents: NomineeDocument[];
   round2Unlocked?: boolean;
   round3Unlocked?: boolean;
   stage1PassedByReu?: boolean;
@@ -151,12 +105,12 @@ export interface Nominee {
   stage3Verdict?: 'Pass' | 'Fail';
   details?: {
     nomineeCategory?: 'Industry' | 'Individual' | 'Micro Enterprise' | 'Government';
-    employees?: string; // equivalent to workforceSize
-    address?: string; // equivalent to addressObj
-    representative?: string; // equivalent to focalName
+    employees?: string;
+    address?: string;
+    representative?: string;
     designation?: string;
     email?: string;
     phone?: string;
-    safetyOfficer?: string; // equivalent to focalName
+    safetyOfficer?: string;
   };
 }

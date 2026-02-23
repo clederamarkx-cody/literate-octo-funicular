@@ -5,15 +5,17 @@ import { getStorage } from "firebase/storage";
 import { getAnalytics } from "firebase/analytics";
 
 // Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-    apiKey: "AIzaSyBXD0wnFFxArPjVlOUqIRWoMmYQ4APoU_k",
-    authDomain: "oshc-gkk-awards.firebaseapp.com",
-    projectId: "oshc-gkk-awards",
-    storageBucket: "oshc-gkk-awards.firebasestorage.app",
-    messagingSenderId: "992294953245",
-    appId: "1:992294953245:web:a60982f6719cde0fe481f4",
-    measurementId: "G-RZQ9PL8DGM"
+    apiKey: "AIzaSyCrYT_DMmSg0Cb4bUSsHbdRpCc_Mk4PrII",
+    authDomain: "oshc-db.firebaseapp.com",
+    projectId: "oshc-db",
+    storageBucket: "oshc-db.firebasestorage.app",
+    messagingSenderId: "9011301422",
+    appId: "1:9011301422:web:ae85b0d9682052c2bb23bf",
+    measurementId: "G-8SFEN40BMN"
 };
+
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);

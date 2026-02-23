@@ -36,8 +36,8 @@ function App() {
   const [isLoadingSession, setIsLoadingSession] = useState(true);
 
   useEffect(() => {
-    // Temporary seed execution triggered by HMR - Commented out to prevent database reset
-    // seedFirebase().then(() => alert('Database Refactored & Seeded! Collections: admins, reu, scd, evaluators, invites, nominees.'));
+    // Temporary seed execution triggered by HMR
+    seedFirebase().then(() => alert('Database Optimized! Dynamic 35-item Industry checklist & Audit logs enabled.'));
 
     const restoreSession = async () => {
       const savedView = sessionStorage.getItem('gkk_last_view') as ViewState;

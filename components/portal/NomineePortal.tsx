@@ -34,7 +34,7 @@ import {
   ArrowLeft
 } from 'lucide-react';
 import { Nominee, NomineeDocument } from '../../types';
-import { uploadNomineeFile, resolveFileUrl, updateNominee, addNomineeDocument } from '../../services/dbService';
+import { uploadNomineeFile, resolveFileUrl, updateNominee, addNomineeDocument, getRequirementsByCategory } from '../../services/dbService';
 import OnboardingTour, { TourStep } from './OnboardingTour';
 import Toast, { ToastType } from '../ui/Toast';
 import NomineeSidebar from './nominee/NomineeSidebar';
@@ -169,144 +169,50 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
     philhealthNo: "00-123456789-0"
   };
 
-  const REQUIREMENTS_MAP: Record<string, { round1: { category: string, label: string }[], round2: { category: string, label: string }[], round3: { category: string, label: string }[] }> = {
-    Industry: {
-      round1: [
-        { category: 'Reportorial Compliance', label: 'WAIR (Work Accident Report)' },
-        { category: 'Reportorial Compliance', label: 'AEDR (Annual Exposure Data)' },
-        { category: 'Reportorial Compliance', label: 'AMR (Annual Medical Report)' },
-        { category: 'Legal & Administrative', label: 'Rule 1020 Registration' },
-        { category: 'Legal & Administrative', label: 'FSIC (Fire Safety)' },
-        { category: 'OSH Systems', label: 'Signed OSH Policy' }
-      ],
-      round2: [
-        { category: 'Reportorial Compliance', label: 'Minutes of OSH Committee Meeting' },
-        { category: 'Reportorial Compliance', label: 'OSH Training Records' },
-        { category: 'Legal & Administrative', label: 'DOLE Clearance / Regional Certification' },
-        { category: 'Legal & Administrative', label: 'LGU Business Permit (Current Year)' },
-        { category: 'OSH Systems', label: 'HIRAC (Hazard Identification Risk Assessment)' },
-        { category: 'OSH Systems', label: 'Emergency Response Preparedness Plan' }
-      ],
-      round3: [
-        { category: 'OSH Systems', label: 'Innovative OSH Programs (Documentation)' },
-        { category: 'OSH Systems', label: 'OSH Best Practices (Case Study)' },
-        { category: 'OSH Systems', label: 'CSR Safety Initiatives' },
-        { category: 'OSH Systems', label: 'Final Board Presentation (Slide Deck)' }
-      ]
-    },
-    Government: {
-      round1: [
-        { category: 'Reportorial Compliance', label: 'CSC Resolution Compliance' },
-        { category: 'Reportorial Compliance', label: 'AEDR (Annual Exposure Data)' },
-        { category: 'Reportorial Compliance', label: 'AMR (Annual Medical Report)' },
-        { category: 'Legal & Administrative', label: 'Agency Profile' },
-        { category: 'Legal & Administrative', label: 'FSIC (Fire Safety)' },
-        { category: 'OSH Systems', label: 'Signed OSH Policy' }
-      ],
-      round2: [
-        { category: 'Reportorial Compliance', label: 'Minutes of Safety Health Committee Meeting' },
-        { category: 'Reportorial Compliance', label: 'OSH Training Records' },
-        { category: 'Legal & Administrative', label: 'CSC Clearance' },
-        { category: 'OSH Systems', label: 'HIRAC (Hazard Identification Risk Assessment)' },
-        { category: 'OSH Systems', label: 'Emergency Preparedness Plan' }
-      ],
-      round3: [
-        { category: 'OSH Systems', label: 'Innovative Public Service OSH Programs' },
-        { category: 'OSH Systems', label: 'OSH Best Practices (Case Study)' },
-        { category: 'OSH Systems', label: 'Final Board Presentation (Slide Deck)' }
-      ]
-    },
-    "Micro Enterprise": {
-      round1: [
-        { category: 'Reportorial Compliance', label: 'WAIR (Work Accident Report)' },
-        { category: 'Legal & Administrative', label: 'Rule 1020 Registration' },
-        { category: 'Legal & Administrative', label: 'BMBE Certificate' },
-        { category: 'OSH Systems', label: 'Signed OSH Policy' }
-      ],
-      round2: [
-        { category: 'Reportorial Compliance', label: 'Basic OSH Training Certificate (BOSH/COSH)' },
-        { category: 'Legal & Administrative', label: 'LGU Business Permit (Current Year)' },
-        { category: 'OSH Systems', label: 'Simplified HIRAC' },
-        { category: 'OSH Systems', label: 'Emergency Response Plan' }
-      ],
-      round3: [
-        { category: 'OSH Systems', label: 'OSH Implementation Report' },
-        { category: 'OSH Systems', label: 'Final Board Presentation (Slide Deck)' }
-      ]
-    },
-    Individual: {
-      round1: [
-        { category: 'Legal & Administrative', label: 'Professional PRC ID / DOLE Accreditation' },
-        { category: 'Legal & Administrative', label: 'Resume / Curriculum Vitae' },
-        { category: 'Reportorial Compliance', label: 'Certificate of Employment' }
-      ],
-      round2: [
-        { category: 'Reportorial Compliance', label: 'OSH Training Certificates' },
-        { category: 'OSH Systems', label: 'Portfolio of OSH Projects' },
-        { category: 'Legal & Administrative', label: 'Recommendation Letters' }
-      ],
-      round3: [
-        { category: 'OSH Systems', label: 'Significant OSH Contributions' },
-        { category: 'OSH Systems', label: 'Final Panel Interview Slide Deck' }
-      ]
-    }
-  };
+  const [isLoadingRequirements, setIsLoadingRequirements] = useState(true);
+  const [dynamicRequirements, setDynamicRequirements] = useState<any>(null);
 
-  const [documents, setDocuments] = useState<DocumentSlot[]>(() => {
-    const currentCategory = nomineeData?.details?.nomineeCategory || 'Industry';
-    const activeRequirements = REQUIREMENTS_MAP[currentCategory] || REQUIREMENTS_MAP['Industry'];
+  useEffect(() => {
+    const fetchReqs = async () => {
+      const category = nomineeData?.details?.nomineeCategory || 'Industry';
+      const reqs = await getRequirementsByCategory(category);
+      setDynamicRequirements(reqs);
+      setIsLoadingRequirements(false);
+    };
+    fetchReqs();
+  }, [nomineeData?.details?.nomineeCategory]);
+
+  const [documents, setDocuments] = useState<DocumentSlot[]>([]);
+
+  useEffect(() => {
+    if (!dynamicRequirements) return;
+
     const initialDocs: DocumentSlot[] = [];
 
-    activeRequirements.round1.forEach((req, idx) => {
-      const slotId = `r1-${idx}`;
-      const savedDoc = nomineeData?.documents?.find((d: any) => d.slotId === slotId);
-      initialDocs.push({
-        id: slotId,
-        category: req.category as any,
-        label: req.label,
-        fileName: savedDoc ? savedDoc.name : null,
-        status: savedDoc ? 'uploaded' : 'pending',
-        lastUpdated: savedDoc ? (savedDoc.date || '-') : '-',
-        previewUrl: savedDoc ? (savedDoc.url || null) : null,
-        type: savedDoc ? (savedDoc.type || '') : '',
-        round: 1
+    const processStage = (stageReqs: any[], round: number, prefix: string) => {
+      stageReqs.forEach((req, idx) => {
+        const slotId = `${prefix}-${idx}`;
+        const savedDoc = nomineeData?.documents?.find((d: any) => d.slotId === slotId);
+        initialDocs.push({
+          id: slotId,
+          category: (req.category || 'General') as any,
+          label: req.label,
+          fileName: savedDoc ? savedDoc.name : null,
+          status: savedDoc ? 'uploaded' : 'pending',
+          lastUpdated: savedDoc ? (savedDoc.date || '-') : '-',
+          previewUrl: savedDoc ? (savedDoc.url || null) : null,
+          type: savedDoc ? (savedDoc.type || '') : '',
+          round: round
+        });
       });
-    });
+    };
 
-    activeRequirements.round2.forEach((req, idx) => {
-      const slotId = `r2-${idx}`;
-      const savedDoc = nomineeData?.documents?.find((d: any) => d.slotId === slotId);
-      initialDocs.push({
-        id: slotId,
-        category: req.category as any,
-        label: req.label,
-        fileName: savedDoc ? savedDoc.name : null,
-        status: savedDoc ? 'uploaded' : 'pending',
-        lastUpdated: savedDoc ? (savedDoc.date || '-') : '-',
-        previewUrl: savedDoc ? (savedDoc.url || null) : null,
-        type: savedDoc ? (savedDoc.type || '') : '',
-        round: 2
-      });
-    });
+    if (dynamicRequirements.stage1) processStage(dynamicRequirements.stage1, 1, 'r1');
+    if (dynamicRequirements.stage2) processStage(dynamicRequirements.stage2, 2, 'r2');
+    if (dynamicRequirements.stage3) processStage(dynamicRequirements.stage3, 3, 'r3');
 
-    activeRequirements.round3.forEach((req, idx) => {
-      const slotId = `r3-${idx}`;
-      const savedDoc = nomineeData?.documents?.find((d: any) => d.slotId === slotId);
-      initialDocs.push({
-        id: slotId,
-        category: req.category as any,
-        label: req.label,
-        fileName: savedDoc ? savedDoc.name : null,
-        status: savedDoc ? 'uploaded' : 'pending',
-        lastUpdated: savedDoc ? (savedDoc.date || '-') : '-',
-        previewUrl: savedDoc ? (savedDoc.url || null) : null,
-        type: savedDoc ? (savedDoc.type || '') : '',
-        round: 3
-      });
-    });
-
-    return initialDocs;
-  });
+    setDocuments(initialDocs);
+  }, [dynamicRequirements, nomineeData?.id]);
 
   // Re-sync if nomineeData changes after mount
   useEffect(() => {
@@ -336,10 +242,14 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
   ];
 
   const getProgress = (round: number) => {
+    if (!dynamicRequirements) return 0;
+    const stageKey = round === 1 ? 'stage1' : round === 2 ? 'stage2' : 'stage3';
+    const stageReqs = dynamicRequirements[stageKey] || [];
+    if (stageReqs.length === 0) return 0;
+
     const roundDocs = documents.filter(d => d.round === round);
-    if (roundDocs.length === 0) return 0;
     const completed = roundDocs.filter(d => d.status === 'uploaded').length;
-    return Math.round((completed / roundDocs.length) * 100);
+    return Math.round((completed / stageReqs.length) * 100);
   };
 
   const stage1Progress = getProgress(1);
