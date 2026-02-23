@@ -75,6 +75,16 @@ export const getApplicant = async (uid: string): Promise<Applicant | null> => {
  */
 export const updateApplicant = async (uid: string, updates: Partial<Applicant>) => {
     const applicantRef = doc(db, APPLICANTS_COLLECTION, uid);
+    const applicantSnap = await getDoc(applicantRef);
+
+    if (!applicantSnap.exists()) {
+        // Fallback: If it's a mock user not in Firebase, create it on the fly
+        const mockApplicant = INITIAL_APPLICANTS.find(a => a.id === uid);
+        if (mockApplicant) {
+            await setDoc(applicantRef, mockApplicant);
+        }
+    }
+
     await updateDoc(applicantRef, {
         ...updates,
         updatedAt: new Date().toISOString()
@@ -86,9 +96,21 @@ export const updateApplicant = async (uid: string, updates: Partial<Applicant>) 
 export const addApplicantDocument = async (uid: string, document: ApplicantDocument) => {
     const applicantRef = doc(db, APPLICANTS_COLLECTION, uid);
     const applicantSnap = await getDoc(applicantRef);
-    if (!applicantSnap.exists()) return;
 
-    const applicant = applicantSnap.data() as Applicant;
+    let applicant: Applicant;
+    if (!applicantSnap.exists()) {
+        // Fallback: If it's a mock user not in Firebase, create it on the fly
+        const mockApplicant = INITIAL_APPLICANTS.find(a => a.id === uid);
+        if (mockApplicant) {
+            await setDoc(applicantRef, mockApplicant);
+            applicant = mockApplicant;
+        } else {
+            return;
+        }
+    } else {
+        applicant = applicantSnap.data() as Applicant;
+    }
+
     const existingDocs = applicant.documents || [];
 
     // Filter out previous version of this slot if it exists to avoid duplicates
