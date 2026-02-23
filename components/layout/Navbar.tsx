@@ -32,8 +32,8 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate, isNominationPage = false })
         if (element) element.scrollIntoView({ behavior: 'smooth' });
       }, 100);
     } else {
-       const element = document.querySelector(href);
-       if (element) element.scrollIntoView({ behavior: 'smooth' });
+      const element = document.querySelector(href);
+      if (element) element.scrollIntoView({ behavior: 'smooth' });
     }
     setIsMobileMenuOpen(false);
   };
@@ -49,12 +49,11 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate, isNominationPage = false })
 
   return (
     <>
-      <nav 
-        className={`fixed w-full z-[110] transition-all duration-500 will-change-transform transform-gpu ${
-          isScrolled || isNominationPage || isMobileMenuOpen
-            ? 'bg-gkk-navy/95 backdrop-blur-md shadow-2xl py-3' 
+      <nav
+        className={`fixed w-full z-[110] transition-all duration-500 will-change-transform transform-gpu ${isScrolled || isNominationPage || isMobileMenuOpen
+            ? 'bg-gkk-navy/95 backdrop-blur-md shadow-2xl py-3'
             : 'bg-transparent py-6'
-        }`}
+          }`}
         style={{ transform: 'translateZ(0)' }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -62,7 +61,7 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate, isNominationPage = false })
             {/* Logo Section */}
             <div className="flex items-center space-x-3 cursor-pointer group" onClick={handleLogoClick}>
               <div className="bg-gradient-to-tr from-gkk-gold to-yellow-200 p-2 rounded-xl shadow-lg shadow-yellow-500/20 group-hover:scale-105 transition-transform duration-300">
-                 <Award className="h-6 w-6 text-gkk-navy" />
+                <Award className="h-6 w-6 text-gkk-navy" />
               </div>
               <div className="text-white">
                 <span className="block font-serif text-lg font-bold tracking-wider leading-none group-hover:text-gkk-gold transition-colors duration-300">
@@ -76,8 +75,8 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate, isNominationPage = false })
             {!isNominationPage && (
               <div className="hidden lg:flex items-center space-x-8">
                 {NAV_LINKS.map((link) => (
-                  <button 
-                    key={link.name} 
+                  <button
+                    key={link.name}
                     onClick={() => handleNavClick(link.href)}
                     className="text-gray-300 hover:text-gkk-gold transition-colors text-xs font-bold uppercase tracking-widest relative group"
                   >
@@ -86,14 +85,14 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate, isNominationPage = false })
                   </button>
                 ))}
                 <div className="h-6 w-px bg-white/10 mx-2"></div>
-                <button 
-                  onClick={() => onNavigate && onNavigate('hall-of-fame')} 
+                <button
+                  onClick={() => onNavigate && onNavigate('hall-of-fame')}
                   className="flex items-center px-4 py-2 text-gkk-gold hover:text-white font-bold uppercase tracking-widest text-[10px] transition-all border border-gkk-gold/30 rounded-lg hover:bg-gkk-gold/10 hover:border-gkk-gold"
                 >
-                  <Trophy size={14} className="mr-2" /> Hall of Fame
+                  <Trophy size={14} className="mr-2" /> GKK Winners
                 </button>
-                <button 
-                  onClick={() => onNavigate && onNavigate('login')} 
+                <button
+                  onClick={() => onNavigate && onNavigate('login')}
                   className="flex items-center px-6 py-2.5 bg-gkk-gold text-gkk-navy font-bold rounded-lg shadow-lg shadow-gkk-gold/20 hover:shadow-gkk-gold/40 hover:-translate-y-0.5 hover:bg-white transition-all text-xs uppercase tracking-widest group"
                 >
                   Login <ArrowRight size={14} className="ml-2 group-hover:translate-x-1 transition-transform" />
@@ -104,67 +103,67 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate, isNominationPage = false })
             {/* Nomination Page Specific Button */}
             {isNominationPage && (
               <div className="hidden lg:block">
-                 <button onClick={() => onNavigate && onNavigate('home')} className="flex items-center text-white hover:text-gkk-gold text-xs font-bold uppercase tracking-widest transition-colors group">
-                   <ChevronRight size={16} className="rotate-180 mr-2 group-hover:-translate-x-1 transition-transform" /> Back to Home
-                 </button>
+                <button onClick={() => onNavigate && onNavigate('home')} className="flex items-center text-white hover:text-gkk-gold text-xs font-bold uppercase tracking-widest transition-colors group">
+                  <ChevronRight size={16} className="rotate-180 mr-2 group-hover:-translate-x-1 transition-transform" /> Back to Home
+                </button>
               </div>
             )}
 
             {/* Mobile/Tablet Menu Toggle */}
             <div className="lg:hidden flex items-center space-x-4">
-               {!isNominationPage && (
-                 <button 
-                   onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} 
-                   className="text-white hover:text-gkk-gold transition-all p-2 bg-white/5 rounded-lg border border-white/10 hover:bg-white/10"
-                 >
-                    {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-                 </button>
-               )}
+              {!isNominationPage && (
+                <button
+                  onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                  className="text-white hover:text-gkk-gold transition-all p-2 bg-white/5 rounded-lg border border-white/10 hover:bg-white/10"
+                >
+                  {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+                </button>
+              )}
             </div>
           </div>
         </div>
       </nav>
 
       {/* Slide-in Mobile Drawer */}
-      <div 
+      <div
         className={`fixed inset-0 z-[100] transition-opacity duration-500 ${isMobileMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
       >
-        <div 
+        <div
           className="absolute inset-0 bg-gkk-navy/80 backdrop-blur-md"
           onClick={() => setIsMobileMenuOpen(false)}
         />
-        <div 
+        <div
           className={`absolute top-0 right-0 h-full w-[85%] max-w-[380px] bg-gkk-navy shadow-2xl border-l border-white/10 transform transition-transform duration-500 ease-out flex flex-col pt-24 ${isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}
         >
           <div className="p-6 border-b border-white/5">
             <div className="flex items-center space-x-3">
-               <span className="text-white font-serif font-bold text-lg uppercase tracking-widest">Portal Navigation</span>
+              <span className="text-white font-serif font-bold text-lg uppercase tracking-widest">Portal Navigation</span>
             </div>
           </div>
           <div className="flex-1 overflow-y-auto py-8 px-6 space-y-4">
-             {NAV_LINKS.map((link, idx) => (
-               <button
-                 key={link.name}
-                 onClick={() => handleNavClick(link.href)}
-                 className="w-full flex items-center justify-between px-5 py-4 bg-white/5 hover:bg-white/10 rounded-xl border border-white/5 text-gray-200 hover:text-white transition-all group"
-                 style={{ transitionDelay: `${idx * 40}ms` }}
-               >
-                 <span className="text-sm font-bold uppercase tracking-widest">{link.name}</span>
-                 <ChevronRight size={18} className="text-gkk-gold group-hover:translate-x-1 transition-transform" />
-               </button>
-             ))}
-             <div className="pt-6 mt-6 border-t border-white/5">
-                <button 
-                  onClick={() => { if(onNavigate) onNavigate('hall-of-fame'); setIsMobileMenuOpen(false); }}
-                  className="w-full flex items-center space-x-4 px-5 py-4 text-gkk-gold hover:text-white font-bold uppercase tracking-widest text-xs transition-colors"
-                >
-                  <Trophy size={18} /> <span>Hall of Fame</span>
-                </button>
-             </div>
+            {NAV_LINKS.map((link, idx) => (
+              <button
+                key={link.name}
+                onClick={() => handleNavClick(link.href)}
+                className="w-full flex items-center justify-between px-5 py-4 bg-white/5 hover:bg-white/10 rounded-xl border border-white/5 text-gray-200 hover:text-white transition-all group"
+                style={{ transitionDelay: `${idx * 40}ms` }}
+              >
+                <span className="text-sm font-bold uppercase tracking-widest">{link.name}</span>
+                <ChevronRight size={18} className="text-gkk-gold group-hover:translate-x-1 transition-transform" />
+              </button>
+            ))}
+            <div className="pt-6 mt-6 border-t border-white/5">
+              <button
+                onClick={() => { if (onNavigate) onNavigate('hall-of-fame'); setIsMobileMenuOpen(false); }}
+                className="w-full flex items-center space-x-4 px-5 py-4 text-gkk-gold hover:text-white font-bold uppercase tracking-widest text-xs transition-colors"
+              >
+                <Trophy size={18} /> <span>Hall of Fame</span>
+              </button>
+            </div>
           </div>
           <div className="p-6 border-t border-white/5 bg-black/20">
-            <button 
-              onClick={() => { if(onNavigate) onNavigate('login'); setIsMobileMenuOpen(false); }}
+            <button
+              onClick={() => { if (onNavigate) onNavigate('login'); setIsMobileMenuOpen(false); }}
               className="w-full flex items-center justify-center px-6 py-4 bg-gkk-gold text-gkk-navy font-bold rounded-xl shadow-xl hover:bg-white transition-all uppercase tracking-widest text-sm group"
             >
               Secure Login <ArrowRight size={18} className="ml-3 group-hover:translate-x-1 transition-transform" />
