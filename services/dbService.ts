@@ -146,8 +146,14 @@ export const uploadApplicantFile = async (
 
         const uploadTask = uploadBytesResumable(storageRef, file);
 
+        let timeoutId = setTimeout(() => {
+            uploadTask.cancel();
+            reject(new Error("Upload timed out (15s). This is usually caused by missing CORS configuration on the Firebase Storage bucket."));
+        }, 15000);
+
         if (cancelToken) {
             cancelToken.cancel = () => {
+                clearTimeout(timeoutId);
                 uploadTask.cancel();
                 reject(new Error("Upload cancelled by user"));
             };
@@ -159,14 +165,17 @@ export const uploadApplicantFile = async (
                 if (onProgress) onProgress(Math.floor(progress));
             },
             (error) => {
+                clearTimeout(timeoutId);
                 console.error("Firebase Storage upload failed", error);
                 reject(error);
             },
             async () => {
                 try {
+                    clearTimeout(timeoutId);
                     const downloadUrl = await getDownloadURL(uploadTask.snapshot.ref);
                     resolve(downloadUrl);
                 } catch (err) {
+                    clearTimeout(timeoutId);
                     reject(err);
                 }
             }
