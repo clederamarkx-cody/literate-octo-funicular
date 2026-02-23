@@ -125,7 +125,7 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [uploadStatus, setUploadStatus] = useState<'idle' | 'uploading' | 'success'>('idle');
+  const [uploadStatus, setUploadStatus] = useState<'idle' | 'encrypting' | 'uploading' | 'success'>('idle');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   // Toast State
@@ -300,6 +300,15 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
 
   const handleUpload = async () => {
     if (!selectedFile || !applicantData) return;
+    setUploadStatus('encrypting');
+    setUploadProgress(0);
+
+    // Simulate encryption before uploading
+    for (let i = 0; i <= 100; i += 5) {
+      await new Promise(res => setTimeout(res, 50));
+      setUploadProgress(i);
+    }
+
     setUploadStatus('uploading');
     setUploadProgress(0);
 
@@ -724,8 +733,8 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
                       </div>
                     </div>
                   )}
-                  {uploadStatus === 'uploading' && (
-                    <div className="space-y-3"><div className="flex justify-between text-[10px] font-bold text-gray-400 uppercase tracking-widest"><span>Encrypting...</span><span>{uploadProgress}%</span></div><div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden"><div className="bg-gkk-gold h-full transition-all duration-300" style={{ width: `${uploadProgress}%` }}></div></div></div>
+                  {(uploadStatus === 'uploading' || uploadStatus === 'encrypting') && (
+                    <div className="space-y-3"><div className="flex justify-between text-[10px] font-bold text-gray-400 uppercase tracking-widest"><span>{uploadStatus === 'encrypting' ? 'Encrypting...' : 'Uploading...'}</span><span>{uploadProgress}%</span></div><div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden"><div className="bg-gkk-gold h-full transition-all duration-300" style={{ width: `${uploadProgress}%` }}></div></div></div>
                   )}
                 </div>
               )}
@@ -734,7 +743,7 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
               {uploadStatus !== 'success' && (
                 <>
                   <button onClick={handleCloseUpload} className="px-8 py-3 text-xs font-bold text-gray-400 uppercase tracking-widest">Cancel</button>
-                  <button onClick={handleUpload} disabled={!selectedFile || uploadStatus === 'uploading'} className="px-10 py-3 bg-gkk-navy text-white rounded-2xl font-bold uppercase tracking-widest text-xs shadow-xl disabled:opacity-20">{uploadStatus === 'uploading' ? '...' : 'Upload'}</button>
+                  <button onClick={handleUpload} disabled={!selectedFile || uploadStatus === 'uploading' || uploadStatus === 'encrypting'} className="px-10 py-3 bg-gkk-navy text-white rounded-2xl font-bold uppercase tracking-widest text-xs shadow-xl disabled:opacity-20">{(uploadStatus === 'uploading' || uploadStatus === 'encrypting') ? '...' : 'Upload'}</button>
                 </>
               )}
             </div>
