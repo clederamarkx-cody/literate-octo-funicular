@@ -51,8 +51,8 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate, isNominationPage = false })
     <>
       <nav
         className={`fixed w-full z-[110] transition-all duration-500 will-change-transform transform-gpu ${isScrolled || isNominationPage || isMobileMenuOpen
-            ? 'bg-gkk-navy/95 backdrop-blur-md shadow-2xl py-3'
-            : 'bg-transparent py-6'
+          ? 'bg-gkk-navy/95 backdrop-blur-md shadow-2xl py-3'
+          : 'bg-transparent py-6'
           }`}
         style={{ transform: 'translateZ(0)' }}
       >
@@ -87,9 +87,9 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate, isNominationPage = false })
                 <div className="h-6 w-px bg-white/10 mx-2"></div>
                 <button
                   onClick={() => onNavigate && onNavigate('hall-of-fame')}
-                  className="flex items-center px-4 py-2 text-gkk-gold hover:text-white font-bold uppercase tracking-widest text-[10px] transition-all border border-gkk-gold/30 rounded-lg hover:bg-gkk-gold/10 hover:border-gkk-gold"
+                  className="flex items-center px-5 py-2.5 text-gkk-gold hover:text-white font-bold uppercase tracking-widest text-xs transition-all border border-gkk-gold/40 rounded-lg hover:bg-gkk-gold/10 hover:border-gkk-gold"
                 >
-                  <Trophy size={14} className="mr-2" /> GKK Winners
+                  <Trophy size={16} className="mr-2" /> GKK Winners
                 </button>
                 <button
                   onClick={() => onNavigate && onNavigate('login')}
