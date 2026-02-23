@@ -116,8 +116,10 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
   ];
 
   // Consent & Validation
-  const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [agreedDataPrivacy, setAgreedDataPrivacy] = useState(false);
+  const [agreedAuthority, setAgreedAuthority] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
+  const [targetSubmitStage, setTargetSubmitStage] = useState<number | null>(null);
 
   // Preview State
   const [previewModalOpen, setPreviewModalOpen] = useState(false);
@@ -129,6 +131,7 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadStatus, setUploadStatus] = useState<'idle' | 'encrypting' | 'uploading' | 'success'>('idle');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploadRemarks, setUploadRemarks] = useState('');
 
   // Toast State
   const [toast, setToast] = useState<{ message: string, type: ToastType } | null>(null);
@@ -288,6 +291,7 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
     setUploadStatus('idle');
     setUploadProgress(0);
     setSelectedFile(null);
+    setUploadRemarks('');
     setIsUploadModalOpen(true);
   };
 
@@ -343,16 +347,17 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
       setUploadProgress(100);
       setUploadStatus('success');
 
-      const today = new Date().toLocaleDateString();
+      const today = new Date().toLocaleString();
       const updatedDoc: ApplicantDocument = {
         name: selectedFile.name,
         type: selectedFile.type,
         url: fileUrl,
         date: today,
-        slotId: selectedDocId || undefined
+        slotId: selectedDocId || undefined,
+        remarks: uploadRemarks
       };
 
-      setDocuments(prev => prev.map(doc => doc.id === selectedDocId ? { ...doc, status: 'uploaded', fileName: selectedFile.name, lastUpdated: today, previewUrl: fileUrl, type: selectedFile.type } : doc));
+      setDocuments(prev => prev.map(doc => doc.id === selectedDocId ? { ...doc, status: 'uploaded', fileName: selectedFile.name, lastUpdated: today, previewUrl: fileUrl, type: selectedFile.type, remarks: uploadRemarks } : doc));
 
       if (onDocumentUpload) onDocumentUpload(updatedDoc);
       setTimeout(() => handleCloseUpload(), 1500);
@@ -384,22 +389,26 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
     }
   };
 
-  const handleFinalSubmit = () => {
-    if (stage1Progress < 100) {
-      setToast({ message: "Incomplete Submission. Please upload all required documents.", type: 'warning' });
+  const handleStageSubmit = (stage: number) => {
+    const progress = getProgress(stage);
+    if (progress < 100) {
+      setToast({ message: `Incomplete Submission. Please upload all required documents for Stage ${stage}.`, type: 'warning' });
       return;
     }
+    setTargetSubmitStage(stage);
+    setAgreedDataPrivacy(false);
+    setAgreedAuthority(false);
     setShowTermsModal(true);
   };
 
   const handleConfirmSubmit = () => {
-    if (!agreedToTerms) {
-      setToast({ message: "Consent required. Please accept the Terms and Conditions.", type: 'error' });
+    if (!agreedDataPrivacy || !agreedAuthority) {
+      setToast({ message: "Consent required. Please accept both Terms and Conditions.", type: 'error' });
       return;
     }
-    setToast({ message: "Records successfully transmitted to GKK Archive.", type: 'success' });
+    setToast({ message: `Stage ${targetSubmitStage} records successfully transmitted.`, type: 'success' });
     setShowTermsModal(false);
-    if (onUpdateApplicant) {
+    if (onUpdateApplicant && targetSubmitStage === 3) {
       onUpdateApplicant({ status: 'completed' });
     }
   };
@@ -634,11 +643,20 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
                 </div>
 
                 <div id="documents-section" className="space-y-8">
-                  <div>
-                    <h3 className="text-2xl font-serif font-bold text-gkk-navy uppercase tracking-widest">Stage 1 Submission</h3>
-                    <p className="text-sm border-l-4 border-gkk-gold pl-3 py-1 font-bold italic mt-4 text-gkk-navy/80 bg-gold-50/50 inline-block pr-6">Each specific requirement must be uploaded as a single PDF file.</p>
+                  <div className="bg-white rounded-3xl border border-gray-200 p-8 shadow-sm">
+                    <div className="flex flex-col md:flex-row justify-between items-start mb-6 gap-4">
+                      <div>
+                        <h3 className="text-2xl font-serif font-bold text-gkk-navy uppercase tracking-widest">Stage 1</h3>
+                        <div className="mt-4 space-y-2">
+                          <p className="text-sm border-l-4 border-gkk-gold pl-3 py-1 font-bold italic text-gkk-navy/80 bg-gold-50/50">1. Each specific requirement must be uploaded as a single PDF file.</p>
+                          <p className="text-sm border-l-4 border-gkk-gold pl-3 py-1 font-bold italic text-gkk-navy/80 bg-gold-50/50">2. This stage focuses on the completeness of the submissions.</p>
+                          <p className="text-sm border-l-4 border-gkk-gold pl-3 py-1 font-bold italic text-gkk-navy/80 bg-gold-50/50">3. A remarks section must be included per file upload to capture feedback or reviewer notes.</p>
+                        </div>
+                      </div>
+                      <button onClick={() => handleStageSubmit(1)} disabled={stage1Progress < 100} className="flex items-center justify-center px-8 py-3 bg-gradient-to-r from-gkk-navy to-gkk-royalBlue text-white font-bold rounded-2xl shadow-xl hover:shadow-gkk-navy/40 hover:-translate-y-1 transition-all disabled:opacity-30 disabled:cursor-not-allowed group text-xs uppercase tracking-widest shrink-0"><Send size={16} className="mr-2 group-hover:translate-x-1 transition-transform" />Submit Stage 1</button>
+                    </div>
+                    <div className="space-y-4">{renderDocumentGrid(1)}</div>
                   </div>
-                  <div className="space-y-4">{renderDocumentGrid(1)}</div>
                   <div className="space-y-4">
                     <div id="round-2-lock" className={`rounded-3xl border transition-all duration-300 overflow-hidden ${applicantData?.round2Unlocked ? 'bg-white border-gray-200 shadow-xl' : 'bg-gray-50 border-gray-100 opacity-60'}`}>
                       <button onClick={() => applicantData?.round2Unlocked && setRound2Open(!round2Open)} disabled={!applicantData?.round2Unlocked} className={`w-full p-8 flex items-center justify-between group transition-colors ${applicantData?.round2Unlocked ? 'cursor-pointer hover:bg-blue-50/20' : 'cursor-not-allowed'}`}>
@@ -647,7 +665,10 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
                           <div className="text-left"><div className="flex items-center gap-3"><div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${applicantData?.round2Unlocked ? 'bg-gkk-navy text-white' : 'bg-gray-300 text-white'}`}>2</div><h4 className="font-bold text-gkk-navy text-xl leading-none">Stage 2 Submission</h4></div>
                             <p className="text-xs text-gray-500 mt-2 font-bold uppercase tracking-widest">{applicantData?.round2Unlocked ? 'Unlocked - Technical Board' : 'Locked'}</p>
                             {applicantData?.round2Unlocked && (
-                              <p className="text-[10px] border-l-2 border-blue-400 pl-2 py-0.5 font-bold italic mt-2 text-blue-800 bg-blue-50 inline-block pr-3">Each specific requirement must be uploaded as a single PDF file.</p>
+                              <div className="mt-4 space-y-2 max-w-lg">
+                                <p className="text-sm border-l-4 border-blue-400 pl-3 py-1 font-bold italic text-blue-800 bg-blue-50">1. This stage focuses on the correctness and consistency of data and validity.</p>
+                                <p className="text-sm border-l-4 border-blue-400 pl-3 py-1 font-bold italic text-blue-800 bg-blue-50">2. A remarks section must be included per file upload to capture feedback or reviewer notes.</p>
+                              </div>
                             )}
                           </div>
                         </div>
@@ -655,7 +676,12 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
                           <div className="flex items-center space-x-3 text-blue-600 bg-blue-50 px-5 py-2 rounded-2xl font-bold uppercase tracking-widest text-[10px] group-hover:bg-blue-600 group-hover:text-white transition-all"><span>{round2Open ? 'Hide' : 'Review'}</span>{round2Open ? <ChevronUp size={16} /> : <ChevronDown size={16} />}</div>
                         )}
                       </button>
-                      <div className={`transition-all duration-700 ease-in-out ${round2Open ? 'max-h-[2000px] border-t border-gray-100 p-8 bg-white' : 'max-h-0 overflow-hidden'}`}>{renderDocumentGrid(2)}</div>
+                      <div className={`transition-all duration-700 ease-in-out ${round2Open ? 'max-h-[2000px] border-t border-gray-100 p-8 bg-white' : 'max-h-0 overflow-hidden'}`}>
+                        <div className="flex justify-end mb-6">
+                          <button onClick={() => handleStageSubmit(2)} disabled={stage2Progress < 100} className="flex items-center justify-center px-8 py-3 bg-gradient-to-r from-blue-600 to-blue-500 text-white font-bold rounded-2xl shadow-xl hover:shadow-blue-500/40 hover:-translate-y-1 transition-all disabled:opacity-30 disabled:cursor-not-allowed group text-xs uppercase tracking-widest"><Send size={16} className="mr-2 group-hover:translate-x-1 transition-transform" />Submit Stage 2</button>
+                        </div>
+                        {renderDocumentGrid(2)}
+                      </div>
                     </div>
                   </div>
 
@@ -680,7 +706,11 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
                               {applicantData?.round3Unlocked ? 'Unlocked - National Board' : 'Locked - National Level'}
                             </p>
                             {applicantData?.round3Unlocked && (
-                              <p className="text-[10px] border-l-2 border-gkk-gold pl-2 py-0.5 font-bold italic mt-2 text-gkk-navy bg-gold-50 inline-block pr-3">Each specific requirement must be uploaded as a single PDF file.</p>
+                              <div className="mt-4 space-y-2 max-w-lg">
+                                <p className="text-sm border-l-4 border-gkk-gold pl-3 py-1 font-bold italic text-gkk-navy bg-gold-50">1. Only upload requirements that are for re-submission.</p>
+                                <p className="text-sm border-l-4 border-gkk-gold pl-3 py-1 font-bold italic text-gkk-navy bg-gold-50">2. Only PDF files are accepted as the required file type.</p>
+                                <p className="text-sm border-l-4 border-gkk-gold pl-3 py-1 font-bold italic text-gkk-navy bg-gold-50">3. A remarks section must be included per file upload to capture feedback or reviewer notes.</p>
+                              </div>
                             )}
                           </div>
                         </div>
@@ -692,29 +722,14 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
                         )}
                       </button>
                       <div className={`transition-all duration-700 ease-in-out ${round3Open && applicantData?.round3Unlocked ? 'max-h-[2000px] border-t border-gray-100 p-8 bg-white' : 'max-h-0 overflow-hidden'}`}>
+                        <div className="flex justify-end mb-6">
+                          <button onClick={() => handleStageSubmit(3)} disabled={stage3Progress < 100} className="flex items-center justify-center px-8 py-3 bg-gradient-to-r from-gkk-gold to-yellow-500 text-gkk-navy font-bold rounded-2xl shadow-xl hover:shadow-yellow-500/40 hover:-translate-y-1 transition-all disabled:opacity-30 disabled:cursor-not-allowed group text-xs uppercase tracking-widest"><Send size={16} className="mr-2 group-hover:translate-x-1 transition-transform" />Submit Stage 3</button>
+                        </div>
                         {renderDocumentGrid(3)}
                       </div>
                     </div>
                   </div>
-                  <div className="pt-10">
-                    <div className="bg-white rounded-3xl border border-gray-200 p-10 shadow-2xl relative overflow-hidden">
-                      <div className="relative z-10">
-                        <div className="flex items-start gap-6 mb-10">
-                          <div className="p-4 bg-amber-100 rounded-2xl text-amber-600 shadow-sm"><ShieldAlert size={32} /></div>
-                          <div className="flex-1">
-                            <h4 className="font-bold text-gkk-navy text-2xl mb-3 uppercase tracking-wider">Final Declaration</h4>
-                            <p className="text-xs text-gray-500 font-bold uppercase tracking-widest leading-relaxed">
-                              Proceeding with submission requires acknowledgment of the DOLE GKK Data Privacy and Authenticity terms.
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex flex-col lg:flex-row justify-between items-center gap-8 bg-gray-50/50 p-6 rounded-3xl border border-gray-100">
-                          <div className="flex items-center gap-4 text-xs text-gray-400 font-bold uppercase tracking-widest"><Clock size={18} className="text-gkk-gold" /><span>{stage1Progress === 100 ? 'Records Ready' : 'Pending Uploads'}</span></div>
-                          <button onClick={handleFinalSubmit} disabled={stage1Progress < 100} className="flex items-center justify-center px-12 py-5 bg-gradient-to-r from-gkk-navy to-gkk-royalBlue text-white font-bold rounded-2xl shadow-2xl hover:shadow-gkk-navy/40 hover:-translate-y-1 transition-all disabled:opacity-30 disabled:cursor-not-allowed min-w-[320px] group text-sm uppercase tracking-widest"><Send size={20} className="mr-3 group-hover:translate-x-1 transition-transform" />Submit</button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+
                 </div>
               </div>
             ) : (
@@ -743,7 +758,7 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
               ) : (
                 <div className="space-y-8">
                   <div className="relative group border-4 border-dashed border-gray-200 rounded-[35px] p-12 text-center hover:border-gkk-gold transition-all cursor-pointer">
-                    <input type="file" onChange={handleFileSelect} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" accept=".pdf,.png,.jpg" />
+                    <input type="file" onChange={handleFileSelect} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" accept={documents.find(d => d.id === selectedDocId)?.round === 3 ? ".pdf" : ".pdf,.png,.jpg"} />
                     <div className="space-y-4">
                       <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center mx-auto text-gray-400 group-hover:text-gkk-gold transition-colors"><Upload size={32} /></div>
                       <p className="text-sm font-bold text-gkk-navy uppercase tracking-widest">{selectedFile ? selectedFile.name : 'Select Artifact'}</p>
@@ -755,6 +770,18 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
                       <div className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl text-sm text-gkk-navy font-bold">
                         {selectedFile ? selectedFile.name : 'No file selected.'}
                       </div>
+
+                      {selectedFile && (
+                        <div className="mt-4 text-left">
+                          <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 block px-1">Reviewer Remarks (Optional)</label>
+                          <textarea
+                            value={uploadRemarks}
+                            onChange={(e) => setUploadRemarks(e.target.value)}
+                            placeholder="Add any notes here regarding this submission..."
+                            className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl text-sm text-gkk-navy font-medium focus:outline-none focus:ring-2 focus:ring-gkk-gold/50 resize-none h-24"
+                          />
+                        </div>
+                      )}
                     </div>
                   )}
                   {(uploadStatus === 'uploading' || uploadStatus === 'encrypting') && (
@@ -845,19 +872,33 @@ const ApplicantPortal: React.FC<ApplicantPortalProps> = ({ onLogout, onUnderDev,
             </div>
 
             <div className="p-8 border-t border-gray-100 bg-gray-50 flex flex-col gap-6 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.05)] z-10">
-              <label className="flex items-start gap-4 cursor-pointer group p-4 bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-all">
-                <div className="relative flex items-center shrink-0 mt-0.5">
-                  <input type="checkbox" checked={agreedToTerms} onChange={(e) => setAgreedToTerms(e.target.checked)} className="peer appearance-none w-7 h-7 border-2 border-gray-300 rounded-xl checked:bg-gkk-gold checked:border-gkk-gold focus:ring-4 focus:ring-gkk-gold/20 outline-none transition-all cursor-pointer shadow-inner" />
-                  <CheckCircle size={18} className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-gkk-navy opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity font-bold scale-50 peer-checked:scale-100 duration-300" />
-                </div>
-                <span className="text-sm font-bold text-gkk-navy uppercase tracking-widest leading-none mt-1 group-hover:text-gkk-gold transition-colors block">
-                  I have read and agree to the Terms and Conditions for document submission
-                </span>
-              </label>
+              <div className="space-y-4">
+                <label className="flex items-start gap-4 cursor-pointer group p-4 bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-all">
+                  <div className="relative flex items-center shrink-0 mt-0.5">
+                    <input type="checkbox" checked={agreedDataPrivacy} onChange={(e) => setAgreedDataPrivacy(e.target.checked)} className="peer appearance-none w-7 h-7 border-2 border-gray-300 rounded-xl checked:bg-gkk-gold checked:border-gkk-gold focus:ring-4 focus:ring-gkk-gold/20 outline-none transition-all cursor-pointer shadow-inner" />
+                    <CheckCircle size={18} className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-gkk-navy opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity font-bold scale-50 peer-checked:scale-100 duration-300" />
+                  </div>
+                  <span className="text-sm font-bold text-gkk-navy leading-tight mt-1 group-hover:text-gkk-gold transition-colors block">
+                    <strong className="block mb-1">Data Privacy Act Compliance</strong>
+                    I consent to the collection, processing, and storage of my organization's data strictly for the purposes of the GKK Awards evaluation in accordance with the Data Privacy Act of 2012.
+                  </span>
+                </label>
+
+                <label className="flex items-start gap-4 cursor-pointer group p-4 bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-all">
+                  <div className="relative flex items-center shrink-0 mt-0.5">
+                    <input type="checkbox" checked={agreedAuthority} onChange={(e) => setAgreedAuthority(e.target.checked)} className="peer appearance-none w-7 h-7 border-2 border-gray-300 rounded-xl checked:bg-gkk-gold checked:border-gkk-gold focus:ring-4 focus:ring-gkk-gold/20 outline-none transition-all cursor-pointer shadow-inner" />
+                    <CheckCircle size={18} className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-gkk-navy opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity font-bold scale-50 peer-checked:scale-100 duration-300" />
+                  </div>
+                  <span className="text-sm font-bold text-gkk-navy leading-tight mt-1 group-hover:text-gkk-gold transition-colors block">
+                    <strong className="block mb-1">Authority to Submit</strong>
+                    I certify that I am duly authorized by my organization to submit these documents and that all information provided is true, correct, and unaltered.
+                  </span>
+                </label>
+              </div>
 
               <div className="flex gap-4">
                 <button onClick={() => setShowTermsModal(false)} className="px-8 py-4 text-xs font-bold text-gray-500 uppercase tracking-widest bg-white border border-gray-200 hover:bg-gray-100 rounded-2xl transition-all w-40 text-center">Cancel</button>
-                <button onClick={handleConfirmSubmit} disabled={!agreedToTerms} className="flex-1 px-8 py-4 bg-gradient-to-r from-gkk-navy to-gkk-royalBlue text-white font-bold rounded-2xl shadow-xl hover:-translate-y-1 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0 transition-all text-sm uppercase tracking-widest flex items-center justify-center gap-3">
+                <button onClick={handleConfirmSubmit} disabled={!agreedDataPrivacy || !agreedAuthority} className="flex-1 px-8 py-4 bg-gradient-to-r from-gkk-navy to-gkk-royalBlue text-white font-bold rounded-2xl shadow-xl hover:-translate-y-1 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0 transition-all text-sm uppercase tracking-widest flex items-center justify-center gap-3">
                   <Send size={18} /> Confirm Submission
                 </button>
               </div>
