@@ -55,7 +55,7 @@ export const UserProfileTable: React.FC = () => {
         };
 
         return (
-            <span className={`px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest border ${styles[role]}`}>
+            <span className={`px-3 py-1 rounded-full text-[14.5px] font-semibold uppercase border ${styles[role]}`}>
                 {role.replace('_', ' ')}
             </span>
         );
@@ -69,7 +69,7 @@ export const UserProfileTable: React.FC = () => {
                         <Users className="text-gkk-gold" size={24} />
                         Staff Profile Directory
                     </h3>
-                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-2 px-1">
+                    <p className="text-[14.5px] text-gray-400 font-semibold mt-2 px-1">
                         Manage all registered staff accounts and permissions.
                     </p>
                 </div>
@@ -82,14 +82,14 @@ export const UserProfileTable: React.FC = () => {
                             placeholder="Find staff..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="pl-10 pr-4 py-3 bg-white border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-gkk-gold/5 focus:border-gkk-gold transition-all font-bold text-xs w-full sm:w-64 shadow-sm"
+                            className="pl-10 pr-4 py-3 bg-white border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-gkk-gold/5 focus:border-gkk-gold transition-all font-semibold text-[14.5px] w-full sm:w-64 shadow-sm"
                         />
                     </div>
 
                     <select
                         value={roleFilter}
                         onChange={(e) => setRoleFilter(e.target.value as any)}
-                        className="px-4 py-3 bg-white border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-gkk-gold/5 focus:border-gkk-gold transition-all font-bold text-xs shadow-sm appearance-none min-w-[140px]"
+                        className="px-4 py-3 bg-white border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-gkk-gold/5 focus:border-gkk-gold transition-all font-semibold text-[14.5px] shadow-sm appearance-none min-w-[140px]"
                     >
                         <option value="all">All Roles</option>
                         <option value="admin">Admin</option>
@@ -104,12 +104,12 @@ export const UserProfileTable: React.FC = () => {
                 <table className="w-full text-left border-collapse min-w-[900px]">
                     <thead>
                         <tr className="bg-gray-50/50 border-b border-gray-100">
-                            <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Team Member</th>
-                            <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Credentials</th>
-                            <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Assignment</th>
-                            <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Role</th>
-                            <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Status</th>
-                            <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Joined</th>
+                            <th className="px-8 py-5 text-[14.5px] font-semibold text-gray-400 uppercase tracking-wide">Team Member</th>
+                            <th className="px-8 py-5 text-[14.5px] font-semibold text-gray-400 uppercase tracking-wide">Credentials</th>
+                            <th className="px-8 py-5 text-[14.5px] font-semibold text-gray-400 uppercase tracking-wide">Assignment</th>
+                            <th className="px-8 py-5 text-[14.5px] font-semibold text-gray-400 uppercase tracking-wide">Role</th>
+                            <th className="px-8 py-5 text-[14.5px] font-semibold text-gray-400 uppercase tracking-wide">Status</th>
+                            <th className="px-8 py-5 text-[14.5px] font-semibold text-gray-400 uppercase tracking-wide text-right">Joined</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-50">
@@ -118,13 +118,13 @@ export const UserProfileTable: React.FC = () => {
                                 <td colSpan={6} className="py-20 text-center">
                                     <div className="flex flex-col items-center gap-3">
                                         <Loader2 className="animate-spin text-gkk-gold" size={32} />
-                                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em]">Synchronizing Directory...</p>
+                                        <p className="text-[14.5px] font-semibold text-gray-400 uppercase">Synchronizing Directory...</p>
                                     </div>
                                 </td>
                             </tr>
                         ) : filteredUsers.length === 0 ? (
                             <tr>
-                                <td colSpan={6} className="py-20 text-center text-gray-400 font-bold uppercase tracking-widest text-xs italic opacity-60">
+                                <td colSpan={6} className="py-20 text-center text-gray-400 font-semibold uppercase text-[14.5px]">
                                     No staff profiles match your criteria.
                                 </td>
                             </tr>
@@ -137,18 +137,18 @@ export const UserProfileTable: React.FC = () => {
                                                 {(user.name || user.email).charAt(0).toUpperCase()}
                                             </div>
                                             <div>
-                                                <p className="font-bold text-gkk-navy text-sm uppercase tracking-tight leading-none group-hover:translate-x-1 transition-transform">
+                                                <p className="font-semibold text-gkk-navy text-[14.5px] uppercase leading-none group-hover:translate-x-1 transition-transform">
                                                     {user.name || 'Anonymous User'}
                                                 </p>
                                                 <div className="flex items-center gap-2 mt-2">
-                                                    <span className="text-[9px] font-medium text-gray-400">ID: {user.userId.slice(0, 8)}...</span>
+                                                    <span className="text-[14.5px] font-medium text-gray-400">ID: {user.userId.slice(0, 8)}...</span>
                                                 </div>
                                             </div>
                                         </div>
                                     </td>
                                     <td className="px-8 py-6">
                                         <div className="space-y-1">
-                                            <div className="flex items-center gap-2 text-xs font-medium text-gray-600">
+                                            <div className="flex items-center gap-2 text-[14.5px] font-semibold text-gray-600">
                                                 <Mail size={12} className="text-gray-300" />
                                                 {user.email}
                                             </div>
@@ -157,7 +157,7 @@ export const UserProfileTable: React.FC = () => {
                                     <td className="px-8 py-6">
                                         <div className="flex items-center gap-2">
                                             <MapPin size={12} className="text-gkk-gold" />
-                                            <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+                                            <span className="text-[14.5px] font-semibold text-gray-500 uppercase">
                                                 {user.region || 'National HQ'}
                                             </span>
                                         </div>
@@ -168,14 +168,14 @@ export const UserProfileTable: React.FC = () => {
                                     <td className="px-8 py-6">
                                         <div className="flex items-center gap-2">
                                             <div className={`w-1.5 h-1.5 rounded-full ${user.status === 'active' ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.4)]' : 'bg-amber-500'}`} />
-                                            <span className="text-[10px] font-black text-gray-500 uppercase tracking-[0.1em]">
+                                            <span className="text-[14.5px] font-semibold text-gray-500 uppercase">
                                                 {user.status || 'Active'}
                                             </span>
                                         </div>
                                     </td>
                                     <td className="px-8 py-6 text-right">
                                         <div className="flex flex-col items-end gap-1">
-                                            <div className="flex items-center gap-1.5 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                                            <div className="flex items-center gap-1.5 text-[14.5px] font-semibold text-gray-400 uppercase">
                                                 <Clock size={10} />
                                                 {user.createdAt ? new Date(user.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '---'}
                                             </div>
@@ -189,13 +189,13 @@ export const UserProfileTable: React.FC = () => {
             </div>
 
             <div className="px-8 py-5 bg-gray-50/80 border-t border-gray-100 flex justify-between items-center">
-                <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em]">
+                <p className="text-[14.5px] font-semibold text-gray-400 uppercase">
                     Showing {filteredUsers.length} of {users.length} registered personnel
                 </p>
                 <div className="flex gap-2">
                     <button
                         onClick={fetchUsers}
-                        className="px-4 py-2 bg-white border border-gray-200 rounded-xl text-[9px] font-bold text-gray-500 hover:text-gkk-navy hover:border-gkk-navy transition-all uppercase tracking-widest shadow-sm"
+                        className="px-4 py-2 bg-white border border-gray-200 rounded-xl text-[14.5px] font-semibold text-gray-500 hover:text-gkk-navy hover:border-gkk-navy transition-all uppercase shadow-sm"
                     >
                         Force Refresh
                     </button>

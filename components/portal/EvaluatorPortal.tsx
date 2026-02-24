@@ -540,18 +540,18 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
         <div className="bg-white rounded-[40px] border border-gray-200 shadow-sm overflow-hidden flex flex-col w-full">
           <div className="p-8 border-b border-gray-100 bg-gray-50/30">
             <h3 className="font-serif font-bold text-xl text-gkk-navy uppercase tracking-wider">GKK Access Key Generator</h3>
-            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-2">Generate invitation keys for new nominees and staff.</p>
+            <p className="text-[14.5px] text-gray-400 font-semibold mt-2">Generate invitation keys for new nominees and staff.</p>
           </div>
           <form onSubmit={handleIssueKey} className="p-8 space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
-                <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Establishment Name</label>
+                <label className="block text-[14.5px] font-semibold text-gray-400 uppercase tracking-wide mb-2 ml-1">Establishment Name</label>
                 <input
                   type="text"
                   required
                   value={newKeyData.companyName}
                   onChange={(e) => setNewKeyData({ ...newKeyData, companyName: e.target.value })}
-                  className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-gkk-gold/5 focus:border-gkk-gold outline-none transition-all font-bold text-sm tracking-tight"
+                  className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-gkk-gold/5 focus:border-gkk-gold outline-none transition-all font-semibold text-[14.5px]"
                   placeholder="e.g. Acme Corp Philippines"
                 />
               </div>
@@ -583,7 +583,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                 <select
                   value={newKeyData.role}
                   onChange={(e) => setNewKeyData({ ...newKeyData, role: e.target.value })}
-                  className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-gkk-gold/5 focus:border-gkk-gold outline-none transition-all font-bold text-sm tracking-tight appearance-none"
+                  className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-gkk-gold/5 focus:border-gkk-gold outline-none transition-all font-semibold text-[14.5px] appearance-none"
                 >
                   <option value="nominee">Nominee</option>
                   <option value="reu">REU (Regional Extension Unit)</option>
@@ -622,7 +622,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
               ) : (
                 <div className="flex items-end pb-1">
                   <div className="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 flex items-center justify-center">
-                    <p className="text-[9px] text-gray-400 font-bold uppercase tracking-[0.2em]">Sector selection only for Nominees</p>
+                    <p className="text-[14.5px] text-gray-400 font-semibold">Sector selection only for Nominees</p>
                   </div>
                 </div>
               )}
@@ -631,7 +631,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
             <div className="flex justify-end pt-2">
               <button
                 disabled={isIssuingKey}
-                className="px-12 py-4 bg-gkk-navy text-white font-bold rounded-2xl shadow-xl shadow-gkk-navy/20 hover:bg-gkk-royalBlue transition-all uppercase tracking-widest text-[10px] disabled:opacity-50"
+                className="px-12 py-4 bg-gkk-navy text-white font-semibold rounded-2xl shadow-xl shadow-gkk-navy/20 hover:bg-gkk-royalBlue transition-all uppercase tracking-wider text-[14.5px] disabled:opacity-50"
               >
                 {isIssuingKey ? 'Generating...' : 'Issue GKK Access Key'}
               </button>
@@ -644,57 +644,57 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
       <div className="bg-white rounded-[40px] border border-gray-200 shadow-sm overflow-hidden">
         <div className="p-8 border-b border-gray-100 bg-gray-50/30 flex justify-between items-center">
           <h3 className="font-serif font-bold text-xl text-gkk-navy uppercase tracking-wider">Access Key Log</h3>
-          <span className="text-[10px] bg-blue-50 text-blue-600 px-3 py-1 rounded-full font-bold uppercase tracking-widest">{allKeys.length} Total Keys</span>
+          <span className="text-[14.5px] bg-blue-50 text-blue-600 px-3 py-1 rounded-full font-semibold uppercase tracking-wide">{allKeys.length} Total Keys</span>
         </div>
         <div className="overflow-x-auto max-h-[600px]">
           <table className="w-full text-left border-collapse min-w-[1000px]">
             <thead>
               <tr className="bg-gray-50/50 border-b border-gray-100">
-                <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest">Pass Key</th>
-                <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest">Establishment / User</th>
-                <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest">Email</th>
-                <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest">Role</th>
-                <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest">Region</th>
-                <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest">Category</th>
-                <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest">Status</th>
-                <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest text-right">Issued</th>
+                <th className="px-6 py-4 text-[14.5px] font-semibold text-gray-400 uppercase tracking-wide">Pass Key</th>
+                <th className="px-6 py-4 text-[14.5px] font-semibold text-gray-400 uppercase tracking-wide">Establishment / User</th>
+                <th className="px-6 py-4 text-[14.5px] font-semibold text-gray-400 uppercase tracking-wide">Email</th>
+                <th className="px-6 py-4 text-[14.5px] font-semibold text-gray-400 uppercase tracking-wide">Role</th>
+                <th className="px-6 py-4 text-[14.5px] font-semibold text-gray-400 uppercase tracking-wide">Region</th>
+                <th className="px-6 py-4 text-[14.5px] font-semibold text-gray-400 uppercase tracking-wide">Category</th>
+                <th className="px-6 py-4 text-[14.5px] font-semibold text-gray-400 uppercase tracking-wide">Status</th>
+                <th className="px-6 py-4 text-[14.5px] font-semibold text-gray-400 uppercase tracking-wide text-right">Issued</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
               {allKeys.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="p-10 text-center text-gray-400 font-semibold uppercase tracking-widest text-xs">No keys issued yet.</td>
+                  <td colSpan={8} className="p-10 text-center text-gray-400 font-semibold uppercase tracking-wide text-[14.5px]">No keys issued yet.</td>
                 </tr>
               ) : (
                 allKeys.sort((a: any, b: any) => new Date(b.created_at || b.issuedAt).getTime() - new Date(a.created_at || a.issuedAt).getTime()).map((key: any) => (
                   <tr key={key.key_id || key.keyId} className="group hover:bg-gray-50/50 transition-colors">
                     <td className="px-6 py-4">
-                      <span className="text-xs font-semibold text-gkk-navy uppercase tracking-wide select-all">{key.key_id || key.keyId}</span>
+                      <span className="text-[14.5px] font-semibold text-gkk-navy uppercase tracking-wide select-all">{key.key_id || key.keyId}</span>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="text-xs text-gkk-navy font-semibold uppercase">{key.name || '---'}</span>
+                      <span className="text-[14.5px] text-gkk-navy font-semibold uppercase">{key.name || '---'}</span>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="text-xs text-gray-500 font-semibold">{key.email || '---'}</span>
+                      <span className="text-[14.5px] text-gray-500 font-semibold">{key.email || '---'}</span>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="px-2 py-0.5 rounded-md bg-gray-100 text-gray-500 text-xs font-semibold uppercase">
+                      <span className="px-2 py-0.5 rounded-md bg-gray-100 text-gray-500 text-[14.5px] font-semibold uppercase">
                         {key.role.replace('_', ' ')}
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="text-xs text-gray-500 font-semibold uppercase">{key.region}</span>
+                      <span className="text-[14.5px] text-gray-500 font-semibold uppercase">{key.region}</span>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="text-xs text-gray-500 font-semibold uppercase">{key.category || 'N/A'}</span>
+                      <span className="text-[14.5px] text-gray-500 font-semibold uppercase">{key.category || 'N/A'}</span>
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`px-2 py-0.5 rounded-full text-xs font-semibold uppercase border ${key.status === 'activated' ? 'bg-green-50 text-green-600 border-green-100' : 'bg-amber-50 text-amber-600 border-amber-100'}`}>
+                      <span className={`px-2 py-0.5 rounded-full text-[14.5px] font-semibold uppercase border ${key.status === 'activated' ? 'bg-green-50 text-green-600 border-green-100' : 'bg-amber-50 text-amber-600 border-amber-100'}`}>
                         {key.status}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <span className="text-xs text-gray-400 font-semibold uppercase">{new Date(key.created_at || key.issuedAt).toLocaleDateString()}</span>
+                      <span className="text-[14.5px] text-gray-400 font-semibold uppercase">{new Date(key.created_at || key.issuedAt).toLocaleDateString()}</span>
                     </td>
                   </tr>
                 ))
