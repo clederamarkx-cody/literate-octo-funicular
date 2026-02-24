@@ -358,10 +358,10 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
     if (isCancelledRef.current) return;
 
     setUploadStatus('uploading');
-    setUploadProgress(0);
+    setUploadProgress(1); // Show we moved past encryption
+    console.log("[UI TRACE] Phase Change: Real Storage Upload Initiated");
 
     try {
-      setUploadProgress(1); // Give an initial tiny boost so it's not sitting at 0%
       const fileUrl = await uploadNomineeFile(
         nomineeData.id,
         selectedDocId || 'unknown_slot',

@@ -20,13 +20,25 @@ export const SYSTEM_LOGS_COLLECTION = 'system_logs';
  * Required for secure storage operations.
  */
 export const ensureFirebaseAuth = async () => {
-    if (auth.currentUser) return auth.currentUser;
+    if (auth.currentUser) {
+        console.log("[AUTH TRACE] User already present:", auth.currentUser.uid);
+        return auth.currentUser;
+    }
+
+    console.log("[AUTH TRACE] No user found, signing in anonymously...");
+
+    // 10-second Auth Timeout
+    const authPromise = signInAnonymously(auth);
+    const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("Authentication handshake timed out (10s). Please check your internet connection.")), 10000)
+    );
+
     try {
-        const result = await signInAnonymously(auth);
-        console.log("Silent Anonymous Auth Success", result.user.uid);
+        const result = (await Promise.race([authPromise, timeoutPromise])) as any;
+        console.log("[AUTH TRACE] Silent Anonymous Auth Success:", result.user.uid);
         return result.user;
     } catch (e) {
-        console.error("Silent Anonymous Auth Failed", e);
+        console.error("[AUTH TRACE] Silent Anonymous Auth Failed:", e);
         throw e;
     }
 };
