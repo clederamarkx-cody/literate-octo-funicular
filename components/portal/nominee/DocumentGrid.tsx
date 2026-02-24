@@ -48,13 +48,7 @@ const DocumentGrid: React.FC<DocumentGridProps> = ({
 }) => {
     // Keep track of which categories are expanded. By default, maybe expand the first one that has documents.
     // Default all categories to open for better visibility of the 35+ items
-    const [openCategories, setOpenCategories] = useState<Record<string, boolean>>(() => {
-        const initialState: Record<string, boolean> = {};
-        docCategories.forEach(cat => {
-            initialState[cat.id] = true;
-        });
-        return initialState;
-    });
+    const [openCategories, setOpenCategories] = useState<Record<string, boolean>>({});
 
     const toggleCategory = (catId: string) => {
         setOpenCategories(prev => ({
