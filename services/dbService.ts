@@ -245,28 +245,7 @@ export const getUserRole = async (uid: string): Promise<UserRole | null> => {
     return null;
 };
 
-/**
- * Updates the evaluation verdict for a specific stage
- */
-export const updateStageVerdict = async (nomineeId: string, stage: 1 | 2 | 3, verdict: 'Pass' | 'Fail') => {
-    try {
-        const appRef = doc(db, APPLICATIONS_COLLECTION, nomineeId);
-        const updateData: Partial<Nominee> = {};
 
-        switch (stage) {
-            case 1: updateData.stage1Verdict = verdict; break;
-            case 2: updateData.stage2Verdict = verdict; break;
-            case 3: updateData.stage3Verdict = verdict; break;
-        }
-
-        await updateDoc(appRef, updateData);
-        await logAction('SUBMIT_VERDICT', `Stage ${stage} marked as ${verdict.toUpperCase()}`, nomineeId);
-        return true;
-    } catch (error) {
-        console.error(`Error updating stage ${stage} verdict:`, error);
-        return false;
-    }
-};
 
 /**
  * Finds a user by email across the unified Users collection

@@ -41,7 +41,7 @@ import {
   Upload
 } from 'lucide-react';
 import { Nominee, NomineeDocument, UserRole } from '../../types';
-import { getAllNominees, updateStageVerdict, resolveFileUrl, updateDocumentEvaluation, getRequirementsByCategory } from '../../services/dbService';
+import { getAllNominees, resolveFileUrl, updateDocumentEvaluation, getRequirementsByCategory } from '../../services/dbService';
 
 interface EvaluatorPortalProps {
   onLogout: () => void;
@@ -124,20 +124,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
     setRound2Open(false);
   };
 
-  const handleVerdictUpdate = async (stage: 1 | 2 | 3, verdict: 'Pass' | 'Fail') => {
-    if (!selectedNominee) return;
 
-    const success = await updateStageVerdict(selectedNominee.id, stage, verdict);
-    if (success) {
-      const updatedApplicant = { ...selectedNominee };
-      if (stage === 1) updatedApplicant.stage1Verdict = verdict;
-      if (stage === 2) updatedApplicant.stage2Verdict = verdict;
-      if (stage === 3) updatedApplicant.stage3Verdict = verdict;
-
-      setSelectedNominee(updatedApplicant);
-      setLocalNominees(prev => prev.map(a => a.id === updatedApplicant.id ? updatedApplicant : a));
-    }
-  };
 
   const handleBackToList = () => {
     setSelectedNominee(null);
@@ -420,48 +407,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
           </div>
           <div className="space-y-4">{renderDocumentGrid(1)}</div>
 
-          {userRole === 'reu' && (
-            <div className="bg-white rounded-[30px] p-8 border border-gkk-navy/10 shadow-xl flex items-center justify-between">
-              <div>
-                <h4 className="font-bold text-gkk-navy text-lg uppercase">REU Verification</h4>
-                <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mt-1">Mark this profile as passed for Regional review.</p>
-              </div>
-              <button
-                onClick={() => {
-                  const updated = { ...selectedNominee, stage1PassedByReu: true };
-                  setSelectedNominee(updated);
-                  setLocalNominees(prev => prev.map(a => a.id === updated.id ? updated : a));
-                }}
-                className={`px-10 py-4 rounded-2xl font-bold uppercase tracking-widest text-xs transition-all shadow-lg ${selectedNominee.stage1PassedByReu ? 'bg-green-100 text-green-600 cursor-default' : (selectedNominee.region === 'NCR' ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-gkk-gold text-gkk-navy hover:bg-gkk-navy hover:text-white')}`}
-                disabled={selectedNominee.stage1PassedByReu || selectedNominee.region === 'NCR'}
-              >
-                {selectedNominee.stage1PassedByReu ? 'Passed' : (selectedNominee.region === 'NCR' ? 'NCR Restriction' : 'Mark as Passed')}
-              </button>
-            </div>
-          )}
 
-          {(userRole === 'admin' || userRole === 'scd_team_leader') && (
-            <div className="bg-white rounded-[30px] p-8 border border-gkk-navy/10 shadow-xl flex items-center justify-between mt-4">
-              <div>
-                <h4 className="font-bold text-gkk-navy text-lg uppercase">Stage 1 Verdict</h4>
-                <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mt-1">Final decision for Regional compliance.</p>
-              </div>
-              <div className="flex items-center gap-4">
-                <button
-                  onClick={() => handleVerdictUpdate(1, 'Pass')}
-                  className={`px-8 py-4 font-bold rounded-2xl transition-all text-[10px] uppercase tracking-widest flex items-center gap-2 shadow-lg ${selectedNominee.stage1Verdict === 'Pass' ? 'bg-green-600 text-white shadow-green-600/20' : 'bg-gray-100 text-gray-400 hover:bg-green-50 hover:text-green-600'}`}
-                >
-                  <ThumbsUp size={16} /> Pass
-                </button>
-                <button
-                  onClick={() => handleVerdictUpdate(1, 'Fail')}
-                  className={`px-8 py-4 font-bold rounded-2xl transition-all text-[10px] uppercase tracking-widest flex items-center gap-2 shadow-lg ${selectedNominee.stage1Verdict === 'Fail' ? 'bg-red-600 text-white shadow-red-600/20' : 'bg-gray-100 text-gray-400 hover:bg-red-50 hover:text-red-600'}`}
-                >
-                  <ThumbsDown size={16} /> Fail
-                </button>
-              </div>
-            </div>
-          )}
 
           {userRole !== 'reu' && (
             <>
@@ -492,23 +438,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                         }} className={`px-10 py-4 rounded-[20px] font-bold transition-all shadow-xl text-[10px] tracking-widest uppercase ${selectedNominee.round2Unlocked ? 'bg-red-50 text-red-600 border border-red-100 hover:bg-red-100' : 'bg-gkk-gold text-gkk-navy hover:bg-gkk-navy hover:text-white'}`}>{selectedNominee.round2Unlocked ? 'Deactivate Stage 2' : 'Activate Stage 2'}</button>
                       )}
 
-                      {(userRole === 'admin' || userRole === 'scd_team_leader') && (
-                        <div className="flex items-center gap-2 border-l border-gray-200 pl-4 ml-2">
-                          <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mr-2">Verdict:</p>
-                          <button
-                            onClick={() => handleVerdictUpdate(2, 'Pass')}
-                            className={`px-6 py-3 font-bold rounded-2xl transition-all text-[10px] uppercase tracking-widest flex items-center gap-2 ${selectedNominee.stage2Verdict === 'Pass' ? 'bg-green-600 text-white shadow-lg shadow-green-600/20' : 'bg-gray-100 text-gray-400 hover:bg-green-50 hover:text-green-600'}`}
-                          >
-                            <ThumbsUp size={14} /> Pass
-                          </button>
-                          <button
-                            onClick={() => handleVerdictUpdate(2, 'Fail')}
-                            className={`px-6 py-3 font-bold rounded-2xl transition-all text-[10px] uppercase tracking-widest flex items-center gap-2 ${selectedNominee.stage2Verdict === 'Fail' ? 'bg-red-600 text-white shadow-lg shadow-red-600/20' : 'bg-gray-100 text-gray-400 hover:bg-red-50 hover:text-red-600'}`}
-                          >
-                            <ThumbsDown size={14} /> Fail
-                          </button>
-                        </div>
-                      )}
+
                     </div>
                   </div>
                   {(selectedNominee.round2Unlocked || ['admin', 'scd', 'evaluator'].includes(userRole || '')) && (
@@ -547,23 +477,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                         }} className={`px-10 py-4 rounded-[20px] font-bold transition-all shadow-xl text-[10px] tracking-widest uppercase ${selectedNominee.round3Unlocked ? 'bg-red-50 text-red-600 border border-red-100 hover:bg-red-100' : 'bg-gkk-navy text-white hover:bg-gkk-royalBlue'}`}>{selectedNominee.round3Unlocked ? 'Deactivate Stage 3' : 'Activate Stage 3'}</button>
                       )}
 
-                      {(userRole === 'admin' || userRole === 'scd_team_leader') && (
-                        <div className="flex items-center gap-2 border-l border-gray-200 pl-4 ml-2">
-                          <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mr-2">Verdict:</p>
-                          <button
-                            onClick={() => handleVerdictUpdate(3, 'Pass')}
-                            className={`px-6 py-3 font-bold rounded-2xl transition-all text-[10px] uppercase tracking-widest flex items-center gap-2 ${selectedNominee.stage3Verdict === 'Pass' ? 'bg-green-600 text-white shadow-lg shadow-green-600/20' : 'bg-gray-100 text-gray-400 hover:bg-green-50 hover:text-green-600'}`}
-                          >
-                            <ThumbsUp size={14} /> Pass
-                          </button>
-                          <button
-                            onClick={() => handleVerdictUpdate(3, 'Fail')}
-                            className={`px-6 py-3 font-bold rounded-2xl transition-all text-[10px] uppercase tracking-widest flex items-center gap-2 ${selectedNominee.stage3Verdict === 'Fail' ? 'bg-red-600 text-white shadow-lg shadow-red-600/20' : 'bg-gray-100 text-gray-400 hover:bg-red-50 hover:text-red-600'}`}
-                          >
-                            <ThumbsDown size={14} /> Fail
-                          </button>
-                        </div>
-                      )}
+
                     </div>
                   </div>
                   {(selectedNominee.round3Unlocked || userRole === 'admin' || userRole === 'scd_team_leader') && (
