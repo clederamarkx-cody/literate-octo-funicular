@@ -207,40 +207,74 @@ export const uploadNomineeFile = async (
     onProgress?: (progress: number) => void,
     cancelToken?: { cancel?: () => void }
 ): Promise<string> => {
-    // 1. Ensure Auth Session before starting upload
-    await ensureFirebaseAuth();
+    // 1. Trace Auth State
+    console.log("[STORAGE TRACE] Checking Auth...");
+    const user = await ensureFirebaseAuth();
+    console.log("[STORAGE TRACE] Auth User:", user?.uid || 'NONE', "isAnonymous:", user?.isAnonymous);
 
     const fileUid = `${uid}_${documentId}_${Date.now()}`;
-    const storageRef = ref(storage, `nominee_docs/${uid}/${fileUid}_${file.name}`);
+    const storagePath = `nominee_docs/${uid}/${fileUid}_${file.name}`;
+    console.log("[STORAGE TRACE] Starting upload to:", storagePath, "Size:", (file.size / 1024).toFixed(2), "KB");
+
+    const storageRef = ref(storage, storagePath);
     const uploadTask = uploadBytesResumable(storageRef, file);
 
     if (cancelToken) {
-        cancelToken.cancel = () => uploadTask.cancel();
+        cancelToken.cancel = () => {
+            console.log("[STORAGE TRACE] Manual Cancellation Triggered");
+            uploadTask.cancel();
+        };
     }
 
     return new Promise((resolve, reject) => {
+        let lastBytes = 0;
+        let lastActiveTime = Date.now();
+
+        // 15-second "No Progress" Timeout
+        const timeoutInterval = setInterval(() => {
+            if (Date.now() - lastActiveTime > 15000) {
+                console.error("[STORAGE TRACE] TIMEOUT: No progress for 15s");
+                clearInterval(timeoutInterval);
+                uploadTask.cancel();
+                reject(new Error("Upload timed out. Please check your network or Firebase Authentication status."));
+            }
+        }, 5000);
+
         uploadTask.on('state_changed',
             (snapshot) => {
-                const progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+                const currentBytes = snapshot.bytesTransferred;
+                if (currentBytes > lastBytes) {
+                    lastBytes = currentBytes;
+                    lastActiveTime = Date.now(); // Reset timeout on actual progress
+                }
+
+                const progress = Math.round((currentBytes / snapshot.totalBytes) * 100);
+                console.log(`[STORAGE TRACE] Progress: ${progress}% (${currentBytes}/${snapshot.totalBytes} bytes) - State: ${snapshot.state}`);
+
                 if (onProgress) onProgress(progress);
             },
             (error: any) => {
-                console.error("Firebase Storage Error:", error.code, error.message);
-                // Provide more actionable error messages
+                clearInterval(timeoutInterval);
+                console.error("[STORAGE TRACE] FATAL ERROR:", error.code, error.message);
+
                 let userFriendlyError = error.message;
                 if (error.code === 'storage/unauthorized') {
-                    userFriendlyError = "Permission denied. Please ensure Anonymous Auth is enabled in Firebase.";
-                } else if (error.code === 'storage/canceled') {
-                    userFriendlyError = "Upload cancelled by user";
+                    userFriendlyError = "Unauthenticated. Please ensure Anonymous Auth is enabled in the Firebase Console.";
+                } else if (error.code === 'storage/canceled' && (Date.now() - lastActiveTime > 15000)) {
+                    userFriendlyError = "Upload connection stalled and was timed out.";
                 }
 
                 reject(new Error(userFriendlyError));
             },
             async () => {
+                clearInterval(timeoutInterval);
+                console.log("[STORAGE TRACE] Upload Complete! Fetching URL...");
                 try {
                     const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+                    console.log("[STORAGE TRACE] Download URL retrieved.");
                     resolve(downloadURL);
                 } catch (e) {
+                    console.error("[STORAGE TRACE] URL Resolution Error:", e);
                     reject(e);
                 }
             }

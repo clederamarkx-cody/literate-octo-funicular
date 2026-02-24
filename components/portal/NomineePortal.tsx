@@ -367,8 +367,10 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
         selectedDocId || 'unknown_slot',
         selectedFile,
         (progress) => {
-          // Normalize to [10, 99] range during the upload phase so it never resets to 0
-          const displayProgress = Math.max(10, Math.min(99, progress));
+          // Deep logging in portal as well
+          console.log(`[UI TRACE] Upload Progress Hook: ${progress}%`);
+          // Start at 5% and head towards 95% during the stream
+          const displayProgress = Math.max(5, Math.min(95, progress));
           setUploadProgress(displayProgress);
         },
         cancelTokenRef.current
