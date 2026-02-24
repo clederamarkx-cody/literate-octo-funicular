@@ -465,6 +465,9 @@ export const activateAccessKey = async (
 
         const role = (key.role as UserRole) || 'nominee';
 
+        // CRITICAL: Use the user_id pre-allocated during key issuance
+        const targetUid = key.user_id || uid;
+
         // 1. Update User Profile to 'active'
         const profileUpdates: any = {
             email: details.email,
@@ -474,14 +477,14 @@ export const activateAccessKey = async (
             region: key.region
         };
 
-        const profileUpdated = await updateUserProfile(uid, profileUpdates);
+        const profileUpdated = await updateUserProfile(targetUid, profileUpdates);
         if (!profileUpdated) return false;
 
         // 2. Specific setup for Nominees
         if (role === 'nominee') {
             const finalCategory = key.category || details.category || 'Industry';
             const { error: appError } = await supabase.from(APPLICATIONS_COLLECTION).upsert({
-                id: uid,
+                id: targetUid,
                 reg_id: normalizedKey,
                 name: details.companyName,
                 email: details.email,
@@ -503,7 +506,7 @@ export const activateAccessKey = async (
             .from(ACCESS_KEYS_COLLECTION)
             .update({
                 status: 'activated',
-                user_id: uid,
+                user_id: targetUid,
                 activated_at: new Date().toISOString()
             })
             .eq('key_id', normalizedKey);
@@ -536,9 +539,33 @@ export const verifyAccessKey = async (passKey: string) => {
 
 export const issueAccessKey = async (data: { companyName: string, email: string, region: string, role?: string, category?: string }): Promise<string> => {
     const random = Math.floor(1000 + Math.random() * 9000).toString();
-    // Generate a temporary ID if we don't have one, though activation usually provides the real UID.
-    // However, to show in the table immediately, we need a record.
-    const tempUserId = crypto.randomUUID();
+
+    // Check if user already exists to avoid unique constraint violations
+    const existingUser = await getUserByEmail(data.email);
+    let targetUserId = existingUser?.uid;
+
+    if (!targetUserId) {
+        // Only generate new if not found
+        targetUserId = crypto.randomUUID();
+
+        // 1. Pre-create User Profile in 'pending' status
+        const { error: userError } = await supabase.from(USERS_COLLECTION).insert({
+            user_id: targetUserId,
+            email: data.email,
+            role: data.role || 'nominee',
+            status: 'pending',
+            name: data.companyName,
+            region: data.region
+        });
+
+        if (userError) {
+            console.error("Pre-creating user profile failed:", userError);
+            // If it failed because of race condition, try fetching again
+            const doubleCheck = await getUserByEmail(data.email);
+            if (doubleCheck) targetUserId = doubleCheck.uid;
+            else return ''; // Stop if we can't get a valid UID
+        }
+    }
 
     // Generate abbreviation from company name
     const words = data.companyName.trim().split(/[\s-]+/);
@@ -552,22 +579,10 @@ export const issueAccessKey = async (data: { companyName: string, email: string,
 
     const keyId = `GKK-26-${abbreviation}-${random}`;
 
-    // 1. Pre-create User Profile in 'pending' status
-    const { error: userError } = await supabase.from(USERS_COLLECTION).insert({
-        user_id: tempUserId,
-        email: data.email,
-        role: data.role || 'nominee',
-        status: 'pending',
-        name: data.companyName,
-        region: data.region
-    });
-
-    if (userError) console.error("Pre-creating user profile failed:", userError);
-
-    // 2. Issue the Access Key linked to the temp user ID
+    // 2. Issue the Access Key linked to the actual/pre-created user ID
     const { error } = await supabase.from(ACCESS_KEYS_COLLECTION).insert({
         key_id: keyId,
-        user_id: tempUserId,
+        user_id: targetUserId,
         role: data.role || 'nominee',
         status: 'issued',
         email: data.email,
@@ -576,9 +591,12 @@ export const issueAccessKey = async (data: { companyName: string, email: string,
         category: data.category
     });
 
-    if (error) console.error("Issue key failed:", error);
+    if (error) {
+        console.error("Issue key failed:", error);
+        return '';
+    }
 
-    await logAction('ISSUE_KEY', `Issued key ${keyId} for role ${data.role || 'nominee'} (Pending Registration)`);
+    await logAction('ISSUE_KEY', `Issued key ${keyId} for role ${data.role || 'nominee'}`, targetUserId);
     return keyId;
 };
 
