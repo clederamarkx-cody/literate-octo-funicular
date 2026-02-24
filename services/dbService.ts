@@ -1,5 +1,5 @@
 import { collection, doc, setDoc, getDoc, updateDoc, query, where, getDocs, deleteDoc } from 'firebase/firestore';
-import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { signInAnonymously } from 'firebase/auth';
 import { db, storage, auth } from './firebase';
 import { Nominee, NomineeDocument, UserRole } from '../types';
@@ -226,72 +226,34 @@ export const uploadNomineeFile = async (
 
     const fileUid = `${uid}_${documentId}_${Date.now()}`;
     const storagePath = `nominee_docs/${uid}/${fileUid}_${file.name}`;
-    console.log("[STORAGE TRACE] Starting upload to:", storagePath, "Size:", (file.size / 1024).toFixed(2), "KB");
+    console.log("[STORAGE TRACE] Starting ATOMIC upload to:", storagePath, "Size:", (file.size / 1024).toFixed(2), "KB");
 
     const storageRef = ref(storage, storagePath);
-    const uploadTask = uploadBytesResumable(storageRef, file);
 
-    if (cancelToken) {
-        cancelToken.cancel = () => {
-            console.log("[STORAGE TRACE] Manual Cancellation Triggered");
-            uploadTask.cancel();
-        };
+    // Atomic upload doesn't have native progress, so we provide an immediate start log
+    if (onProgress) onProgress(10);
+
+    try {
+        const uploadResult = await uploadBytes(storageRef, file);
+        console.log("[STORAGE TRACE] Atomic Upload Binary Success");
+
+        if (onProgress) onProgress(100);
+
+        const downloadURL = await getDownloadURL(uploadResult.ref);
+        console.log("[STORAGE TRACE] Download URL retrieved.");
+        return downloadURL;
+    } catch (error: any) {
+        console.error("[STORAGE TRACE] FATAL ERROR:", error.code, error.message);
+
+        let userFriendlyError = error.message;
+        if (error.code === 'storage/unauthorized') {
+            userFriendlyError = "Unauthenticated. Please ensure Anonymous Auth is enabled in the Firebase Console.";
+        } else if (error.code === 'storage/retry-limit-exceeded') {
+            userFriendlyError = "Network error: Connection refused. Please check your firewall or fix CORS.";
+        }
+
+        throw new Error(userFriendlyError);
     }
-
-    return new Promise((resolve, reject) => {
-        let lastBytes = 0;
-        let lastActiveTime = Date.now();
-
-        // 15-second "No Progress" Timeout
-        const timeoutInterval = setInterval(() => {
-            if (Date.now() - lastActiveTime > 15000) {
-                console.error("[STORAGE TRACE] TIMEOUT: No progress for 15s");
-                clearInterval(timeoutInterval);
-                uploadTask.cancel();
-                reject(new Error("Upload timed out. Please check your network or Firebase Authentication status."));
-            }
-        }, 5000);
-
-        uploadTask.on('state_changed',
-            (snapshot) => {
-                const currentBytes = snapshot.bytesTransferred;
-                if (currentBytes > lastBytes) {
-                    lastBytes = currentBytes;
-                    lastActiveTime = Date.now(); // Reset timeout on actual progress
-                }
-
-                const progress = Math.round((currentBytes / snapshot.totalBytes) * 100);
-                console.log(`[STORAGE TRACE] Progress: ${progress}% (${currentBytes}/${snapshot.totalBytes} bytes) - State: ${snapshot.state}`);
-
-                if (onProgress) onProgress(progress);
-            },
-            (error: any) => {
-                clearInterval(timeoutInterval);
-                console.error("[STORAGE TRACE] FATAL ERROR:", error.code, error.message);
-
-                let userFriendlyError = error.message;
-                if (error.code === 'storage/unauthorized') {
-                    userFriendlyError = "Unauthenticated. Please ensure Anonymous Auth is enabled in the Firebase Console.";
-                } else if (error.code === 'storage/canceled' && (Date.now() - lastActiveTime > 15000)) {
-                    userFriendlyError = "Upload connection stalled and was timed out.";
-                }
-
-                reject(new Error(userFriendlyError));
-            },
-            async () => {
-                clearInterval(timeoutInterval);
-                console.log("[STORAGE TRACE] Upload Complete! Fetching URL...");
-                try {
-                    const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-                    console.log("[STORAGE TRACE] Download URL retrieved.");
-                    resolve(downloadURL);
-                } catch (e) {
-                    console.error("[STORAGE TRACE] URL Resolution Error:", e);
-                    reject(e);
-                }
-            }
-        );
-    });
 };
 
 /**
