@@ -444,15 +444,40 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
     setShowTermsModal(true);
   };
 
-  const handleConfirmSubmit = () => {
+  const handleConfirmSubmit = async () => {
     if (!agreedDataPrivacy || !agreedAuthority) {
       setToast({ message: "Consent required. Please accept both Terms and Conditions.", type: 'error' });
       return;
     }
-    setToast({ message: `Stage ${targetSubmitStage} records successfully transmitted.`, type: 'success' });
-    setShowTermsModal(false);
-    if (onUpdateNominee && targetSubmitStage === 3) {
-      onUpdateNominee({ status: 'completed' });
+    if (!nomineeData || !targetSubmitStage) return;
+
+    try {
+      // Persist the submission status to the database
+      const updates: any = { status: 'submitted' };
+
+      // Mark the stage as submitted so evaluators can review
+      if (targetSubmitStage === 1) {
+        // Stage 1 is submitted and ready for REU evaluation
+        updates.status = 'submitted';
+      } else if (targetSubmitStage === 2) {
+        // Stage 2 submitted
+        updates.status = 'under_review';
+      } else if (targetSubmitStage === 3) {
+        // Stage 3 submitted - final stage
+        updates.status = 'under_review';
+      }
+
+      await updateNominee(nomineeData.id, updates);
+
+      setToast({ message: `Stage ${targetSubmitStage} records successfully transmitted to the Regional Board.`, type: 'success' });
+      setShowTermsModal(false);
+
+      if (onUpdateNominee) {
+        onUpdateNominee(updates);
+      }
+    } catch (error) {
+      console.error("Stage submission failed:", error);
+      setToast({ message: `Failed to submit Stage ${targetSubmitStage}. Please try again.`, type: 'error' });
     }
   };
 
