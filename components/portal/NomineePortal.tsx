@@ -193,18 +193,18 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
 
   const profileData = {
     details: {
-      companyName: nomineeData?.name || nomineeData?.organizationName || "Acme Manufacturing Phils.",
-      companyAddress: nomineeData?.details?.address || "Industrial Park, Laguna",
-      region: nomineeData?.region || nomineeData?.region || "Region IV-A",
-      industry: nomineeData?.details?.industry || nomineeData?.industrySector || "Manufacturing",
-      workforceSize: nomineeData?.details?.employees || nomineeData?.workforceSize || "250",
+      companyName: nomineeData?.name || nomineeData?.organizationName || "",
+      companyAddress: nomineeData?.details?.address || "",
+      region: nomineeData?.region || nomineeData?.region || "",
+      industry: nomineeData?.details?.industry || nomineeData?.industrySector || "",
+      workforceSize: nomineeData?.details?.employees || nomineeData?.workforceSize || "",
       nomineeCategory: nomineeData?.details?.nomineeCategory || 'Industry',
     },
-    representative: nomineeData?.focalName || (nomineeData as any).representative || nomineeData?.details?.representative || "Juan Dela Cruz",
-    email: nomineeData?.focalEmail || nomineeData?.email || nomineeData?.details?.email || "safety@merdev.ph",
-    phone: nomineeData?.details?.phone || nomineeData?.focalPhone || "0917-123-4567",
-    safetyOfficer: nomineeData?.details?.safetyOfficer || "Engr. Maria Clara",
-    regId: nomineeData?.regId || "NOM-2024-8821",
+    representative: nomineeData?.focalName || (nomineeData as any).representative || nomineeData?.details?.representative || "",
+    email: nomineeData?.focalEmail || nomineeData?.email || nomineeData?.details?.email || "",
+    phone: nomineeData?.details?.phone || nomineeData?.focalPhone || "",
+    safetyOfficer: nomineeData?.details?.safetyOfficer || "",
+    regId: nomineeData?.regId || "",
   };
 
   const [isLoadingRequirements, setIsLoadingRequirements] = useState(true);
