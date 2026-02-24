@@ -16,7 +16,6 @@ const NominationForm: React.FC<NominationFormProps> = ({ onBack }) => {
   const [email, setEmail] = useState('');
   const [accessKey, setAccessKey] = useState('');
   const [companyName, setCompanyName] = useState('Nominated Establishment');
-  const [category, setCategory] = useState<Nominee['details']['nomineeCategory']>('Industry');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,8 +29,7 @@ const NominationForm: React.FC<NominationFormProps> = ({ onBack }) => {
       // 2. Validate and Activate Key (Consolidated Flow)
       const isActivated = await activateAccessKey(accessKey.trim(), newId, {
         email: email.trim().toLowerCase(),
-        companyName: companyName.trim(),
-        category: category
+        companyName: companyName.trim()
       });
 
       if (!isActivated) {
@@ -139,37 +137,20 @@ const NominationForm: React.FC<NominationFormProps> = ({ onBack }) => {
                 </div>
               </div>
 
-              <div className="grid md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-3 ml-1">Account Administrator Email</label>
-                  <div className="relative group">
-                    <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
-                      <Mail className="h-5 w-5 text-gray-300 group-focus-within:text-gkk-gold transition-colors" />
-                    </div>
-                    <input
-                      required
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="w-full pl-14 pr-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-gkk-gold/10 focus:border-gkk-gold focus:bg-white outline-none transition-all font-medium placeholder:text-gray-300"
-                      placeholder="safety.officer@establishment.ph"
-                    />
+              <div>
+                <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-3 ml-1">Account Administrator Email</label>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                    <Mail className="h-5 w-5 text-gray-300 group-focus-within:text-gkk-gold transition-colors" />
                   </div>
-                </div>
-
-                <div>
-                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-3 ml-1">Nominee Sector / Class</label>
-                  <select
+                  <input
                     required
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value as Nominee['details']['nomineeCategory'])}
-                    className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-gkk-gold/10 focus:border-gkk-gold focus:bg-white outline-none transition-all font-medium text-gkk-navy appearance-none"
-                  >
-                    <option value="Industry">Industry</option>
-                    <option value="Individual">Individual</option>
-                    <option value="Micro Enterprise">Micro Enterprise</option>
-                    <option value="Government">Government</option>
-                  </select>
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full pl-14 pr-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-gkk-gold/10 focus:border-gkk-gold focus:bg-white outline-none transition-all font-medium placeholder:text-gray-300"
+                    placeholder="safety.officer@establishment.ph"
+                  />
                 </div>
               </div>
 

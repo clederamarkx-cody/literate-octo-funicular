@@ -339,7 +339,7 @@ export const getNomineeByPassKey = async (passKey: string): Promise<Nominee | nu
 export const activateAccessKey = async (
     passKey: string,
     uid: string,
-    details: { email: string; companyName: string; category: string }
+    details: { email: string; companyName: string; category?: string }
 ): Promise<boolean> => {
     try {
         const { data: key, error: keyError } = await supabase
@@ -356,7 +356,8 @@ export const activateAccessKey = async (
         // Conditional setup based on role
         if (role === 'nominee') {
             const finalCategory = key.category || details.category || 'Industry';
-            await createNominee(uid, passKey, details.companyName, finalCategory as any, details.email);
+            const finalCompanyName = key.name || details.companyName || 'Nominated Establishment';
+            await createNominee(uid, passKey, finalCompanyName, finalCategory as any, details.email);
         } else {
             // Admin/Evaluator roles only need a user profile
             await createUserProfile(uid, details.email, role);
