@@ -239,6 +239,7 @@ const NominationForm: React.FC<NominationFormProps> = ({ onBack }) => {
                     <input
                       required
                       type={showPassword ? "text" : "password"}
+                      autoComplete="new-password"
                       className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-gkk-gold/10 focus:border-gkk-gold focus:bg-white outline-none transition-all font-medium"
                       placeholder="••••••••"
                     />
@@ -256,6 +257,7 @@ const NominationForm: React.FC<NominationFormProps> = ({ onBack }) => {
                   <input
                     required
                     type={showPassword ? "text" : "password"}
+                    autoComplete="new-password"
                     className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-gkk-gold/10 focus:border-gkk-gold focus:bg-white outline-none transition-all font-medium"
                     placeholder="••••••••"
                   />
