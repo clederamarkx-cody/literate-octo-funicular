@@ -98,7 +98,7 @@ const NomineeProfileEdit: React.FC<NomineeProfileEditProps> = ({ profileData, on
                                 <input
                                     type="text"
                                     readOnly
-                                    value={formData.details.nomineeCategory.charAt(0).toUpperCase() + formData.details.nomineeCategory.slice(1)}
+                                    value={formData.details.nomineeCategory ? (formData.details.nomineeCategory.charAt(0).toUpperCase() + formData.details.nomineeCategory.slice(1)) : 'Private Industry'}
                                     className="w-full pl-11 pr-4 py-3 rounded-2xl border border-gray-100 bg-gray-50 text-gray-400 font-bold cursor-not-allowed outline-none"
                                 />
                             </div>

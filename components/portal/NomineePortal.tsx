@@ -192,19 +192,19 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
   }, []);
 
   const profileData = {
-    companyName: nomineeData?.name || "Acme Manufacturing Phils.",
-    regId: nomineeData?.regId || "NOM-2024-8821",
-    industry: nomineeData?.industry || "Manufacturing",
-    employees: nomineeData?.details?.employees || "250",
-    region: nomineeData?.region || "Region IV-A",
-    address: nomineeData?.details?.address || "Industrial Park, Laguna",
+    details: {
+      companyName: nomineeData?.name || "Acme Manufacturing Phils.",
+      companyAddress: nomineeData?.details?.address || "Industrial Park, Laguna",
+      region: nomineeData?.region || "Region IV-A",
+      industry: nomineeData?.details?.industry || "Manufacturing",
+      workforceSize: nomineeData?.details?.employees || "250",
+      nomineeCategory: nomineeData?.details?.nomineeCategory || 'private',
+    },
     representative: nomineeData?.details?.representative || "Juan Dela Cruz",
-    designation: nomineeData?.details?.designation || "Safety Manager",
     email: nomineeData?.details?.email || "safety@acme.ph",
     phone: nomineeData?.details?.phone || "0917-123-4567",
     safetyOfficer: nomineeData?.details?.safetyOfficer || "Engr. Maria Clara",
-    doleRegNo: "R4A-12345-2020",
-    philhealthNo: "00-123456789-0"
+    regId: nomineeData?.regId || "NOM-2024-8821",
   };
 
   const [isLoadingRequirements, setIsLoadingRequirements] = useState(true);
@@ -478,13 +478,13 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
                             <Building2 size={36} />
                           </div>
                           <div>
-                            <h2 className="text-3xl font-serif font-bold text-gkk-navy leading-tight">{profileData.companyName}</h2>
-                            <p className="text-gray-500 flex items-center gap-2 mt-2 font-medium"><MapPin size={14} className="text-gkk-gold" /> {profileData.address}, {profileData.region}</p>
+                            <h2 className="text-3xl font-serif font-bold text-gkk-navy leading-tight">{profileData.details.companyName}</h2>
+                            <p className="text-gray-500 flex items-center gap-2 mt-2 font-medium"><MapPin size={14} className="text-gkk-gold" /> {profileData.details.companyAddress}, {profileData.details.region}</p>
                           </div>
                         </div>
                         <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-                          <div className="space-y-2"><span className="text-[10px] font-bold text-gray-400 uppercase block">Industry Sector</span><div className="flex items-center gap-2 text-sm font-bold text-gkk-navy"><Briefcase size={16} className="text-gkk-gold" /> {profileData.industry}</div></div>
-                          <div className="space-y-2"><span className="text-[10px] font-bold text-gray-400 uppercase block">Workforce Size</span><div className="flex items-center gap-2 text-sm font-bold text-gkk-navy"><Users size={16} className="text-gkk-gold" /> {profileData.employees} Pax</div></div>
+                          <div className="space-y-2"><span className="text-[10px] font-bold text-gray-400 uppercase block">Industry Sector</span><div className="flex items-center gap-2 text-sm font-bold text-gkk-navy"><Briefcase size={16} className="text-gkk-gold" /> {profileData.details.industry}</div></div>
+                          <div className="space-y-2"><span className="text-[10px] font-bold text-gray-400 uppercase block">Workforce Size</span><div className="flex items-center gap-2 text-sm font-bold text-gkk-navy"><Users size={16} className="text-gkk-gold" /> {profileData.details.workforceSize} Pax</div></div>
                           <div className="space-y-2"><span className="text-[10px] font-bold text-gray-400 uppercase block">Nomination ID</span><div className="flex items-center gap-2 text-sm font-bold text-gkk-navy font-mono"><Hash size={16} className="text-gkk-gold" /> {profileData.regId}</div></div>
                           <div className="space-y-2"><span className="text-[10px] font-bold text-gray-400 uppercase block">Safety Focal</span><div className="flex items-center gap-2 text-sm font-bold text-gkk-navy"><HardHat size={16} className="text-gkk-gold" /> {profileData.safetyOfficer}</div></div>
                         </div>
