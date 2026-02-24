@@ -566,9 +566,8 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                     </div>
                   </div>
                   {(selectedNominee.round2Unlocked || ['admin', 'scd_team_leader'].includes(userRole || '')) && (
-                    <div className="border-t border-gray-100">
-                      <button onClick={() => setRound2Open(!round2Open)} className="w-full py-5 bg-gray-50/50 hover:bg-gray-100 transition-colors flex items-center justify-center text-[10px] font-bold text-gray-400 uppercase tracking-[0.4em]">{(round2Open || ['admin', 'scd_team_leader'].includes(userRole || '')) ? 'Collapse Records' : 'Review Records'}{(round2Open || ['admin', 'scd_team_leader'].includes(userRole || '')) ? <ChevronUp size={16} className="ml-2" /> : <ChevronDown size={16} className="ml-2" />}</button>
-                      <div className={`transition-all duration-700 ease-in-out ${(round2Open || ['admin', 'scd_team_leader'].includes(userRole || '')) ? 'max-h-[2000px] p-10 bg-white' : 'max-h-0 overflow-hidden'}`}>{renderDocumentGrid(2)}</div>
+                    <div className="border-t border-gray-100 bg-white">
+                      <div className="p-10">{renderDocumentGrid(2)}</div>
                     </div>
                   )}
                 </div>

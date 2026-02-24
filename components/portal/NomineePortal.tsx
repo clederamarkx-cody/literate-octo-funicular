@@ -44,6 +44,44 @@ import DocumentGrid from './nominee/DocumentGrid';
 import UploadModal from './nominee/UploadModal';
 import TermsModal from './nominee/TermsModal';
 import NomineeProfileEdit from './nominee/NomineeProfileEdit';
+
+export const STAGE_1_REQUIREMENTS = [
+  { category: 'Management', label: '1. Endorsement by DOLE Regional Office' },
+  { category: 'Management', label: '2. Accomplished GKK Application Form' },
+  { category: 'Systems', label: '3. Company Safety and Health Policy (Signed)' },
+  { category: 'Systems', label: '4. Occupational Safety and Health Program' },
+  { category: 'Training', label: '5. OSH Committee Organization/Minutes (Latest)' },
+  { category: 'Compliance', label: '6. DOLE Registration (Rule 1020)' },
+  { category: 'Compliance', label: '7. TAV/Joint Delivery Report (Latest)' },
+  { category: 'Compliance', label: '8. Certificate of Compliance (Labor Standards)' },
+  { category: 'Compliance', label: '9. Certificate of Compliance (OSH Standards)' },
+  { category: 'Designation', label: '10. Designation of Safety Officer' },
+  { category: 'Designation', label: '11. Designation of OH Personnel (Nurse/First Aider)' },
+  { category: 'Training', label: '12. Training Certificates (Safety Officer)' },
+  { category: 'Training', label: '13. Training Certificates (First Aid)' },
+  { category: 'Systems', label: '14. Emergency Preparedness & Response Plan' },
+  { category: 'Systems', label: '15. Fire Safety Inspection Certificate (FSIC)' },
+  { category: 'Systems', label: '16. Annual Medical Report (Latest)' },
+  { category: 'Systems', label: '17. Annual Work Accident/Illness Report (WAIR)' },
+  { category: 'Systems', label: '18. Minutes of OSH Committee Meetings (Full Year)' },
+  { category: 'Systems', label: '19. OSH Promotion & Enhancement Activities' },
+  { category: 'Systems', label: '20. PPE Issuance Records' },
+  { category: 'Systems', label: '21. OSH Training/Orientation for Workers' },
+  { category: 'Systems', label: '22. OSH Rules & Regulation Handbook' },
+  { category: 'Health', label: '23. Drug-Free Workplace Policy & Program' },
+  { category: 'Health', label: '24. HIV/AIDS Workplace Policy & Program' },
+  { category: 'Health', label: '25. Tuberculosis Policy & Program' },
+  { category: 'Health', label: '26. Hepatitis B Policy & Program' },
+  { category: 'Health', label: '27. Mental Health Policy & Program' },
+  { category: 'Systems', label: '28. Work Equipment/Machine Guarding' },
+  { category: 'Systems', label: '29. Material Safety Data Sheets (MSDS)' },
+  { category: 'Systems', label: '30. Waste Management System' },
+  { category: 'Systems', label: '31. OSH Innovative Programs' },
+  { category: 'Construction', label: '32. CSHP (For Construction Projects)' },
+  { category: 'Excellence', label: '33. CSR Programs Related to Safety' },
+  { category: 'Management', label: '34. Social Accountability Records' },
+  { category: 'General', label: '35. Additional Documents (Requested)' }
+];
 interface NomineePortalProps {
   onLogout: () => void;
   onUnderDev: () => void;
@@ -176,7 +214,14 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
     const fetchReqs = async () => {
       const category = nomineeData?.details?.nomineeCategory || 'Industry';
       const reqs = await getRequirementsByCategory(category);
-      setDynamicRequirements(reqs);
+
+      // Force Stage 1 to always have the 35 requirements
+      const mergedReqs = {
+        ...reqs,
+        stage1: STAGE_1_REQUIREMENTS
+      };
+
+      setDynamicRequirements(mergedReqs);
       setIsLoadingRequirements(false);
     };
     fetchReqs();
