@@ -650,51 +650,51 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
           <table className="w-full text-left border-collapse min-w-[1000px]">
             <thead>
               <tr className="bg-gray-50/50 border-b border-gray-100">
-                <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Pass Key</th>
-                <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Establishment / User</th>
-                <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Email</th>
-                <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Role</th>
-                <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Region</th>
-                <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Category</th>
-                <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Status</th>
-                <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-right">Issued</th>
+                <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest">Pass Key</th>
+                <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest">Establishment / User</th>
+                <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest">Email</th>
+                <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest">Role</th>
+                <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest">Region</th>
+                <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest">Category</th>
+                <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest">Status</th>
+                <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest text-right">Issued</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
               {allKeys.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="p-10 text-center text-gray-400 font-bold uppercase tracking-widest text-xs italic">No keys issued yet.</td>
+                  <td colSpan={8} className="p-10 text-center text-gray-400 font-semibold uppercase tracking-widest text-xs">No keys issued yet.</td>
                 </tr>
               ) : (
                 allKeys.sort((a: any, b: any) => new Date(b.created_at || b.issuedAt).getTime() - new Date(a.created_at || a.issuedAt).getTime()).map((key: any) => (
                   <tr key={key.key_id || key.keyId} className="group hover:bg-gray-50/50 transition-colors">
                     <td className="px-6 py-4">
-                      <span className="font-mono font-bold text-gkk-navy uppercase text-xs tracking-wider select-all">{key.key_id || key.keyId}</span>
+                      <span className="text-xs font-semibold text-gkk-navy uppercase tracking-wide select-all">{key.key_id || key.keyId}</span>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="text-xs text-gkk-navy font-bold uppercase tracking-tight">{key.name || '---'}</span>
+                      <span className="text-xs text-gkk-navy font-semibold uppercase">{key.name || '---'}</span>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="text-xs text-gray-500 font-medium">{key.email || '---'}</span>
+                      <span className="text-xs text-gray-500 font-semibold">{key.email || '---'}</span>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="px-2 py-0.5 rounded-md bg-gray-100 text-gray-500 text-xs font-bold uppercase tracking-widest">
+                      <span className="px-2 py-0.5 rounded-md bg-gray-100 text-gray-500 text-xs font-semibold uppercase">
                         {key.role.replace('_', ' ')}
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="text-xs text-gray-400 font-bold uppercase">{key.region}</span>
+                      <span className="text-xs text-gray-500 font-semibold uppercase">{key.region}</span>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="text-xs text-gray-400 font-bold uppercase italic">{key.category || 'N/A'}</span>
+                      <span className="text-xs text-gray-500 font-semibold uppercase">{key.category || 'N/A'}</span>
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`px-2 py-0.5 rounded-full text-xs font-black uppercase tracking-widest border ${key.status === 'activated' ? 'bg-green-50 text-green-600 border-green-100' : 'bg-amber-50 text-amber-600 border-amber-100'}`}>
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-semibold uppercase border ${key.status === 'activated' ? 'bg-green-50 text-green-600 border-green-100' : 'bg-amber-50 text-amber-600 border-amber-100'}`}>
                         {key.status}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <span className="text-xs text-gray-300 font-bold uppercase">{new Date(key.created_at || key.issuedAt).toLocaleDateString()}</span>
+                      <span className="text-xs text-gray-400 font-semibold uppercase">{new Date(key.created_at || key.issuedAt).toLocaleDateString()}</span>
                     </td>
                   </tr>
                 ))
