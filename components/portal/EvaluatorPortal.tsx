@@ -474,14 +474,14 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
     <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500">
       <div className="grid lg:grid-cols-1 gap-8">
         {/* Issuance Form */}
-        <div className="bg-white rounded-[40px] border border-gray-200 shadow-sm overflow-hidden flex flex-col max-w-2xl">
+        <div className="bg-white rounded-[40px] border border-gray-200 shadow-sm overflow-hidden flex flex-col w-full">
           <div className="p-8 border-b border-gray-100 bg-gray-50/30">
             <h3 className="font-serif font-bold text-xl text-gkk-navy uppercase tracking-wider">GKK Access Key Generator</h3>
             <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-2">Generate invitation keys for new nominees and staff.</p>
           </div>
           <form onSubmit={handleIssueKey} className="p-8 space-y-6">
-            <div className="space-y-4">
-              <div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="md:col-span-2">
                 <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Establishment Name</label>
                 <input
                   type="text"
@@ -503,35 +503,35 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                   placeholder="safety@company.ph"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Assigned Role</label>
-                  <select
-                    value={newKeyData.role}
-                    onChange={(e) => setNewKeyData({ ...newKeyData, role: e.target.value })}
-                    className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-gkk-gold/5 focus:border-gkk-gold outline-none transition-all font-bold text-sm tracking-tight appearance-none"
-                  >
-                    <option value="nominee">Nominee</option>
-                    <option value="reu">REU (Regional Extension Unit)</option>
-                    <option value="scd_team_leader">SCD Team Leader</option>
-                    <option value="evaluator">Evaluator</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Assigned Region</label>
-                  <select
-                    value={newKeyData.region}
-                    onChange={(e) => setNewKeyData({ ...newKeyData, region: e.target.value })}
-                    className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-gkk-gold/5 focus:border-gkk-gold outline-none transition-all font-bold text-sm tracking-tight appearance-none"
-                  >
-                    {PH_REGIONS.map(reg => (
-                      <option key={reg} value={reg}>{reg}</option>
-                    ))}
-                  </select>
-                </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Assigned Role</label>
+                <select
+                  value={newKeyData.role}
+                  onChange={(e) => setNewKeyData({ ...newKeyData, role: e.target.value })}
+                  className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-gkk-gold/5 focus:border-gkk-gold outline-none transition-all font-bold text-sm tracking-tight appearance-none"
+                >
+                  <option value="nominee">Nominee</option>
+                  <option value="reu">REU (Regional Extension Unit)</option>
+                  <option value="scd_team_leader">SCD Team Leader</option>
+                  <option value="evaluator">Evaluator</option>
+                </select>
               </div>
 
-              {newKeyData.role === 'nominee' && (
+              <div>
+                <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Assigned Region</label>
+                <select
+                  value={newKeyData.region}
+                  onChange={(e) => setNewKeyData({ ...newKeyData, region: e.target.value })}
+                  className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-gkk-gold/5 focus:border-gkk-gold outline-none transition-all font-bold text-sm tracking-tight appearance-none"
+                >
+                  {PH_REGIONS.map(reg => (
+                    <option key={reg} value={reg}>{reg}</option>
+                  ))}
+                </select>
+              </div>
+
+              {newKeyData.role === 'nominee' ? (
                 <div>
                   <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Nominee Sector / Class</label>
                   <select
@@ -545,14 +545,23 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                     <option value="Government">Government</option>
                   </select>
                 </div>
+              ) : (
+                <div className="flex items-end pb-1">
+                  <div className="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 flex items-center justify-center">
+                    <p className="text-[9px] text-gray-400 font-bold uppercase tracking-[0.2em]">Sector selection only for Nominees</p>
+                  </div>
+                </div>
               )}
             </div>
-            <button
-              disabled={isIssuingKey}
-              className="w-full py-4 bg-gkk-navy text-white font-bold rounded-2xl shadow-xl shadow-gkk-navy/20 hover:bg-gkk-royalBlue transition-all uppercase tracking-widest text-[10px] disabled:opacity-50"
-            >
-              {isIssuingKey ? 'Generating...' : 'Issue GKK Access Key'}
-            </button>
+
+            <div className="flex justify-end pt-2">
+              <button
+                disabled={isIssuingKey}
+                className="px-12 py-4 bg-gkk-navy text-white font-bold rounded-2xl shadow-xl shadow-gkk-navy/20 hover:bg-gkk-royalBlue transition-all uppercase tracking-widest text-[10px] disabled:opacity-50"
+              >
+                {isIssuingKey ? 'Generating...' : 'Issue GKK Access Key'}
+              </button>
+            </div>
           </form>
         </div>
       </div>
