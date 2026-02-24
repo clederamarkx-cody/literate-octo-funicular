@@ -669,32 +669,32 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                 allKeys.sort((a: any, b: any) => new Date(b.created_at || b.issuedAt).getTime() - new Date(a.created_at || a.issuedAt).getTime()).map((key: any) => (
                   <tr key={key.key_id || key.keyId} className="group hover:bg-gray-50/50 transition-colors">
                     <td className="px-6 py-4">
-                      <span className="font-mono font-bold text-gkk-navy uppercase text-[10px] tracking-wider select-all">{key.key_id || key.keyId}</span>
+                      <span className="font-mono font-bold text-gkk-navy uppercase text-xs tracking-wider select-all">{key.key_id || key.keyId}</span>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="text-[11px] text-gkk-navy font-bold uppercase tracking-tight">{key.name || '---'}</span>
+                      <span className="text-xs text-gkk-navy font-bold uppercase tracking-tight">{key.name || '---'}</span>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="text-[11px] text-gray-500 font-medium">{key.email || '---'}</span>
+                      <span className="text-xs text-gray-500 font-medium">{key.email || '---'}</span>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="px-2 py-0.5 rounded-md bg-gray-100 text-gray-500 text-[9px] font-bold uppercase tracking-widest">
+                      <span className="px-2 py-0.5 rounded-md bg-gray-100 text-gray-500 text-xs font-bold uppercase tracking-widest">
                         {key.role.replace('_', ' ')}
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="text-[10px] text-gray-400 font-bold uppercase">{key.region}</span>
+                      <span className="text-xs text-gray-400 font-bold uppercase">{key.region}</span>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="text-[10px] text-gray-400 font-bold uppercase italic">{key.category || 'N/A'}</span>
+                      <span className="text-xs text-gray-400 font-bold uppercase italic">{key.category || 'N/A'}</span>
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest border ${key.status === 'activated' ? 'bg-green-50 text-green-600 border-green-100' : 'bg-amber-50 text-amber-600 border-amber-100'}`}>
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-black uppercase tracking-widest border ${key.status === 'activated' ? 'bg-green-50 text-green-600 border-green-100' : 'bg-amber-50 text-amber-600 border-amber-100'}`}>
                         {key.status}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <span className="text-[10px] text-gray-300 font-bold uppercase">{new Date(key.created_at || key.issuedAt).toLocaleDateString()}</span>
+                      <span className="text-xs text-gray-300 font-bold uppercase">{new Date(key.created_at || key.issuedAt).toLocaleDateString()}</span>
                     </td>
                   </tr>
                 ))
