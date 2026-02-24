@@ -880,6 +880,10 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                           setLocalNominees(prev => prev.map(a => a.id === updated.id ? updated : a));
                         }} className={`px-10 py-4 rounded-[20px] font-bold transition-all shadow-xl text-[10px] tracking-widest uppercase ${selectedNominee.round3Unlocked ? 'bg-red-50 text-red-600 border border-red-100 hover:bg-red-100' : 'bg-gkk-navy text-white hover:bg-gkk-royalBlue'}`}>{selectedNominee.round3Unlocked ? 'Deactivate Stage 3' : 'Activate Stage 3'}</button>
                       )}
+                      <button
+                        onClick={() => { setView('list'); setSelectedNominee(null); }}
+                        className="px-10 py-4 rounded-[20px] font-semibold transition-all shadow-sm text-[14.5px] uppercase bg-white border border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gkk-navy"
+                      >Close</button>
 
 
                     </div>
