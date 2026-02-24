@@ -74,11 +74,16 @@ export const createUserProfile = async (uid: string, email: string, role: UserRo
         role,
         status: role === 'nominee' ? 'pending' : 'active'
     });
-    if (error) console.error("User profile creation failed:", error);
+    if (error) {
+        console.error("User profile creation failed:", error);
+        return false;
+    }
+    return true;
 };
 
 export const createNominee = async (uid: string, regId: string, name: string, nomineeCategory: Nominee['details']['nomineeCategory'], email: string) => {
-    await createUserProfile(uid, email, 'nominee');
+    const userCreated = await createUserProfile(uid, email, 'nominee');
+    if (!userCreated) return false;
 
     const newApplication: any = {
         id: uid,
@@ -104,9 +109,11 @@ export const createNominee = async (uid: string, regId: string, name: string, no
     };
 
     const { error } = await supabase.from(APPLICATIONS_COLLECTION).insert(newApplication);
-    if (error) console.error("Application creation failed:", error);
-
-    return newApplication;
+    if (error) {
+        console.error("Create nominee failed:", error);
+        return false;
+    }
+    return true;
 };
 
 export const getNominee = async (uid: string): Promise<Nominee | null> => {
@@ -329,7 +336,7 @@ export const getNomineeByPassKey = async (passKey: string): Promise<Nominee | nu
             *,
             documents: ${DOCUMENTS_COLLECTION} (*)
         `)
-        .eq('reg_id', passKey)
+        .eq('reg_id', passKey.toUpperCase())
         .single();
 
     if (error || !data) return null;
@@ -341,11 +348,12 @@ export const activateAccessKey = async (
     uid: string,
     details: { email: string; companyName: string; category?: string }
 ): Promise<boolean> => {
+    const normalizedKey = passKey.trim().toUpperCase();
     try {
         const { data: key, error: keyError } = await supabase
             .from(ACCESS_KEYS_COLLECTION)
             .select('*')
-            .eq('key_id', passKey)
+            .eq('key_id', normalizedKey)
             .eq('status', 'issued')
             .single();
 
@@ -357,10 +365,12 @@ export const activateAccessKey = async (
         if (role === 'nominee') {
             const finalCategory = key.category || details.category || 'Industry';
             const finalCompanyName = key.name || details.companyName || 'Nominated Establishment';
-            await createNominee(uid, passKey, finalCompanyName, finalCategory as any, details.email);
+            const nomineeCreated = await createNominee(uid, normalizedKey, finalCompanyName, finalCategory as any, details.email);
+            if (!nomineeCreated) return false;
         } else {
             // Admin/Evaluator roles only need a user profile
-            await createUserProfile(uid, details.email, role);
+            const userCreated = await createUserProfile(uid, details.email, role);
+            if (!userCreated) return false;
         }
 
         const { error: updateError } = await supabase
@@ -370,7 +380,7 @@ export const activateAccessKey = async (
                 user_id: uid,
                 activated_at: new Date().toISOString()
             })
-            .eq('key_id', passKey);
+            .eq('key_id', normalizedKey);
 
         return !updateError;
     } catch (error) {
@@ -397,8 +407,19 @@ export const verifyAccessKey = async (passKey: string) => {
 
 export const issueAccessKey = async (data: { companyName: string, email: string, region: string, role?: string, category?: string }): Promise<string> => {
     const random = Math.floor(1000 + Math.random() * 9000).toString();
-    const prefix = data.role === 'nominee' ? 'GKK-SB' : data.role ? `GKK-${data.role.toUpperCase()}` : 'GKK-SB';
-    const keyId = `${prefix}-${data.companyName.substring(0, 3).toUpperCase()}-${random}`;
+
+    // Generate abbreviation from company name
+    const words = data.companyName.trim().split(/[\s-]+/);
+    let abbreviation = '';
+
+    if (words.length > 1) {
+        abbreviation = words.map(w => w[0]).join('').substring(0, 4).toUpperCase();
+    } else {
+        abbreviation = data.companyName.substring(0, 4).toUpperCase();
+    }
+
+    // New format: GKK-26-[Abbreviation]-[Random]
+    const keyId = `GKK-26-${abbreviation}-${random}`;
 
     const { error } = await supabase.from(ACCESS_KEYS_COLLECTION).insert({
         key_id: keyId,

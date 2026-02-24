@@ -23,11 +23,11 @@ const NominationForm: React.FC<NominationFormProps> = ({ onBack }) => {
     setError(null);
 
     try {
-      // 1. Generate unique internal ID
-      const newId = 'user_' + Date.now().toString();
+      // 1. Generate unique internal ID (Must be valid UUID for Supabase)
+      const newId = crypto.randomUUID();
 
       // 2. Validate and Activate Key (Consolidated Flow)
-      const isActivated = await activateAccessKey(accessKey.trim(), newId, {
+      const isActivated = await activateAccessKey(accessKey.trim().toUpperCase(), newId, {
         email: email.trim().toLowerCase(),
         companyName: companyName.trim()
       });
@@ -132,7 +132,7 @@ const NominationForm: React.FC<NominationFormProps> = ({ onBack }) => {
                     value={accessKey}
                     onChange={(e) => setAccessKey(e.target.value)}
                     className="w-full pl-14 pr-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-gkk-gold/10 focus:border-gkk-gold focus:bg-white outline-none transition-all font-mono font-bold tracking-widest placeholder:text-gray-300"
-                    placeholder="GKK-2024-XXXX-XXXX"
+                    placeholder="GKK-26-XXXX-XXXX"
                   />
                 </div>
               </div>
