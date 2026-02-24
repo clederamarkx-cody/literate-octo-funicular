@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 /* Added missing Loader2 to the lucide-react import list */
 import { Eye, EyeOff, Shield, User, Lock, ArrowRight, LayoutDashboard, KeyRound, Zap, Loader2, Building2, AlertCircle, Mail } from 'lucide-react';
-import { getUserByEmail, getNomineeByPassKey, seedFirebase, verifyAccessKey } from '../../services/dbService';
+import { getUserByEmail, getNomineeByPassKey, verifyAccessKey } from '../../services/dbService';
 interface LoginProps {
     onLogin?: (role: string, email?: string) => void;
     onRegisterClick?: () => void;

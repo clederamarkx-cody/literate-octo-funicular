@@ -14,7 +14,7 @@ import Footer from './components/layout/Footer';
 import ChatWidget from './components/layout/ChatWidget';
 import { FileText, Calendar, Mail } from 'lucide-react';
 import { Nominee, NomineeDocument } from './types';
-import { getNominee, addNomineeDocument, updateNominee, createUserProfile, createNominee, seedFirebase } from './services/dbService';
+import { getNominee, addNomineeDocument, updateNominee, createUserProfile, createNominee } from './services/dbService';
 
 // Lazy load components
 const NominationForm = lazy(() => import('./components/portal/NominationForm'));
@@ -36,9 +36,6 @@ function App() {
   const [isLoadingSession, setIsLoadingSession] = useState(true);
 
   useEffect(() => {
-    // Temporary seed execution triggered by HMR
-    seedFirebase().then(() => alert('Database Optimized! Dynamic 35-item Industry checklist & Audit logs enabled.'));
-
     const restoreSession = async () => {
       const savedView = sessionStorage.getItem('gkk_last_view') as ViewState;
       if (savedView && ['hall-of-fame', 'nominate', 'login', 'under-development'].includes(savedView)) {
