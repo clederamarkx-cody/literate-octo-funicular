@@ -417,7 +417,7 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
         />
 
         <div className="flex-1 overflow-y-auto p-8 scroll-smooth">
-          <div className="max-w-6xl mx-auto space-y-8 pb-20">
+          <div className="max-w-7xl mx-auto space-y-8 pb-20">
             {activeTab === 'dashboard' ? (
               <div className="animate-in fade-in duration-500 space-y-8">
                 <div className="bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden relative group">
