@@ -66,7 +66,7 @@ function App() {
             } else {
               sessionStorage.removeItem('gkk_session');
             }
-          } else if (role === 'evaluator') {
+          } else if (['evaluator', 'scd_team_leader', 'reu', 'admin'].includes(role)) {
             setView('evaluator-portal');
           }
         } catch (e) {
