@@ -830,7 +830,9 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
           <div className="flex items-center text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em]">
             <span>Validator Portal</span>
             <ChevronRight size={14} className="mx-2" />
-            <span className="text-gkk-navy">{activeTab === 'dashboard' ? 'Overview' : activeTab === 'management' ? 'Management' : 'Queue'}</span>
+            <span className="text-gkk-navy">
+              {activeTab === 'dashboard' ? 'Overview' : activeTab === 'management' ? 'Management' : activeTab === 'profile' ? 'My Profile' : 'Queue'}
+            </span>
           </div>
 
           <div className="flex items-center space-x-4">
@@ -887,19 +889,29 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
             {view === 'list' ? (
               activeTab === 'dashboard' ? renderDashboard() :
                 activeTab === 'management' ? renderManagement() :
-                  activeTab === 'profile' && staffProfile ? (
-                    <StaffProfileEdit
-                      userData={staffProfile}
-                      onUpdateProfile={async (updates) => {
-                        if (!staffProfile?.userId) return false;
-                        const success = await updateUserProfile(staffProfile.userId, updates);
-                        if (success) {
-                          setStaffProfile(prev => prev ? { ...prev, ...updates } : null);
-                        }
-                        return success;
-                      }}
-                      onUnderDev={onUnderDev}
-                    />
+                  activeTab === 'profile' ? (
+                    staffProfile ? (
+                      <StaffProfileEdit
+                        userData={staffProfile}
+                        onUpdateProfile={async (updates) => {
+                          if (!staffProfile?.userId) return false;
+                          const success = await updateUserProfile(staffProfile.userId, updates);
+                          if (success) {
+                            setStaffProfile(prev => prev ? { ...prev, ...updates } : null);
+                          }
+                          return success;
+                        }}
+                        onUnderDev={onUnderDev}
+                      />
+                    ) : (
+                      <div className="flex flex-col items-center justify-center py-40 bg-white rounded-[40px] border border-gray-100 shadow-sm animate-pulse">
+                        <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-200 mb-6">
+                          <User size={32} />
+                        </div>
+                        <h3 className="text-xl font-bold text-gray-300 uppercase tracking-widest">Loading Profile...</h3>
+                        <p className="text-xs text-gray-400 mt-2 font-bold uppercase tracking-tight">Syncing security credentials</p>
+                      </div>
+                    )
                   ) : renderEntries()
             ) : renderReview()}
           </div>
