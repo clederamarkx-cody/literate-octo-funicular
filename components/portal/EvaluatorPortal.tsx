@@ -512,7 +512,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                     className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-gkk-gold/5 focus:border-gkk-gold outline-none transition-all font-bold text-sm tracking-tight appearance-none"
                   >
                     <option value="nominee">Nominee</option>
-                    <option value="reu">REU (Regional Expansion Unit)</option>
+                    <option value="reu">REU (Regional Extension Unit)</option>
                     <option value="scd_team_leader">SCD Team Leader</option>
                     <option value="evaluator">Regional Board Evaluator</option>
                   </select>

@@ -17,7 +17,7 @@ The system has been migrated from a Firebase/localStorage mock to a robust **Sup
 - **Public Landing Page**: Interactive showcase of award categories, timeline, and champions.
 - **Unified Nominee Portal**: Registration via passkeys, profile management, and document submission.
 - **Role-Based Portals**:
-    - **REU (Regional Expansion Unit)**: Front-line document verification and Stage 1 vetting.
+    - **REU (Regional Extension Unit)**: Front-line document verification and Stage 1 vetting.
     - **Evaluator / Regional Board**: Scoring and site inspection triggering.
     - **SCD (Safety Control Division)**: Oversight and final validation.
     - **Admin**: Full pipeline control and system audit visibility.
