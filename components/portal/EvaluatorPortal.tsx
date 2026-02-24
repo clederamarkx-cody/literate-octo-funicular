@@ -42,6 +42,7 @@ import {
   Upload
 } from 'lucide-react';
 import { Nominee, NomineeDocument, UserRole, AccessKey } from '../../types';
+import { STAGE_1_REQUIREMENTS } from './NomineePortal';
 import { getAllNominees, resolveFileUrl, updateDocumentEvaluation, getRequirementsByCategory, issueAccessKey, getAllAccessKeys } from '../../services/dbService';
 import { PH_REGIONS } from '../../constants';
 
@@ -121,7 +122,14 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
         setIsLoadingRequirements(true);
         const category = selectedNominee.details?.nomineeCategory || 'Industry';
         const reqs = await getRequirementsByCategory(category);
-        setDynamicRequirements(reqs);
+
+        // Force Stage 1 to always have the 35 requirements
+        const mergedReqs = {
+          ...reqs,
+          stage1: STAGE_1_REQUIREMENTS
+        };
+
+        setDynamicRequirements(mergedReqs);
         setIsLoadingRequirements(false);
       };
       fetchReqs();
@@ -266,27 +274,51 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                   };
 
                   return (
-                    <div key={localIdx} className={`p-4 border rounded-2xl transition-all ${docStatus === 'pass' ? 'bg-green-50 border-green-200 shadow-inner' : docStatus === 'fail' ? 'bg-red-50 border-red-200 shadow-inner' : doc ? 'bg-white border-gray-100 shadow-sm' : 'bg-gray-50/50 border-gray-100'}`}>
-                      <div className="flex justify-between items-start mb-2">
-                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Evidence</span>
-                        <div className="flex gap-1">
-                          {docStatus === 'pass' && <span className="text-[8px] font-bold text-green-600 bg-green-100 px-2 py-0.5 rounded-full">PASSED</span>}
-                          {docStatus === 'fail' && <span className="text-[8px] font-bold text-red-600 bg-red-100 px-2 py-0.5 rounded-full">FAILED</span>}
-                          {doc ? <span className="text-[8px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">UPLOADED</span> : <span className="text-[8px] font-bold text-gray-400 bg-gray-50 px-2 py-0.5 rounded-full">EMPTY</span>}
+                    <div key={localIdx} className={`p-5 border rounded-2xl transition-all ${docStatus === 'pass' ? 'bg-green-50 border-green-200 shadow-inner' : docStatus === 'fail' ? 'bg-red-50 border-red-200 shadow-inner' : doc ? 'bg-white border-gray-100 shadow-sm' : 'bg-gray-50/50 border-gray-100'}`}>
+                      <div className="flex justify-between items-start mb-3">
+                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Evidence</span>
+                        <div className="flex gap-1.5">
+                          {docStatus === 'pass' && <span className="text-[9px] font-black text-green-600 bg-green-100 px-2 py-0.5 rounded-md">PASSED</span>}
+                          {docStatus === 'fail' && <span className="text-[9px] font-black text-red-600 bg-red-100 px-2 py-0.5 rounded-md">FAILED</span>}
+                          {doc ? <span className="text-[9px] font-black text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md">SUBMITTED</span> : <span className="text-[9px] font-black text-gray-400 bg-gray-100 px-2 py-0.5 rounded-md">EMPTY</span>}
                         </div>
                       </div>
-                      <h5 className="text-xs font-bold text-gkk-navy mb-1 uppercase tracking-tight">{req.label}</h5>
-                      {doc && <p className="text-[10px] text-blue-600 truncate mb-4 font-bold tracking-tight">{doc.name}</p>}
-                      <div className="mt-4 space-y-2">
+                      <h5 className="text-sm font-bold text-gkk-navy mb-2 leading-relaxed min-h-[2.5em]">{req.label}</h5>
+                      {doc && (
+                        <p className="text-[11px] text-blue-600 truncate mb-4 font-bold bg-blue-50/50 p-2 rounded-xl border border-blue-100/30 flex items-center gap-2">
+                          <FileText size={14} className="shrink-0" /> {doc.name}
+                        </p>
+                      )}
+
+                      <div className="mt-4 space-y-3">
                         {doc ? (
                           <>
-                            <button onClick={() => handlePreview(doc)} className="w-full py-2 bg-gkk-navy text-white hover:bg-gkk-royalBlue rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all shadow-md flex items-center justify-center gap-2"><Eye size={12} /> Verify Record</button>
+                            <button
+                              onClick={() => handlePreview(doc)}
+                              className="w-full py-2.5 bg-gkk-navy text-white hover:bg-gkk-royalBlue rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-md flex items-center justify-center gap-2"
+                            >
+                              <Eye size={14} /> VIEW PROOF
+                            </button>
                             <div className="flex gap-2">
-                              <button onClick={() => handleDocVerdict('pass')} className={`flex-1 py-1.5 rounded-xl text-[10px] font-bold border transition-all ${docStatus === 'pass' ? 'bg-green-600 text-white border-green-600 shadow-lg' : 'bg-white text-gray-400 border-gray-200 hover:text-green-600'}`}>PASS</button>
-                              <button onClick={() => handleDocVerdict('fail')} className={`flex-1 py-1.5 rounded-xl text-[10px] font-bold border transition-all ${docStatus === 'fail' ? 'bg-red-600 text-white border-red-600 shadow-lg' : 'bg-white text-gray-400 border-gray-200 hover:text-red-600'}`}>FAIL</button>
+                              <button
+                                onClick={() => handleDocVerdict('pass')}
+                                className={`flex-1 py-1.5 rounded-xl text-xs font-black border transition-all ${docStatus === 'pass' ? 'bg-green-600 text-white border-green-600 shadow-md' : 'bg-white text-gray-400 border-gray-200 hover:text-green-600'}`}
+                              >
+                                PASS
+                              </button>
+                              <button
+                                onClick={() => handleDocVerdict('fail')}
+                                className={`flex-1 py-1.5 rounded-xl text-xs font-black border transition-all ${docStatus === 'fail' ? 'bg-red-600 text-white border-red-600 shadow-md' : 'bg-white text-gray-400 border-gray-200 hover:text-red-600'}`}
+                              >
+                                FAIL
+                              </button>
                             </div>
                           </>
-                        ) : <div className="w-full py-2 bg-gray-100 text-gray-400 rounded-xl text-[10px] font-bold uppercase tracking-widest text-center cursor-not-allowed italic">Awaiting</div>}
+                        ) : (
+                          <div className="w-full py-2.5 bg-gray-50 border border-dashed border-gray-200 text-gray-400 rounded-xl text-[10px] font-bold uppercase tracking-widest text-center italic">
+                            Awaiting Submission
+                          </div>
+                        )}
                       </div>
                     </div>
                   );
