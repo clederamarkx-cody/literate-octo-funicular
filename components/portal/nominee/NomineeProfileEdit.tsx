@@ -76,15 +76,21 @@ const NomineeProfileEdit: React.FC<NomineeProfileEditProps> = ({ profileData, on
 
                     <div className="grid md:grid-cols-2 gap-6">
                         <div className="space-y-2">
-                            <label className="text-xs font-bold text-gray-500 uppercase tracking-widest px-1">Organization Name</label>
-                            <input
-                                type="text"
-                                value={formData.details.companyName}
-                                onChange={(e) => handleChange('details', 'companyName', e.target.value)}
-                                className="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:border-gkk-navy focus:ring-2 focus:ring-gkk-navy/10 outline-none transition-all font-medium text-gkk-navy bg-gray-50/50"
-                                placeholder="Enter organization name"
-                                required
-                            />
+                            <label className="text-xs font-bold text-gray-500 uppercase tracking-widest px-1 flex items-center justify-between">
+                                Organization Name
+                                <span className="flex items-center gap-1 text-[8px] text-gkk-gold bg-gold-50 px-1.5 py-0.5 rounded-md border border-gkk-gold/20">
+                                    <Lock size={8} /> Fixed by Admin
+                                </span>
+                            </label>
+                            <div className="relative">
+                                <Building2 size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300" />
+                                <input
+                                    type="text"
+                                    readOnly
+                                    value={formData.details.companyName}
+                                    className="w-full pl-11 pr-4 py-3 rounded-2xl border border-gray-100 bg-gray-50 text-gray-400 font-bold cursor-not-allowed outline-none"
+                                />
+                            </div>
                         </div>
                         <div className="space-y-2">
                             <label className="text-xs font-bold text-gray-500 uppercase tracking-widest px-1 flex items-center justify-between">

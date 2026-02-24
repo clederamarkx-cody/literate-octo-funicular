@@ -456,7 +456,7 @@ export const activateAccessKey = async (
     try {
         const { data: key, error: keyError } = await supabase
             .from(ACCESS_KEYS_COLLECTION)
-            .select('*')
+            .select('*, focal_name')
             .eq('key_id', normalizedKey)
             .eq('status', 'issued')
             .single();
@@ -473,7 +473,7 @@ export const activateAccessKey = async (
             email: details.email,
             role: role,
             status: 'active',
-            name: details.companyName,
+            name: key.focal_name || details.companyName, // Focal Person Name
             region: key.region
         };
 
@@ -487,13 +487,16 @@ export const activateAccessKey = async (
                 id: targetUid,
                 reg_id: normalizedKey,
                 name: details.companyName,
+                organization_name: details.companyName,
+                focal_name: key.focal_name || details.email, // Use focal name from key
                 email: details.email,
                 role: 'nominee',
                 status: 'in_progress',
                 submitted_date: new Date().toISOString(),
                 details: {
                     nomineeCategory: finalCategory,
-                    email: details.email
+                    email: details.email,
+                    representative: key.focal_name || details.email // Sync representative too
                 }
             });
             if (appError) {
@@ -537,7 +540,7 @@ export const verifyAccessKey = async (passKey: string) => {
     };
 };
 
-export const issueAccessKey = async (data: { companyName: string, email: string, region: string, role?: string, category?: string }): Promise<string> => {
+export const issueAccessKey = async (data: { companyName: string, focalName: string, email: string, region: string, role?: string, category?: string }): Promise<string> => {
     const random = Math.floor(1000 + Math.random() * 9000).toString();
 
     // Check if user already exists to avoid unique constraint violations
@@ -554,7 +557,7 @@ export const issueAccessKey = async (data: { companyName: string, email: string,
             email: data.email,
             role: data.role || 'nominee',
             status: 'pending',
-            name: data.companyName,
+            name: data.focalName || data.companyName, // Store Focal Person Name
             region: data.region
         });
 
@@ -587,6 +590,7 @@ export const issueAccessKey = async (data: { companyName: string, email: string,
         status: 'issued',
         email: data.email,
         name: data.companyName,
+        focal_name: data.focalName,
         region: data.region,
         category: data.category
     });

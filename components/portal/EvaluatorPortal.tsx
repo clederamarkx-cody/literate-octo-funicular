@@ -143,7 +143,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
   const [dynamicRequirements, setDynamicRequirements] = useState<any>(null);
   const [allKeys, setAllKeys] = useState<any[]>([]);
   const [isIssuingKey, setIsIssuingKey] = useState(false);
-  const [newKeyData, setNewKeyData] = useState({ companyName: '', email: '', region: 'NCR', role: 'nominee', category: 'Industry' });
+  const [newKeyData, setNewKeyData] = useState({ companyName: '', focalName: '', email: '', region: 'NCR', role: 'nominee', category: 'Industry' });
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [issuedKeyId, setIssuedKeyId] = useState('');
 
@@ -188,7 +188,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
       const keyId = await issueAccessKey(newKeyData);
       setIssuedKeyId(keyId);
       setShowSuccessModal(true);
-      setNewKeyData({ companyName: '', email: '', region: 'NCR', role: 'nominee', category: 'Industry' });
+      setNewKeyData({ companyName: '', focalName: '', email: '', region: 'NCR', role: 'nominee', category: 'Industry' });
       const updatedKeys = await getAllAccessKeys();
       setAllKeys(updatedKeys);
     } catch (err) {
@@ -544,7 +544,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
           </div>
           <form onSubmit={handleIssueKey} className="p-8 space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="md:col-span-2">
+              <div>
                 <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Establishment Name</label>
                 <input
                   type="text"
@@ -553,6 +553,17 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                   onChange={(e) => setNewKeyData({ ...newKeyData, companyName: e.target.value })}
                   className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-gkk-gold/5 focus:border-gkk-gold outline-none transition-all font-bold text-sm tracking-tight"
                   placeholder="e.g. Acme Corp Philippines"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Primary Focal Person</label>
+                <input
+                  type="text"
+                  required
+                  value={newKeyData.focalName}
+                  onChange={(e) => setNewKeyData({ ...newKeyData, focalName: e.target.value })}
+                  className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-gkk-gold/5 focus:border-gkk-gold outline-none transition-all font-bold text-sm tracking-tight"
+                  placeholder="e.g. Juan Dela Cruz"
                 />
               </div>
               <div>

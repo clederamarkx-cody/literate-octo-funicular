@@ -193,16 +193,16 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
 
   const profileData = {
     details: {
-      companyName: nomineeData?.name || "Acme Manufacturing Phils.",
+      companyName: nomineeData?.name || nomineeData?.organizationName || "Acme Manufacturing Phils.",
       companyAddress: nomineeData?.details?.address || "Industrial Park, Laguna",
-      region: nomineeData?.region || "Region IV-A",
-      industry: nomineeData?.details?.industry || "Manufacturing",
-      workforceSize: nomineeData?.details?.employees || "250",
-      nomineeCategory: nomineeData?.details?.nomineeCategory || 'private',
+      region: nomineeData?.region || nomineeData?.region || "Region IV-A",
+      industry: nomineeData?.details?.industry || nomineeData?.industrySector || "Manufacturing",
+      workforceSize: nomineeData?.details?.employees || nomineeData?.workforceSize || "250",
+      nomineeCategory: nomineeData?.details?.nomineeCategory || 'Industry',
     },
-    representative: nomineeData?.details?.representative || "Juan Dela Cruz",
-    email: nomineeData?.details?.email || "safety@acme.ph",
-    phone: nomineeData?.details?.phone || "0917-123-4567",
+    representative: nomineeData?.focalName || nomineeData?.details?.representative || "Juan Dela Cruz",
+    email: nomineeData?.details?.email || nomineeData?.focalEmail || "safety@acme.ph",
+    phone: nomineeData?.details?.phone || nomineeData?.focalPhone || "0917-123-4567",
     safetyOfficer: nomineeData?.details?.safetyOfficer || "Engr. Maria Clara",
     regId: nomineeData?.regId || "NOM-2024-8821",
   };
