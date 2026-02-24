@@ -336,7 +336,19 @@ export const activateAccessKey = async (
             role: 'nominee',
             activatedAt: new Date().toISOString(),
             documents: [],
-            region: inviteData.region || 'NCR'
+            region: inviteData.region || 'NCR',
+            round2Unlocked: false,
+            round3Unlocked: false,
+            details: {
+                nomineeCategory: details.category,
+                email: details.email,
+                employees: '',
+                address: '',
+                representative: '',
+                designation: '',
+                phone: '',
+                safetyOfficer: ''
+            }
         });
 
         // 3. Mark the Access Key as activated and bind user
@@ -598,14 +610,18 @@ export const seedFirebase = async () => {
             { category: 'General', label: '35. Additional Documents (Requested)' }
         ];
 
-        await setDoc(doc(db, REQUIREMENTS_COLLECTION, 'cat_industry'), {
-            categoryId: 'cat_industry',
-            categoryName: 'Industry & Construction',
-            lastUpdated: new Date().toISOString(),
-            stage1: stage1Reqs,
-            stage2: [],
-            stage3: []
-        });
+        // 3. Dynamic Requirements (Seeding for all common categories)
+        const categoriesToSeed = ['industry', 'micro enterprise', 'government', 'individual'];
+        for (const catId of categoriesToSeed) {
+            await setDoc(doc(db, REQUIREMENTS_COLLECTION, `cat_${catId}`), {
+                categoryId: `cat_${catId}`,
+                categoryName: catId.charAt(0).toUpperCase() + catId.slice(1),
+                lastUpdated: new Date().toISOString(),
+                stage1: stage1Reqs,
+                stage2: [],
+                stage3: []
+            });
+        }
 
         // 4. GKK Winners
         for (const winner of INITIAL_GKK_WINNERS) {
