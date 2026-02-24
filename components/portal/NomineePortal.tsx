@@ -397,7 +397,7 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
       setTimeout(() => handleCloseUpload(), 1500);
     } catch (e: any) {
       if (e.message !== "Upload cancelled by user") {
-        console.error("Firebase Storage Upload Failed", e);
+        console.error("Local Storage Upload Failed", e);
         if (!isCancelledRef.current) {
           setUploadStatus('idle');
           // e.message already has the user-friendly string from uploadNomineeFile

@@ -32,7 +32,7 @@ export interface NomineeDocument {
 
 // 1. Users (Consolidated Staff & Nominees)
 export interface User {
-  userId: string; // Firebase Auth UID
+  userId: string; // Internal UID
   name: string;
   email: string;
   role: UserRole;

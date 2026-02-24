@@ -94,7 +94,7 @@ function App() {
       setCurrentNomineeId(newId);
       navigateTo('nominee-portal');
     } catch (err) {
-      console.error("Failed to quick register to Firebase", err);
+      console.error("Failed to quick register to local database", err);
     }
   }, [navigateTo]);
 
@@ -103,7 +103,7 @@ function App() {
     try {
       await addNomineeDocument(currentNominee.id, doc);
     } catch (err) {
-      console.error("Failed to save document to Firebase", err);
+      console.error("Failed to save document to local database", err);
     }
     setNominees(prev => prev.map(app => app.id === currentNominee.id ? { ...app, documents: [...app.documents, doc] } : app));
   }, [currentNominee]);
@@ -113,7 +113,7 @@ function App() {
     try {
       await updateNominee(currentNominee.id, updates);
     } catch (err) {
-      console.error("Failed to save details to Firebase", err);
+      console.error("Failed to save details to local database", err);
     }
     setNominees(prev => prev.map(app => app.id === currentNominee.id ? { ...app, ...updates } : app));
   }, [currentNominee]);
@@ -122,7 +122,7 @@ function App() {
     try {
       await updateNominee(nomineeId, { round2Unlocked: unlocked });
     } catch (err) {
-      console.error("Failed to toggle round 2 details to Firebase", err);
+      console.error("Failed to toggle round 2 details to local database", err);
     }
     setNominees(prev => prev.map(app => app.id === nomineeId ? { ...app, round2Unlocked: unlocked } : app));
   }, []);
@@ -131,7 +131,7 @@ function App() {
     try {
       await updateNominee(nomineeId, { round3Unlocked: unlocked });
     } catch (err) {
-      console.error("Failed to toggle round 3 details to Firebase", err);
+      console.error("Failed to toggle round 3 details to local database", err);
     }
     setNominees(prev => prev.map(app => app.id === nomineeId ? { ...app, round3Unlocked: unlocked } : app));
   }, []);

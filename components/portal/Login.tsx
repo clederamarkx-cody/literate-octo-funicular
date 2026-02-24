@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 /* Added missing Loader2 to the lucide-react import list */
 import { Eye, EyeOff, Shield, User, Lock, ArrowRight, LayoutDashboard, KeyRound, Zap, Loader2, Building2, AlertCircle, Mail } from 'lucide-react';
-import { getUserByEmail, getNomineeByPassKey, verifyAccessKey, seedFirebase } from '../../services/dbService';
+import { getUserByEmail, getNomineeByPassKey, verifyAccessKey } from '../../services/dbService';
 interface LoginProps {
     onLogin?: (role: string, email?: string) => void;
     onRegisterClick?: () => void;
@@ -247,21 +247,6 @@ const Login: React.FC<LoginProps> = ({ onLogin, onRegisterClick, onQuickRegister
                             <button onClick={onRegisterClick} className="text-gkk-navy hover:text-gkk-gold transition-colors border-b-2 border-gkk-gold/30">
                                 Activate Your Access Key
                             </button>
-                        </p>
-                        <p className="mt-4 text-[9px] text-gray-400 font-bold uppercase tracking-widest">
-                            Testing? <button
-                                type="button"
-                                onClick={async () => {
-                                    const confirmed = window.confirm("CRITICAL: This will hard-reset your database to include the new 35 Industry Requirements and unlock Stage 1 for the Demo Account (NOM-2024-8821). Proceed?");
-                                    if (confirmed) {
-                                        setIsLoading(true);
-                                        const ok = await seedFirebase();
-                                        setIsLoading(false);
-                                        if (ok) alert('SUCCESS: Database reset with 35 granular requirements! Use "Autofill Demo Account" to log in.');
-                                    }
-                                }}
-                                className="text-gkk-navy hover:underline font-bold"
-                            >Seed Fresh Test Data (35 Requirements)</button>
                         </p>
                     </div>
                 </div>
