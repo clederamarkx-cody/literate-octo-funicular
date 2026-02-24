@@ -666,14 +666,14 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                   <td colSpan={8} className="p-10 text-center text-gray-400 font-bold uppercase tracking-widest text-xs italic">No keys issued yet.</td>
                 </tr>
               ) : (
-                allKeys.sort((a: any, b: any) => new Date(b.issuedAt).getTime() - new Date(a.issuedAt).getTime()).map((key: any) => (
-                  <tr key={key.keyId} className="group hover:bg-gray-50/50 transition-colors">
+                allKeys.sort((a: any, b: any) => new Date(b.created_at || b.issuedAt).getTime() - new Date(a.created_at || a.issuedAt).getTime()).map((key: any) => (
+                  <tr key={key.key_id || key.keyId} className="group hover:bg-gray-50/50 transition-colors">
                     <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center border ${key.status === 'activated' ? 'bg-green-50 text-green-600 border-green-100' : 'bg-amber-50 text-amber-600 border-amber-100'}`}>
-                          {key.status === 'activated' ? <CheckCircle size={14} /> : <KeyRound size={14} />}
+                      <div className="flex flex-col items-start gap-1">
+                        <div className={`w-7 h-7 rounded-lg flex items-center justify-center border ${key.status === 'activated' ? 'bg-green-50 text-green-600 border-green-100' : 'bg-amber-50 text-amber-600 border-amber-100'}`}>
+                          {key.status === 'activated' ? <CheckCircle size={12} /> : <KeyRound size={12} />}
                         </div>
-                        <span className="font-mono font-bold text-gkk-navy uppercase text-[11px] tracking-wider">{key.keyId}</span>
+                        <span className="font-mono font-bold text-gkk-navy uppercase text-[10px] tracking-wider select-all">{key.key_id || key.keyId}</span>
                       </div>
                     </td>
                     <td className="px-6 py-4">
@@ -699,7 +699,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <span className="text-[10px] text-gray-300 font-bold uppercase">{new Date(key.issuedAt).toLocaleDateString()}</span>
+                      <span className="text-[10px] text-gray-300 font-bold uppercase">{new Date(key.created_at || key.issuedAt).toLocaleDateString()}</span>
                     </td>
                   </tr>
                 ))
