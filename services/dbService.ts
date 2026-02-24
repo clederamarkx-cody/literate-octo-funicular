@@ -13,19 +13,7 @@ export const ACCESS_KEYS_COLLECTION = 'accessKeys';
 export const APPLICATIONS_COLLECTION = 'applications';
 export const REQUIREMENTS_COLLECTION = 'requirements';
 export const WINNERS_COLLECTION = 'gkk_winners';
-
-// Legacy/Internal Collection Names used for seeding/cleanup
-export const NOMINEES_COLLECTION = 'nominees';
-export const ADMINS_COLLECTION = 'admins';
-export const REU_COLLECTION = 'reu';
-export const SCD_COLLECTION = 'scd_team_leaders';
-export const EVALUATORS_COLLECTION = 'evaluators';
-export const INVITES_COLLECTION = 'invites';
-export const EVALUATIONS_REVIEWS_COLLECTION = 'evaluation_reviews';
-export const AWARD_CATEGORIES_COLLECTION = 'award_categories';
 export const SYSTEM_LOGS_COLLECTION = 'system_logs';
-export const SETTINGS_COLLECTION = 'settings';
-
 /**
  * Standardized Logging for Audit Trails
  */
@@ -399,21 +387,14 @@ export const verifyAccessKey = async (passKey: string): Promise<{ uid: string, r
 
 export const seedFirebase = async () => {
     try {
-        console.log("Cleaning Database...");
+        console.log("Cleaning Database (Strict Minimal Schema)...");
         const collectionsToClear = [
-            NOMINEES_COLLECTION,
-            ADMINS_COLLECTION,
-            REU_COLLECTION,
-            SCD_COLLECTION,
-            EVALUATORS_COLLECTION,
-            INVITES_COLLECTION,
+            USERS_COLLECTION,
+            ACCESS_KEYS_COLLECTION,
             APPLICATIONS_COLLECTION,
-            WINNERS_COLLECTION,
-            EVALUATIONS_REVIEWS_COLLECTION,
             REQUIREMENTS_COLLECTION,
-            AWARD_CATEGORIES_COLLECTION,
-            SYSTEM_LOGS_COLLECTION,
-            SETTINGS_COLLECTION
+            WINNERS_COLLECTION,
+            SYSTEM_LOGS_COLLECTION
         ];
 
         for (const collName of collectionsToClear) {
@@ -423,38 +404,21 @@ export const seedFirebase = async () => {
             console.log(`Cleared ${collName}`);
         }
 
-        console.log("Seeding Role-Specific Collections & Applications...");
+        console.log("Seeding Unified Database...");
 
-        // ============================================
-        // Seed Users, Staff, and Access Keys
-        // ============================================
-
-        const USERS_COLLECTION = 'users';
-        const ACCESS_KEYS_COLLECTION = 'accessKeys';
-
-        const rolesToSeed = [
-            { email: 'admin@oshe.gov.ph', role: 'admin', coll: ADMINS_COLLECTION, region: 'NCR' },
-            { email: 'reu@oshe.gov.ph', role: 'reu', coll: REU_COLLECTION, region: 'Region 1' },
-            { email: 'scd@oshe.gov.ph', role: 'scd_team_leader', coll: SCD_COLLECTION, region: 'NCR' },
-            { email: 'evaluator@oshe.gov.ph', role: 'evaluator', coll: EVALUATORS_COLLECTION, region: 'Region 2' },
+        // 1. Staff Users & Keys
+        const staffRoles = [
+            { email: 'admin@oshe.gov.ph', role: 'admin', region: 'NCR' },
+            { email: 'reu@oshe.gov.ph', role: 'reu', region: 'Region 1' },
+            { email: 'scd@oshe.gov.ph', role: 'scd_team_leader', region: 'NCR' },
+            { email: 'evaluator@oshe.gov.ph', role: 'evaluator', region: 'Region 2' },
         ];
 
-        // Seed Staff inside legacy collections and the centralized Users + Access Keys collections
-        for (const s of rolesToSeed) {
+        for (const s of staffRoles) {
             const uid = `user_${s.role}_mock`;
             const keyId = `GKK-KEY-${s.role.toUpperCase()}`;
 
-            // 1. Legacy separate collections
-            await setDoc(doc(db, s.coll, uid), {
-                id: uid,
-                email: s.email,
-                role: s.role,
-                name: s.role.toUpperCase() + ' User',
-                status: 'completed',
-                createdAt: new Date().toISOString()
-            });
-
-            // 2. Centralized users collection
+            // Single Users Table
             await setDoc(doc(db, USERS_COLLECTION, uid), {
                 userId: uid,
                 email: s.email,
@@ -465,226 +429,59 @@ export const seedFirebase = async () => {
                 region: s.region
             });
 
-            // 3. Centralized accessKeys collection
+            // Access Keys Table
             await setDoc(doc(db, ACCESS_KEYS_COLLECTION, keyId), {
                 keyId: keyId,
                 userId: uid,
                 role: s.role,
-                status: 'activated',
+                status: 'reusable', // Staff keys are reusable for tests
                 issuedAt: new Date().toISOString(),
                 activatedAt: new Date().toISOString(),
-                regId: keyId,
                 email: s.email,
                 name: s.role.toUpperCase() + ' User',
                 region: s.region
             });
         }
 
-        // Seed 1 Active Demo Nominee & Application
-        const demoUid = 'user_demo_nominee';
-
-        // Legacy Nominees Collection
-        await setDoc(doc(db, NOMINEES_COLLECTION, demoUid), {
-            id: demoUid,
-            email: 'nominee@gkk.gov.ph',
-            role: 'nominee',
-            createdAt: new Date().toISOString()
-        });
-
-        // Centralized Users Collection
-        await setDoc(doc(db, USERS_COLLECTION, demoUid), {
-            userId: demoUid,
-            email: 'nominee@gkk.gov.ph',
-            role: 'nominee',
-            name: 'Demo Manufacturing Corp',
-            status: 'active',
-            createdAt: new Date().toISOString(),
-            region: 'NCR',
-            nomineeCategory: 'Industry'
-        });
-
-        // Centralized AccessKeys Collection
-        await setDoc(doc(db, ACCESS_KEYS_COLLECTION, 'NOM-2024-8821'), {
-            keyId: 'NOM-2024-8821',
-            userId: demoUid,
-            role: 'nominee',
-            status: 'activated',
-            issuedAt: new Date().toISOString(),
-            activatedAt: new Date().toISOString(),
-            regId: 'NOM-2024-8821',
-            email: 'nominee@gkk.gov.ph',
-            name: 'Demo Manufacturing Corp',
-            region: 'NCR'
-        });
-
-        await setDoc(doc(db, APPLICATIONS_COLLECTION, demoUid), {
-            id: demoUid,
-            applicationId: demoUid,
-            nomineeId: demoUid,
-            regId: 'NOM-2024-8821',
-            role: 'nominee',
-            status: 'in_progress',
-            name: 'Demo Manufacturing Corp',
-            organizationName: 'Demo Manufacturing Corp',
-            email: 'nominee@gkk.gov.ph',
-            focalEmail: 'nominee@gkk.gov.ph',
-            industry: 'Manufacturing',
-            industrySector: 'Manufacturing',
-            region: 'NCR',
-            category: 'industry',
-            submittedDate: new Date().toISOString(),
-            documents: []
-        });
-
-        // Seed 19 Unused Invites in legacy and AccessKeys
-        for (let i = 2; i <= 20; i++) {
-            const passKey = `GKK-2024-${Math.floor(1000 + Math.random() * 9000)}-${Math.floor(1000 + Math.random() * 9000)}`;
-            const inviteId = `invite_${i}`;
-            const invEmail = `invite_${i}@pending.gkk`;
-            const invRegion = `Region ${i % 17 + 1}`;
-
-            // Legacy invites
-            await setDoc(doc(db, INVITES_COLLECTION, inviteId), {
-                id: inviteId,
-                regId: passKey,
-                role: 'nominee_invite',
-                status: 'unused',
-                name: 'Pending Registration',
-                email: invEmail,
-                industry: 'Unspecified',
-                region: invRegion,
-                submittedDate: new Date().toISOString(),
-                documents: []
-            });
-
-            // Centralized AccessKeys
-            await setDoc(doc(db, ACCESS_KEYS_COLLECTION, passKey), {
-                keyId: passKey,
+        // 2. Nominee Activation Keys (5 Unused for activation testing)
+        const activationKeys = ['ACT-001', 'ACT-002', 'ACT-003', 'ACT-004', 'ACT-005'];
+        for (const key of activationKeys) {
+            await setDoc(doc(db, ACCESS_KEYS_COLLECTION, key), {
+                keyId: key,
                 role: 'nominee',
                 status: 'issued',
                 issuedAt: new Date().toISOString(),
-                regId: passKey,
-                email: invEmail,
-                name: 'Pending Registration',
-                region: invRegion,
-                industry: 'Unspecified'
+                region: 'NCR'
             });
         }
 
-        // Seed Winners
+        // 3. Dynamic Requirements
+        const stage1Reqs = [
+            { category: 'Compliance', label: 'WAIR Report' },
+            { category: 'Compliance', label: 'AEDR Report' },
+            { category: 'Legal', label: 'Fire Safety Cert' },
+            { category: 'Systems', label: 'OSH Policy' }
+        ];
+
+        await setDoc(doc(db, REQUIREMENTS_COLLECTION, 'cat_industry'), {
+            categoryId: 'cat_industry',
+            categoryName: 'Industry & Construction',
+            lastUpdated: new Date().toISOString(),
+            stage1: stage1Reqs,
+            stage2: [],
+            stage3: []
+        });
+
+        // 4. GKK Winners
         for (const winner of INITIAL_GKK_WINNERS) {
             await setDoc(doc(collection(db, WINNERS_COLLECTION)), winner);
         }
 
-        // ============================================
-        // Seed Extended Schema (Compatibility Test)
-        // ============================================
-
-        // Seed Categories
-        await setDoc(doc(db, AWARD_CATEGORIES_COLLECTION, 'cat_industry'), { categoryId: 'industry', name: 'Private Sector', description: 'Industry Sector Awards' });
-        await setDoc(doc(db, AWARD_CATEGORIES_COLLECTION, 'cat_micro'), { categoryId: 'microEnterprises', name: 'Micro Enterprises', description: 'Small business awards' });
-
-        // Seed Requirements for Industry (Comprehensive 35-item list)
-        const industryRequirements = {
-            categoryId: 'Industry',
-            stage1: [
-                { label: '1. Endorsement by DOLE Regional Office', category: 'Compliance' },
-                { label: '2. Accomplished GKK Application Form', category: 'Compliance' },
-                { label: '3. Company Safety and Health Policy', category: 'Systems' },
-                { label: '4. Submitted OSH Program (with Receipt)', category: 'Compliance' },
-                { label: '5. Proof of 8-hour OSH Orientation', category: 'Training' },
-                { label: '6. Designation of Safety Officer (SO1–SO4)', category: 'Designation' },
-                { label: '6a. Mandatory OSH training certificate', category: 'Designation' },
-                { label: '6b. Advanced OSH training certificates', category: 'Designation' },
-                { label: '7. Occupational Health Personnel designation', category: 'Designation' },
-                { label: '7a. First Aid certificate', category: 'Designation' },
-                { label: '13. DOLE Registration (Rule 1020)', category: 'Compliance' },
-                { label: '20. Valid Fire Safety Certificate (FSIC)', category: 'Safety' },
-                { label: '24. Proof of Compliance (SSS/PhilHealth)', category: 'Legal' }
-            ],
-            stage2: [
-                { label: '8a. DOLE Reportorial Requirements (2024)', category: 'Compliance' },
-                { label: '8b. DOLE Reportorial Requirements (2025)', category: 'Compliance' },
-                { label: '9a. Signed undertaking (No fatality 2024)', category: 'Legal' },
-                { label: '9b. Signed undertaking (No fatality 2025)', category: 'Legal' },
-                { label: '10a. Work Environment Measurement (2024)', category: 'Systems' },
-                { label: '10b. Work Environment Measurement (2025)', category: 'Systems' },
-                { label: '11. Written Workplace Policies', category: 'Systems' },
-                { label: '12. Risk-based Policy & Program', category: 'Systems' },
-                { label: '14. List of Medical Facilities', category: 'Health' },
-                { label: '15a. Signed HIRAC / Risk Assessment (2024)', category: 'Systems' },
-                { label: '15b. Signed HIRAC / Risk Assessment (2025)', category: 'Systems' },
-                { label: '16a. OSH Information Plan (2024)', category: 'Systems' },
-                { label: '16b. OSH Information Plan (2025)', category: 'Systems' },
-                { label: '17. Valid Permits to Operate', category: 'Safety' },
-                { label: '18. Electrical Wiring Inspection', category: 'Safety' },
-                { label: '19. Employees’ Compensation Logbook', category: 'Health' },
-                { label: '21a. Fire Evacuation Drill (2024)', category: 'Safety' },
-                { label: '21b. Fire Evacuation Drill (2025)', category: 'Safety' }
-            ],
-            stage3: [
-                { label: '22a. CSR / Community Programs (2024)', category: 'Excellence' },
-                { label: '22b. CSR / Community Programs (2025)', category: 'Excellence' },
-                { label: '23a. OSH Budget (2024)', category: 'Management' },
-                { label: '23b. OSH Budget (2025)', category: 'Management' },
-                { label: '25. Environmental Laws Compliance', category: 'Legal' },
-                { label: '33. Valid OSH-related Awards (ISO)', category: 'Excellence' },
-                { label: '34. Industry-specific compliances', category: 'Compliance' },
-                { label: '35. Additional documents', category: 'Other' }
-            ]
-        };
-
-        const constructionAdditional = [
-            { label: '26. Valid PCAB Registration', category: 'Construction' },
-            { label: '27. CSHP (submitted & received)', category: 'Construction' },
-            { label: '27a. DPWH-approved CSHP', category: 'Construction' },
-            { label: '28. Actual Project Completion (S-curve)', category: 'Construction' },
-            { label: '29. Valid CHE Testing', category: 'Construction' },
-            { label: '30. TESDA Certification for CHE Operators', category: 'Construction' },
-            { label: '31. Worker’s Skills Certification', category: 'Construction' },
-            { label: '32. Temporary Welfare Facilities', category: 'Construction' }
-        ];
-
-        await setDoc(doc(db, REQUIREMENTS_COLLECTION, 'cat_industry'), industryRequirements);
-        await setDoc(doc(db, REQUIREMENTS_COLLECTION, 'cat_construction'), {
-            categoryId: 'Construction',
-            stage1: [...industryRequirements.stage1],
-            stage2: [...industryRequirements.stage2, ...constructionAdditional.slice(0, 4)],
-            stage3: [...industryRequirements.stage3, ...constructionAdditional.slice(4)]
-        });
-
-        // Seed Settings
-        await setDoc(doc(db, SETTINGS_COLLECTION, 'system_config'), {
-            key: 'maintenance_mode',
-            value: false
-        });
-
-        // Seed System Logs
-        await setDoc(doc(db, SYSTEM_LOGS_COLLECTION, 'log_1'), {
-            logId: 'log_1',
-            userId: 'system',
-            action: 'database_seed',
-            details: 'Initial database structure generated.',
-            timestamp: new Date().toISOString()
-        });
-
-        // Seed dummy evaluation for the demo app
-        await setDoc(doc(db, EVALUATIONS_REVIEWS_COLLECTION, 'eval_demo_1'), {
-            evaluationId: 'eval_demo_1',
-            applicationId: demoUid,
-            evaluatorId: 'user_reu_mock',
-            role: 'reu',
-            decision: 'Pass',
-            remarks: 'Looks good',
-            visibility: true,
-            evaluatedAt: new Date().toISOString(),
-            status: 'completed'
-        });
-
-        console.log(`Successfully seeded system accounts, winners, and extended schema.`);
+        console.log("Database successfully consolidated to 5 tables.");
         return true;
     } catch (err) {
         console.error("Failed to seed database:", err);
         return false;
     }
 };
+
