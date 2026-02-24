@@ -295,8 +295,13 @@ export const getNomineeByPassKey = async (passKey: string): Promise<Nominee | nu
 
 /**
  * Validates and activates an unused AccessKey for a new Nominee Application.
+ * This consolidates User profile and Application record creation.
  */
-export const activateAccessKey = async (passKey: string, uid: string): Promise<boolean> => {
+export const activateAccessKey = async (
+    passKey: string,
+    uid: string,
+    details: { email: string; companyName: string; category: string }
+): Promise<boolean> => {
     try {
         const keysRef = collection(db, ACCESS_KEYS_COLLECTION);
         const q = query(keysRef, where('keyId', '==', passKey), where('status', '==', 'issued'));
@@ -311,22 +316,27 @@ export const activateAccessKey = async (passKey: string, uid: string): Promise<b
         const nomineeRef = doc(db, USERS_COLLECTION, uid);
         await setDoc(nomineeRef, {
             userId: uid,
-            email: inviteData.email,
+            email: details.email,
             role: 'nominee',
             createdAt: new Date().toISOString(),
             status: 'active'
         });
 
-        // 2. Pre-Create the generic Application document
+        // 2. Pre-Create the Application document
         const appRef = doc(db, APPLICATIONS_COLLECTION, uid);
         await setDoc(appRef, {
             ...inviteData,
             applicationId: uid,
             nomineeId: uid,
             id: uid,
+            name: details.companyName,
+            email: details.email,
+            industry: details.category,
             status: 'in_progress',
+            role: 'nominee',
             activatedAt: new Date().toISOString(),
-            role: 'nominee'
+            documents: [],
+            region: inviteData.region || 'NCR'
         });
 
         // 3. Mark the Access Key as activated and bind user

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 /* Added missing Loader2 to the lucide-react import list */
 import { Eye, EyeOff, Shield, User, Lock, ArrowRight, LayoutDashboard, KeyRound, Zap, Loader2, Building2, AlertCircle, Mail } from 'lucide-react';
-import { getUserByEmail, getNomineeByPassKey, verifyAccessKey } from '../../services/dbService';
+import { getUserByEmail, getNomineeByPassKey, verifyAccessKey, seedFirebase } from '../../services/dbService';
 interface LoginProps {
     onLogin?: (role: string, email?: string) => void;
     onRegisterClick?: () => void;
@@ -247,6 +247,19 @@ const Login: React.FC<LoginProps> = ({ onLogin, onRegisterClick, onQuickRegister
                             <button onClick={onRegisterClick} className="text-gkk-navy hover:text-gkk-gold transition-colors border-b-2 border-gkk-gold/30">
                                 Activate Your Access Key
                             </button>
+                        </p>
+                        <p className="mt-4 text-[9px] text-gray-400 font-bold uppercase tracking-widest">
+                            Testing? <button
+                                type="button"
+                                onClick={async () => {
+                                    const confirmed = window.confirm("This will clear your local GKK data and reset ACT-001 through ACT-005. Proceed?");
+                                    if (confirmed) {
+                                        const ok = await seedFirebase();
+                                        if (ok) alert('Database Reset & Seeded with ACT-001 through ACT-005!');
+                                    }
+                                }}
+                                className="text-gkk-navy hover:underline"
+                            >Seed Fresh Test Data</button>
                         </p>
                     </div>
                 </div>

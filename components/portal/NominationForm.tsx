@@ -27,19 +27,18 @@ const NominationForm: React.FC<NominationFormProps> = ({ onBack }) => {
       // 1. Generate unique internal ID
       const newId = 'user_' + Date.now().toString();
 
-      // 2. Validate and Activate Key
-      const isActivated = await activateAccessKey(accessKey.trim(), newId);
+      // 2. Validate and Activate Key (Consolidated Flow)
+      const isActivated = await activateAccessKey(accessKey.trim(), newId, {
+        email: email.trim().toLowerCase(),
+        companyName: companyName.trim(),
+        category: category
+      });
+
       if (!isActivated) {
         setError("Invalid or previously activated Access Key. Please contact DOLE if you need assistance.");
         setIsSubmitting(false);
         return;
       }
-
-      // 3. Create User Profile
-      await createUserProfile(newId, email.toLowerCase(), 'nominee');
-
-      // 4. Create Nominee Record
-      await createNominee(newId, accessKey.trim(), companyName, category, email);
 
       setIsSubmitting(false);
       setIsSuccess(true);
