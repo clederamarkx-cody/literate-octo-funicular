@@ -201,7 +201,7 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
       nomineeCategory: nomineeData?.details?.nomineeCategory || 'Industry',
     },
     representative: nomineeData?.focalName || (nomineeData as any).representative || nomineeData?.details?.representative || "Juan Dela Cruz",
-    email: nomineeData?.details?.email || nomineeData?.focalEmail || "safety@acme.ph",
+    email: nomineeData?.email || nomineeData?.details?.email || nomineeData?.focalEmail || "safety@acme.ph",
     phone: nomineeData?.details?.phone || nomineeData?.focalPhone || "0917-123-4567",
     safetyOfficer: nomineeData?.details?.safetyOfficer || "Engr. Maria Clara",
     regId: nomineeData?.regId || "NOM-2024-8821",
