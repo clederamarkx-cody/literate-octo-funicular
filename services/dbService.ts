@@ -619,8 +619,7 @@ export const issueAccessKey = async (data: { companyName: string, focalName: str
 export const getAllAccessKeys = async () => {
     const { data, error } = await supabase
         .from(ACCESS_KEYS_COLLECTION)
-        .select('*')
-        .eq('role', 'nominee');
+        .select('*');
 
     return data || [];
 };

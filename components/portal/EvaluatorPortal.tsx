@@ -142,6 +142,9 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
   const [isLoadingRequirements, setIsLoadingRequirements] = useState(false);
   const [dynamicRequirements, setDynamicRequirements] = useState<any>(null);
   const [allKeys, setAllKeys] = useState<any[]>([]);
+  const [keySearchTerm, setKeySearchTerm] = useState('');
+  const [keyStatusFilter, setKeyStatusFilter] = useState<string>('all');
+  const [keyRoleFilter, setKeyRoleFilter] = useState<string>('all');
   const [isIssuingKey, setIsIssuingKey] = useState(false);
   const [newKeyData, setNewKeyData] = useState({ companyName: '', focalName: '', email: '', region: 'NCR', role: 'nominee', category: 'Industry' });
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -642,9 +645,53 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
 
       {/* Access Key Log - Full Width Landscape */}
       <div className="bg-white rounded-[40px] border border-gray-200 shadow-sm overflow-hidden">
-        <div className="p-8 border-b border-gray-100 bg-gray-50/30 flex justify-between items-center">
-          <h3 className="font-serif font-bold text-xl text-gkk-navy uppercase tracking-wider">Access Key Log</h3>
-          <span className="text-[14.5px] bg-blue-50 text-blue-600 px-3 py-1 rounded-full font-semibold uppercase tracking-wide">{allKeys.length} Total Keys</span>
+        <div className="p-8 border-b border-gray-100 bg-gray-50/30">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="font-serif font-bold text-xl text-gkk-navy uppercase tracking-wider">Access Key Log</h3>
+            <span className="text-[14.5px] bg-blue-50 text-blue-600 px-3 py-1 rounded-full font-semibold uppercase tracking-wide">
+              {allKeys.filter((k: any) => {
+                const matchesSearch = keySearchTerm === '' || (k.key_id || '').toLowerCase().includes(keySearchTerm.toLowerCase()) || (k.name || '').toLowerCase().includes(keySearchTerm.toLowerCase()) || (k.email || '').toLowerCase().includes(keySearchTerm.toLowerCase());
+                const matchesStatus = keyStatusFilter === 'all' || k.status === keyStatusFilter;
+                const matchesRole = keyRoleFilter === 'all' || k.role === keyRoleFilter;
+                return matchesSearch && matchesStatus && matchesRole;
+              }).length} of {allKeys.length} Keys
+            </span>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="relative group flex-1">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-gkk-gold transition-colors" size={16} />
+              <input
+                type="text"
+                placeholder="Search by key, name, or email..."
+                value={keySearchTerm}
+                onChange={(e) => setKeySearchTerm(e.target.value)}
+                className="pl-10 pr-4 py-3 bg-white border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-gkk-gold/5 focus:border-gkk-gold transition-all font-semibold text-[14.5px] w-full shadow-sm"
+              />
+            </div>
+            <select
+              value={keyStatusFilter}
+              onChange={(e) => setKeyStatusFilter(e.target.value)}
+              className="px-4 py-3 bg-white border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-gkk-gold/5 focus:border-gkk-gold transition-all font-semibold text-[14.5px] shadow-sm appearance-none min-w-[160px]"
+            >
+              <option value="all">All Status</option>
+              <option value="issued">Issued</option>
+              <option value="activated">Activated</option>
+              <option value="revoked">Revoked</option>
+              <option value="reusable">Reusable</option>
+            </select>
+            <select
+              value={keyRoleFilter}
+              onChange={(e) => setKeyRoleFilter(e.target.value)}
+              className="px-4 py-3 bg-white border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-gkk-gold/5 focus:border-gkk-gold transition-all font-semibold text-[14.5px] shadow-sm appearance-none min-w-[160px]"
+            >
+              <option value="all">All Roles</option>
+              <option value="nominee">Nominee</option>
+              <option value="evaluator">Evaluator</option>
+              <option value="reu">REU</option>
+              <option value="scd_team_leader">SCD Team Leader</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
         </div>
         <div className="overflow-x-auto max-h-[600px]">
           <table className="w-full text-left border-collapse min-w-[1000px]">
@@ -661,44 +708,52 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
-              {allKeys.length === 0 ? (
-                <tr>
-                  <td colSpan={8} className="p-10 text-center text-gray-400 font-semibold uppercase tracking-wide text-[14.5px]">No keys issued yet.</td>
-                </tr>
-              ) : (
-                allKeys.sort((a: any, b: any) => new Date(b.created_at || b.issuedAt).getTime() - new Date(a.created_at || a.issuedAt).getTime()).map((key: any) => (
-                  <tr key={key.key_id || key.keyId} className="group hover:bg-gray-50/50 transition-colors">
-                    <td className="px-6 py-4">
-                      <span className="text-[14.5px] font-semibold text-gkk-navy uppercase tracking-wide select-all">{key.key_id || key.keyId}</span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="text-[14.5px] text-gkk-navy font-semibold uppercase">{key.name || '---'}</span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="text-[14.5px] text-gray-500 font-semibold">{key.email || '---'}</span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="px-2 py-0.5 rounded-md bg-gray-100 text-gray-500 text-[14.5px] font-semibold uppercase">
-                        {key.role.replace('_', ' ')}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="text-[14.5px] text-gray-500 font-semibold uppercase">{key.region}</span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="text-[14.5px] text-gray-500 font-semibold uppercase">{key.category || 'N/A'}</span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`px-2 py-0.5 rounded-full text-[14.5px] font-semibold uppercase border ${key.status === 'activated' ? 'bg-green-50 text-green-600 border-green-100' : 'bg-amber-50 text-amber-600 border-amber-100'}`}>
-                        {key.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <span className="text-[14.5px] text-gray-400 font-semibold uppercase">{new Date(key.created_at || key.issuedAt).toLocaleDateString()}</span>
-                    </td>
+              {(() => {
+                const filteredKeys = allKeys.filter((k: any) => {
+                  const matchesSearch = keySearchTerm === '' || (k.key_id || '').toLowerCase().includes(keySearchTerm.toLowerCase()) || (k.name || '').toLowerCase().includes(keySearchTerm.toLowerCase()) || (k.email || '').toLowerCase().includes(keySearchTerm.toLowerCase());
+                  const matchesStatus = keyStatusFilter === 'all' || k.status === keyStatusFilter;
+                  const matchesRole = keyRoleFilter === 'all' || k.role === keyRoleFilter;
+                  return matchesSearch && matchesStatus && matchesRole;
+                });
+                return filteredKeys.length === 0 ? (
+                  <tr>
+                    <td colSpan={8} className="p-10 text-center text-gray-400 font-semibold uppercase tracking-wide text-[14.5px]">{allKeys.length === 0 ? 'No keys issued yet.' : 'No keys match your filters.'}</td>
                   </tr>
-                ))
-              )}
+                ) : (
+                  filteredKeys.sort((a: any, b: any) => new Date(b.created_at || b.issuedAt).getTime() - new Date(a.created_at || a.issuedAt).getTime()).map((key: any) => (
+                    <tr key={key.key_id || key.keyId} className="group hover:bg-gray-50/50 transition-colors">
+                      <td className="px-6 py-4">
+                        <span className="text-[14.5px] font-semibold text-gkk-navy uppercase tracking-wide select-all">{key.key_id || key.keyId}</span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="text-[14.5px] text-gkk-navy font-semibold uppercase">{key.name || '---'}</span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="text-[14.5px] text-gray-500 font-semibold">{key.email || '---'}</span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="px-2 py-0.5 rounded-md bg-gray-100 text-gray-500 text-[14.5px] font-semibold uppercase">
+                          {key.role.replace('_', ' ')}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="text-[14.5px] text-gray-500 font-semibold uppercase">{key.region}</span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="text-[14.5px] text-gray-500 font-semibold uppercase">{key.category || 'N/A'}</span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={`px-2 py-0.5 rounded-full text-[14.5px] font-semibold uppercase border ${key.status === 'activated' ? 'bg-green-50 text-green-600 border-green-100' : 'bg-amber-50 text-amber-600 border-amber-100'}`}>
+                          {key.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <span className="text-[14.5px] text-gray-400 font-semibold uppercase">{new Date(key.created_at || key.issuedAt).toLocaleDateString()}</span>
+                      </td>
+                    </tr>
+                  ))
+                );
+              })()}
             </tbody>
           </table>
         </div>
