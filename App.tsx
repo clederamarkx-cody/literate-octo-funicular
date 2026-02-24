@@ -14,7 +14,7 @@ import Footer from './components/layout/Footer';
 import ChatWidget from './components/layout/ChatWidget';
 import { FileText, Calendar, Mail } from 'lucide-react';
 import { Nominee, NomineeDocument } from './types';
-import { getNominee, addNomineeDocument, updateNominee, createUserProfile, createNominee } from './services/dbService';
+import { getNominee, addNomineeDocument, updateNominee, createUserProfile, createNominee, setAuthUser } from './services/dbService';
 
 // Lazy load components
 const NominationForm = lazy(() => import('./components/portal/NominationForm'));
@@ -45,7 +45,8 @@ function App() {
       const session = sessionStorage.getItem('gkk_session');
       if (session) {
         try {
-          const { role, uid } = JSON.parse(session);
+          const { role, uid, email } = JSON.parse(session);
+          setAuthUser(uid, email || '');
           if (role === 'nominee' && uid) {
             const data = await getNominee(uid);
             if (data) {
@@ -226,8 +227,9 @@ function App() {
               onBack={() => navigateTo('home')}
               onRegisterClick={() => navigateTo('nominate')}
               onQuickRegister={handleQuickRegister}
-              onLogin={async (role, uid) => {
-                sessionStorage.setItem('gkk_session', JSON.stringify({ role, uid }));
+              onLogin={async (role, uid, email) => {
+                sessionStorage.setItem('gkk_session', JSON.stringify({ role, uid, email }));
+                setAuthUser(uid, email || '');
                 if (role === 'nominee' && uid) {
                   const data = await getNominee(uid);
                   if (data) {

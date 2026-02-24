@@ -83,13 +83,51 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
 
     // Fetch own profile
     const fetchProfile = async () => {
-      // We assume the user is authenticated and we can get their ID
-      // For now, if userRole is passed, we might need the actual UID.
-      // App.tsx handles login, let's assume we can get it from auth.currentUser
+      let uid = '';
+
       const { auth } = await import('../../services/dbService');
       if (auth.currentUser) {
-        const profile = await getUserProfile(auth.currentUser.uid);
-        setStaffProfile(profile);
+        uid = auth.currentUser.uid;
+      } else {
+        // Fallback to session storage if auth state is not yet synced
+        const session = sessionStorage.getItem('gkk_session');
+        if (session) {
+          try {
+            const { uid: sessionUid } = JSON.parse(session);
+            uid = sessionUid;
+          } catch (e) {
+            console.error("Failed to parse session for profile fetch", e);
+          }
+        }
+      }
+
+      if (uid) {
+        const profile = await getUserProfile(uid);
+        if (profile) {
+          setStaffProfile(profile);
+        } else {
+          // If profile doesn't exist in DB, create a minimal one from session or mock it
+          const session = sessionStorage.getItem('gkk_session');
+          let email = 'staff@gkk.gov.ph';
+          let role = (userRole as UserRole) || 'evaluator';
+
+          if (session) {
+            const sData = JSON.parse(session);
+            email = sData.email || email;
+            role = sData.role || role;
+          }
+
+          setStaffProfile({
+            userId: uid,
+            email,
+            role,
+            name: email.split('@')[0].toUpperCase(),
+            region: 'NCR',
+            status: 'active'
+          } as UserType);
+        }
+      } else {
+        console.warn("No UID found for profile fetch");
       }
     };
     fetchProfile();

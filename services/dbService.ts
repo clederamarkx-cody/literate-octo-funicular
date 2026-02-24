@@ -14,6 +14,11 @@ export const auth = {
     }
 };
 
+export const setAuthUser = (uid: string, email: string) => {
+    currentUser = { uid, email, isAnonymous: false };
+    return currentUser;
+};
+
 export const ensureLocalAuth = async () => {
     if (currentUser) return currentUser;
     currentUser = { uid: 'local_user_' + Math.random().toString(36).substring(2, 11), email: 'anonymous@local', isAnonymous: true };
