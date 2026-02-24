@@ -227,7 +227,8 @@ export const getNominee = async (uid: string): Promise<Nominee | null> => {
         industrySector: data.industry_sector,
         workforceSize: data.workforce_size,
         focalName: data.focal_name,
-        focalEmail: data.focal_email,
+        email: data.email || data.details?.email || data.focal_email,
+        focalEmail: data.focal_email || data.email,
         focalPhone: data.focal_phone,
         addressObj: data.address_obj,
         documents: data.documents?.map((d: any) => ({
@@ -378,7 +379,8 @@ export const getAllNominees = async (): Promise<Nominee[]> => {
         industrySector: app.industry_sector,
         workforceSize: app.workforce_size,
         focalName: app.focal_name,
-        focalEmail: app.focal_email,
+        email: app.email || app.details?.email || app.focal_email,
+        focalEmail: app.focal_email || app.email,
         focalPhone: app.focal_phone,
         addressObj: app.address_obj,
         documents: app.documents?.map((d: any) => ({
@@ -505,6 +507,7 @@ export const activateAccessKey = async (
                 organization_name: details.companyName,
                 focal_name: key.focal_name || details.email, // Use focal name from key
                 email: details.email,
+                focal_email: details.email,
                 role: 'nominee',
                 status: 'in_progress',
                 submitted_date: new Date().toISOString(),
