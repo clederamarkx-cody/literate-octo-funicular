@@ -237,7 +237,7 @@ export const getNominee = async (uid: string): Promise<Nominee | null> => {
             date: d.date,
             slotId: d.slot_id,
             remarks: d.remarks,
-            verdict: d.verdict
+            verdict: d.verdict?.toLowerCase()
         })) || []
     } as unknown as Nominee;
 };
@@ -287,9 +287,11 @@ export const updateNominee = async (uid: string, updates: Partial<Nominee>) => {
 };
 
 export const updateDocumentEvaluation = async (appId: string, slotId: string, verdict: 'pass' | 'fail') => {
+    // Database enum uses capitalized values: 'Pass' / 'Fail'
+    const dbVerdict = verdict === 'pass' ? 'Pass' : 'Fail';
     const { error } = await supabase
         .from(DOCUMENTS_COLLECTION)
-        .update({ verdict })
+        .update({ verdict: dbVerdict })
         .eq('application_id', appId)
         .eq('slot_id', slotId);
 
@@ -298,7 +300,7 @@ export const updateDocumentEvaluation = async (appId: string, slotId: string, ve
         return false;
     }
 
-    await logAction('VERIFY_DOCUMENT', `Slot ${slotId} -> ${verdict.toUpperCase()}`, appId);
+    await logAction('VERIFY_DOCUMENT', `Slot ${slotId} -> ${dbVerdict}`, appId);
     return true;
 };
 
@@ -406,7 +408,7 @@ export const getAllNominees = async (): Promise<Nominee[]> => {
             date: d.date,
             slotId: d.slot_id,
             remarks: d.remarks,
-            verdict: d.verdict
+            verdict: d.verdict?.toLowerCase()
         })) || []
     })) as unknown as Nominee[];
 };
