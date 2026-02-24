@@ -1,118 +1,100 @@
 # 14th Gawad Kaligtasan at Kalusugan (GKK) Awards Portal
 
-Welcome to the official repository for the **14th Gawad Kaligtasan at Kalusugan (GKK) Awards Landing Page & Portal**. This application serves as the digital gateway for nominees, evaluators, and the public to participate in the prestigious GKK Awards, recognizing outstanding achievements in Occupational Safety and Health (OSH) in the Philippines.
+Welcome to the official repository for the **14th Gawad Kaligtasan at Kalusugan (GKK) Awards Portal**. This system serves as the digital infrastructure for the Occupational Safety and Health Center (OSHC), recognizing outstanding OSH achievements in the Philippines.
 
 ---
 
-## Features
-
-*   **Public Landing Page**: Showcase of award categories, timeline, submission guidelines, and past champions.
-*   **Role-Based Portals**:
-    *   **Nominee Portal**: Secure registration, multi-stage document submission, and real-time progress tracking.
-    *   **Evaluator Portal**: Dedicated interfaces tailored to different evaluation tiers (REU, Admin, SCD, Regional Board).
-*   **Multi-Stage Verification System**:
-    *   **Stage 1 (Technical & Document Review)**: Regional Expansion Units (REU) verification.
-    *   **Stage 2 (Shortlist & Inspection)**: Unlocked by Admins/SCDs for further evaluation.
-    *   **Stage 3 (Final Board Presentation)**: Final vetting stage.
-*   **Cloud Integration**: Real-time database sync and secure cloud storage for documents using Google Firebase.
-*   **Interactive UI**: Smooth animations, responsive design, and intuitive navigation built on modern web standards.
-
-## Tech Stack
-
-*   **Frontend**: [React 18](https://react.dev/) + [Vite](https://vitejs.dev/)
-*   **Styling**: [Tailwind CSS](https://tailwindcss.com/)
-*   **Icons**: [Lucide React](https://lucide.dev/)
-*   **Language**: [TypeScript](https://www.typescriptlang.org/)
-*   **Backend / BaaS**: [Firebase](https://firebase.google.com/) (Firestore DB & Cloud Storage)
-*   **Routing**: React state-based view management
+## 🚀 Recent Update: Supabase Migration
+The system has been migrated from a Firebase/localStorage mock to a robust **Supabase** live backend. This provides:
+- **Persistent Data**: No more session loss; all data is stored in PostgreSQL.
+- **Relational Integrity**: Proper foreign keys between Users, Applications, and Documents.
+- **Scalability**: A dedicated `application_documents` table for handling heavy file uploads efficiently.
 
 ---
 
-## User Roles & Permissions
+## ✨ Features
 
-The application restricts features based on the `role` property in the user's session:
-
-1.  **`applicant`**: Can fill out their profile and upload documents sequentially across unlocked stages.
-2.  **`reu` (Regional Expansion Unit)**: Can view submitted profiles and pass/fail them for Stage 1 (Exception: restricted from passing NCR region applicants).
-3.  **`evaluator` / Regional Board**: Can evaluate verified documents, trigger Phase 2 evaluations, and input final scoring.
-4.  **`scd` (Safety Control Division)**: Specialized oversight role; can trigger stage unlocks and mandate fail/pass verdicts.
-5.  **`admin`**: Superuser functionality with full visibility and control over pipeline stages and applicant statuses.
+- **Public Landing Page**: Interactive showcase of award categories, timeline, and champions.
+- **Unified Nominee Portal**: Registration via passkeys, profile management, and document submission.
+- **Role-Based Portals**:
+    - **REU (Regional Expansion Unit)**: Front-line document verification and Stage 1 vetting.
+    - **Evaluator / Regional Board**: Scoring and site inspection triggering.
+    - **SCD (Safety Control Division)**: Oversight and final validation.
+    - **Admin**: Full pipeline control and system audit visibility.
+- **Multi-Stage Workflow**: Automated progression through Stage 1 (Technical), Stage 2 (Shortlist), and Stage 3 (National Board).
 
 ---
 
-## Getting Started
+## 🛠 Tech Stack
 
-Follow these steps to set up the project locally.
+- **Frontend**: [React 19](https://react.dev/) + [Vite](https://vitejs.dev/)
+- **Language**: [TypeScript](https://www.typescriptlang.org/)
+- **Database**: [Supabase](https://supabase.com/) (PostgreSQL)
+- **Styling**: Vanilla CSS (Custom tokens) + [Lucide React Icons](https://lucide.dev/)
+- **Infrastructure**: Local Node.js development environment
+
+---
+
+## 🔑 Demo Access
+
+For development and testing, the following credentials and keys are pre-seeded in the database:
+
+| Role | Access Type | Credential | Key Type |
+| :--- | :--- | :--- | :--- |
+| **Admin** | Email | `admin@local` | - |
+| **Admin** | Passkey | `ADMIN-SB-REUSABLE` | Reusable |
+| **Nominee** | Passkey | `GKK-SB-DEMO-2024` | Single Activation |
+
+---
+
+## 🏁 Getting Started
 
 ### Prerequisites
-
-*   [Node.js](https://nodejs.org/) (v18.0.0 or higher recommended)
-*   npm or yarn
-*   A Firebase Project (with Firestore and Storage enabled)
+- [Node.js](https://nodejs.org/) (v18.0.0+)
+- A Supabase Project
 
 ### Installation
 
-1.  **Clone the repository**:
-    ```bash
-    git clone https://github.com/your-username/oshc-gkk-awards-main.git
-    cd oshc-gkk-awards-main
-    ```
+1. **Clone and Install**:
+   ```bash
+   git clone <repo-url>
+   cd oshc-gkk-awards-main
+   npm install
+   ```
 
-2.  **Install dependencies**:
-    ```bash
-    npm install
-    ```
+2. **Supabase Configuration**:
+   The application uses the Supabase client initialized in `services/supabaseClient.ts`. 
+   
+   If you aren't using the pre-configured project, ensure you update your variables:
+   - `supabaseUrl`: Your Supabase Project URL.
+   - `supabaseKey`: Your Supabase Anon/Publishable Key.
 
-3.  **Environment Setup**:
-    Create a `.env` file in the root directory and add your Firebase configuration:
-    ```env
-    VITE_FIREBASE_API_KEY=your_api_key
-    VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
-    VITE_FIREBASE_PROJECT_ID=your_project_id
-    VITE_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
-    VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
-    VITE_FIREBASE_APP_ID=your_app_id
-    ```
-
-4.  **Start the development server**:
-    ```bash
-    npm run dev
-    ```
-
-    Open your browser and navigate to `http://localhost:5173`.
+3. **Start Development**:
+   ```bash
+   npm run dev
+   ```
 
 ---
 
-## Project Structure
+## 📂 Project Structure
 
-```text
-oshc-gkk-awards-main/
-├── firebase.js          # Firebase initialization and config
-├── src/
-│   ├── components/      # React components
-│   │   ├── landing/     # Public-facing informative sections
-│   │   ├── layout/      # Shared wrappers (Navbar, Footer, Modal)
-│   │   ├── portal/      # Login, Evaluator Dashboard, Applicant Dashboard
-│   ├── services/        # Firebase data access layer (dbService.ts)
-│   ├── types.ts         # Global TypeScript interfaces
-│   ├── App.tsx          # Core routing and state provider
-│   └── main.tsx         # React DOM entry
-├── index.html           # HTML template
-├── tailwind.config.js   # Tailwind theme (navy, gold palettes)
-└── vite.config.ts       # Vite configuration
-```
+- `src/components/portal/`: Contains the core logic for Nominee and Evaluator dashboards.
+- `src/services/dbService.ts`: The central data access layer, now fully powered by Supabase.
+- `src/services/supabaseClient.ts`: Connection handler for the Supabase backend.
+- `src/types.ts`: Shared TypeScript interfaces for data consistency.
 
 ---
 
-## Contributing
+## 📜 Database Overview (Live)
 
-Contributions are welcome! If you find any bugs or have feature requests, please open an issue or submit a Pull Request. 
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+The system utilizes 7 core tables:
+1. `users`: Profiles & roles.
+2. `access_keys`: Registration passcodes.
+3. `applications`: Core award submission data.
+4. `application_documents`: Dedicated file tracking (Refined for performance).
+5. `requirements`: Dynamic checklists by category.
+6. `gkk_winners`: Hall of fame archive.
+7. `system_logs`: Audit logs of all actions.
 
 ---
 

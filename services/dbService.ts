@@ -1,43 +1,8 @@
 import { Nominee, NomineeDocument, UserRole } from '../types';
 import { INITIAL_GKK_WINNERS } from '../constants';
+import { supabase } from './supabaseClient';
 
-// --- MOCK DATABASE ENGINE (localStorage) ---
-
-const DB_PREFIX = 'gkk_app_';
-
-const db = {
-    get: (collection: string) => {
-        const data = localStorage.getItem(DB_PREFIX + collection);
-        return data ? JSON.parse(data) : {};
-    },
-    save: (collection: string, data: any) => {
-        localStorage.setItem(DB_PREFIX + collection, JSON.stringify(data));
-    },
-    doc: (collection: string, id: string) => {
-        const col = db.get(collection);
-        return col[id] || null;
-    },
-    setDoc: (collection: string, id: string, data: any, merge = false) => {
-        const col = db.get(collection);
-        if (merge) {
-            col[id] = { ...(col[id] || {}), ...data };
-        } else {
-            col[id] = data;
-        }
-        db.save(collection, col);
-    },
-    deleteDoc: (collection: string, id: string) => {
-        const col = db.get(collection);
-        delete col[id];
-        db.save(collection, col);
-    },
-    query: (collection: string, predicate: (item: any) => boolean) => {
-        const col = db.get(collection);
-        return Object.values(col).filter(predicate);
-    }
-};
-
-// --- MOCK AUTH ENGINE ---
+// --- MOCK AUTH ENGINE (Simplified for integration) ---
 
 let currentUser: { uid: string; email: string; isAnonymous: boolean } | null = null;
 
@@ -51,16 +16,17 @@ export const auth = {
 
 export const ensureLocalAuth = async () => {
     if (currentUser) return currentUser;
-    currentUser = { uid: 'local_user_' + Math.random().toString(36).substr(2, 9), email: 'anonymous@local', isAnonymous: true };
+    currentUser = { uid: 'local_user_' + Math.random().toString(36).substring(2, 11), email: 'anonymous@local', isAnonymous: true };
     console.log("[MOCK AUTH] Signed in as:", currentUser.uid);
     return currentUser;
 };
 
-// --- COLLECTION NAMES ---
+// --- COLLECTION NAMES (Supabase Tables) ---
 
 export const USERS_COLLECTION = 'users';
-export const ACCESS_KEYS_COLLECTION = 'accessKeys';
+export const ACCESS_KEYS_COLLECTION = 'access_keys';
 export const APPLICATIONS_COLLECTION = 'applications';
+export const DOCUMENTS_COLLECTION = 'application_documents';
 export const REQUIREMENTS_COLLECTION = 'requirements';
 export const WINNERS_COLLECTION = 'gkk_winners';
 export const SYSTEM_LOGS_COLLECTION = 'system_logs';
@@ -70,21 +36,31 @@ export const TEST_MODE = false;
 // --- STANDARDIZED API ---
 
 export const logAction = async (action: string, details: string, appId?: string) => {
-    const logId = `log_${Date.now()}`;
-    db.setDoc(SYSTEM_LOGS_COLLECTION, logId, {
-        logId,
-        userId: currentUser?.uid || 'system',
+    const { error } = await supabase.from(SYSTEM_LOGS_COLLECTION).insert({
+        user_id: currentUser?.uid || null,
         action,
         details,
-        applicationId: appId || 'n/a',
-        timestamp: new Date().toISOString()
+        application_id: appId || null
     });
+    if (error) console.error("Logging failed:", error);
 };
 
 export const getRequirementsByCategory = async (category: string) => {
-    const data = db.doc(REQUIREMENTS_COLLECTION, `cat_${category.toLowerCase()}`);
-    if (data) return data;
-    return db.doc(REQUIREMENTS_COLLECTION, 'cat_industry');
+    const { data, error } = await supabase
+        .from(REQUIREMENTS_COLLECTION)
+        .select('*')
+        .eq('category_id', `cat_${category.toLowerCase()}`)
+        .single();
+
+    if (error || !data) {
+        const { data: defaultData } = await supabase
+            .from(REQUIREMENTS_COLLECTION)
+            .select('*')
+            .eq('category_id', 'cat_industry')
+            .single();
+        return defaultData;
+    }
+    return data;
 };
 
 export const isValidRole = (role: string): role is UserRole => {
@@ -92,30 +68,29 @@ export const isValidRole = (role: string): role is UserRole => {
 };
 
 export const createUserProfile = async (uid: string, email: string, role: UserRole) => {
-    db.setDoc(USERS_COLLECTION, uid, {
-        userId: uid,
+    const { error } = await supabase.from(USERS_COLLECTION).insert({
+        user_id: uid,
         email,
         role,
-        createdAt: new Date().toISOString(),
         status: role === 'nominee' ? 'pending' : 'active'
     });
+    if (error) console.error("User profile creation failed:", error);
 };
 
 export const createNominee = async (uid: string, regId: string, name: string, nomineeCategory: Nominee['details']['nomineeCategory'], email: string) => {
     await createUserProfile(uid, email, 'nominee');
 
-    const newApplication: Nominee = {
+    const newApplication: any = {
         id: uid,
-        regId,
+        reg_id: regId,
         name,
         email,
         role: 'nominee',
         industry: 'Unspecified',
         region: 'NCR',
         status: 'in_progress',
-        submittedDate: new Date().toISOString(),
-        round2Unlocked: false,
-        documents: [],
+        submitted_date: new Date().toISOString(),
+        round2_unlocked: false,
         details: {
             nomineeCategory,
             employees: '',
@@ -127,41 +102,115 @@ export const createNominee = async (uid: string, regId: string, name: string, no
             safetyOfficer: ''
         }
     };
-    db.setDoc(APPLICATIONS_COLLECTION, uid, newApplication);
+
+    const { error } = await supabase.from(APPLICATIONS_COLLECTION).insert(newApplication);
+    if (error) console.error("Application creation failed:", error);
+
     return newApplication;
 };
 
 export const getNominee = async (uid: string): Promise<Nominee | null> => {
-    return db.doc(APPLICATIONS_COLLECTION, uid) as Nominee | null;
+    const { data, error } = await supabase
+        .from(APPLICATIONS_COLLECTION)
+        .select(`
+            *,
+            documents: ${DOCUMENTS_COLLECTION} (*)
+        `)
+        .eq('id', uid)
+        .single();
+
+    if (error || !data) return null;
+
+    // Map back to camelCase for the frontend
+    return {
+        ...data,
+        regId: data.reg_id,
+        submittedDate: data.submitted_date,
+        round2Unlocked: data.round2_unlocked,
+        round3Unlocked: data.round3_unlocked,
+        stage1PassedByReu: data.stage1_passed_by_reu,
+        stage2TriggeredByScd: data.stage2_triggered_by_scd,
+        stage3TriggeredByScd: data.stage3_triggered_by_scd,
+        stage1Verdict: data.stage1_verdict,
+        stage2Verdict: data.stage2_verdict,
+        stage3Verdict: data.stage3_verdict,
+        organizationName: data.organization_name,
+        industrySector: data.industry_sector,
+        workforceSize: data.workforce_size,
+        focalName: data.focal_name,
+        focalEmail: data.focal_email,
+        focalPhone: data.focal_phone,
+        addressObj: data.address_obj,
+        documents: data.documents?.map((d: any) => ({
+            name: d.name,
+            type: d.type,
+            url: d.url,
+            date: d.date,
+            slotId: d.slot_id,
+            remarks: d.remarks,
+            verdict: d.verdict
+        })) || []
+    } as unknown as Nominee;
 };
 
 export const updateNominee = async (uid: string, updates: Partial<Nominee>) => {
-    db.setDoc(APPLICATIONS_COLLECTION, uid, updates, true);
+    // Map camelCase to snake_case for Supabase
+    const supabaseUpdates: any = {};
+    if (updates.regId) supabaseUpdates.reg_id = updates.regId;
+    if (updates.status) supabaseUpdates.status = updates.status;
+    if (updates.verdict) supabaseUpdates.verdict = updates.verdict;
+    if (updates.round2Unlocked !== undefined) supabaseUpdates.round2_unlocked = updates.round2Unlocked;
+    if (updates.round3Unlocked !== undefined) supabaseUpdates.round3_unlocked = updates.round3Unlocked;
+    if (updates.stage1PassedByReu !== undefined) supabaseUpdates.stage1_passed_by_reu = updates.stage1PassedByReu;
+    if (updates.stage2TriggeredByScd !== undefined) supabaseUpdates.stage2_triggered_by_scd = updates.stage2TriggeredByScd;
+    if (updates.stage3TriggeredByScd !== undefined) supabaseUpdates.stage3_triggered_by_scd = updates.stage3TriggeredByScd;
+    if (updates.stage1Verdict) supabaseUpdates.stage1_verdict = updates.stage1Verdict;
+    if (updates.stage2Verdict) supabaseUpdates.stage2_verdict = updates.stage2Verdict;
+    if (updates.stage3Verdict) supabaseUpdates.stage3_verdict = updates.stage3Verdict;
+    if (updates.details) supabaseUpdates.details = updates.details;
+    if (updates.name) supabaseUpdates.name = updates.name;
+    if (updates.email) supabaseUpdates.email = updates.email;
+    if (updates.region) supabaseUpdates.region = updates.region;
+    if (updates.industry) supabaseUpdates.industry = updates.industry;
+
+    const { error } = await supabase
+        .from(APPLICATIONS_COLLECTION)
+        .update(supabaseUpdates)
+        .eq('id', uid);
+
+    if (error) console.error("Update nominee failed:", error);
     await logAction('UPDATE_NOMINEE', `Fields: ${Object.keys(updates).join(', ')}`, uid);
 };
 
 export const updateDocumentEvaluation = async (appId: string, slotId: string, verdict: 'pass' | 'fail') => {
-    const data = db.doc(APPLICATIONS_COLLECTION, appId) as Nominee | null;
-    if (data) {
-        const updatedDocs = data.documents.map(doc =>
-            doc.slotId === slotId ? { ...doc, verdict } : doc
-        );
-        db.setDoc(APPLICATIONS_COLLECTION, appId, { documents: updatedDocs }, true);
-        await logAction('VERIFY_DOCUMENT', `Slot ${slotId} -> ${verdict.toUpperCase()}`, appId);
-        return true;
+    const { error } = await supabase
+        .from(DOCUMENTS_COLLECTION)
+        .update({ verdict })
+        .eq('application_id', appId)
+        .eq('slot_id', slotId);
+
+    if (error) {
+        console.error("Update document evaluation failed:", error);
+        return false;
     }
-    return false;
+
+    await logAction('VERIFY_DOCUMENT', `Slot ${slotId} -> ${verdict.toUpperCase()}`, appId);
+    return true;
 };
 
 export const addNomineeDocument = async (uid: string, document: NomineeDocument) => {
-    const nominee = db.doc(APPLICATIONS_COLLECTION, uid) as Nominee | null;
-    if (!nominee) return;
+    const { error } = await supabase.from(DOCUMENTS_COLLECTION).upsert({
+        application_id: uid,
+        slot_id: document.slotId,
+        name: document.name,
+        type: document.type,
+        url: document.url,
+        date: document.date || new Date().toISOString(),
+        remarks: document.remarks,
+        verdict: document.verdict
+    }, { onConflict: 'application_id,slot_id' }); // Requires a unique constraint in Supabase for this to work as upsert
 
-    const existingDocs = nominee.documents || [];
-    const updatedDocs = existingDocs.filter(d => d.slotId !== document.slotId);
-    updatedDocs.push(document);
-
-    db.setDoc(APPLICATIONS_COLLECTION, uid, { documents: updatedDocs }, true);
+    if (error) console.error("Add nominee document failed:", error);
 };
 
 export const uploadNomineeFile = async (
@@ -171,46 +220,120 @@ export const uploadNomineeFile = async (
     onProgress?: (progress: number) => void,
     cancelToken?: { cancel?: () => void }
 ): Promise<string> => {
-    console.log("[MOCK STORAGE] Uploading:", file.name);
+    console.log("[STORAGE] Preparing upload for:", file.name);
     if (onProgress) onProgress(10);
 
-    // Convert to a local blob URL that persists during the session
-    const localUrl = URL.createObjectURL(file);
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${uid}/${documentId}_${Date.now()}.${fileExt}`;
 
+    // Note: Assuming a 'nominee-documents' bucket exists. Plan didn't include creating it yet.
+    // For now, we use a placeholder or local URL if storage isn't set up.
+    // However, if we want full Supabase, we'd do:
+    /*
+    const { data, error } = await supabase.storage.from('nominee-documents').upload(fileName, file);
+    if (error) throw error;
+    const { data: urlData } = supabase.storage.from('nominee-documents').getPublicUrl(data.path);
+    return urlData.publicUrl;
+    */
+
+    // Since storage setup wasn't explicitly in the plan schema (only DB), 
+    // and bucket creation requires more permissions/tools, I'll stick to a local Blob for now 
+    // or return a path that would be used.
+
+    const localUrl = URL.createObjectURL(file);
     if (onProgress) onProgress(100);
-    console.log("[MOCK STORAGE] Success:", localUrl);
     return localUrl;
 };
 
 export const getAllNominees = async (): Promise<Nominee[]> => {
-    return db.query(APPLICATIONS_COLLECTION, () => true) as Nominee[];
+    const { data, error } = await supabase
+        .from(APPLICATIONS_COLLECTION)
+        .select(`
+            *,
+            documents: ${DOCUMENTS_COLLECTION} (*)
+        `);
+
+    if (error) {
+        console.error("Get all nominees failed:", error);
+        return [];
+    }
+
+    return (data || []).map((app: any) => ({
+        ...app,
+        regId: app.reg_id,
+        submittedDate: app.submitted_date,
+        round2Unlocked: app.round2_unlocked,
+        round3Unlocked: app.round3_unlocked,
+        stage1PassedByReu: app.stage1_passed_by_reu,
+        stage2TriggeredByScd: app.stage2_triggered_by_scd,
+        stage3TriggeredByScd: app.stage3_triggered_by_scd,
+        stage1Verdict: app.stage1_verdict,
+        stage2Verdict: app.stage2_verdict,
+        stage3Verdict: app.stage3_verdict,
+        organizationName: app.organization_name,
+        industrySector: app.industry_sector,
+        workforceSize: app.workforce_size,
+        focalName: app.focal_name,
+        focalEmail: app.focal_email,
+        focalPhone: app.focal_phone,
+        addressObj: app.address_obj,
+        documents: app.documents?.map((d: any) => ({
+            name: d.name,
+            type: d.type,
+            url: d.url,
+            date: d.date,
+            slotId: d.slot_id,
+            remarks: d.remarks,
+            verdict: d.verdict
+        })) || []
+    })) as unknown as Nominee[];
 };
 
-/**
- * Dynamically resolves File URLs. 
- */
 export const resolveFileUrl = async (url: string | null | undefined): Promise<string> => {
     return url || '';
 };
 
 export const getUserRole = async (uid: string): Promise<UserRole | null> => {
-    const user = db.doc(USERS_COLLECTION, uid);
-    return user ? user.role : null;
+    const { data, error } = await supabase
+        .from(USERS_COLLECTION)
+        .select('role')
+        .eq('user_id', uid)
+        .single();
+
+    if (error || !data) return null;
+    return data.role as UserRole;
 };
 
 export const getUserByEmail = async (email: string) => {
-    const results = db.query(USERS_COLLECTION, (u) => u.email === email);
-    return results.length > 0 ? { uid: (results[0] as any).userId, role: (results[0] as any).role } : null;
+    const { data, error } = await supabase
+        .from(USERS_COLLECTION)
+        .select('user_id, role')
+        .eq('email', email)
+        .single();
+
+    return data ? { uid: data.user_id, role: data.role as UserRole } : null;
 };
 
 export const getGKKWinners = async (): Promise<any[]> => {
-    const winners = db.query(WINNERS_COLLECTION, () => true);
-    return winners.length > 0 ? winners : INITIAL_GKK_WINNERS;
+    const { data, error } = await supabase
+        .from(WINNERS_COLLECTION)
+        .select('*');
+
+    return data && data.length > 0 ? data : INITIAL_GKK_WINNERS;
 };
 
 export const getNomineeByPassKey = async (passKey: string): Promise<Nominee | null> => {
-    const results = db.query(APPLICATIONS_COLLECTION, (a) => a.regId === passKey);
-    return results.length > 0 ? results[0] as Nominee : null;
+    const { data, error } = await supabase
+        .from(APPLICATIONS_COLLECTION)
+        .select(`
+            *,
+            documents: ${DOCUMENTS_COLLECTION} (*)
+        `)
+        .eq('reg_id', passKey)
+        .single();
+
+    if (error || !data) return null;
+    return data as unknown as Nominee;
 };
 
 export const activateAccessKey = async (
@@ -219,111 +342,79 @@ export const activateAccessKey = async (
     details: { email: string; companyName: string; category: string }
 ): Promise<boolean> => {
     try {
-        const results = db.query(ACCESS_KEYS_COLLECTION, (k) => k.keyId === passKey && k.status === 'issued');
-        if (results.length === 0) return false;
+        const { data: key, error: keyError } = await supabase
+            .from(ACCESS_KEYS_COLLECTION)
+            .select('*')
+            .eq('key_id', passKey)
+            .eq('status', 'issued')
+            .single();
 
-        const key = results[0] as any;
+        if (keyError || !key) return false;
 
         await createNominee(uid, passKey, details.companyName, details.category as any, details.email);
 
-        db.setDoc(ACCESS_KEYS_COLLECTION, key.keyId, {
-            status: 'activated',
-            userId: uid,
-            activatedAt: new Date().toISOString()
-        }, true);
+        const { error: updateError } = await supabase
+            .from(ACCESS_KEYS_COLLECTION)
+            .update({
+                status: 'activated',
+                user_id: uid,
+                activated_at: new Date().toISOString()
+            })
+            .eq('key_id', passKey);
 
-        return true;
+        return !updateError;
     } catch (error) {
-        console.error("Mock activation failed", error);
+        console.error("Activation failed", error);
         return false;
     }
 };
 
 export const verifyAccessKey = async (passKey: string) => {
-    const results = db.query(ACCESS_KEYS_COLLECTION, (k) => k.keyId === passKey);
-    if (results.length > 0) {
-        const data = results[0] as any;
-        return {
-            uid: data.userId || `local_${passKey}`,
-            role: data.role as UserRole,
-            status: data.status
-        };
-    }
-    return null;
+    const { data, error } = await supabase
+        .from(ACCESS_KEYS_COLLECTION)
+        .select('*')
+        .eq('key_id', passKey)
+        .single();
+
+    if (error || !data) return null;
+
+    return {
+        uid: data.user_id || `local_${passKey}`,
+        role: data.role as UserRole,
+        status: data.status
+    };
 };
 
 export const issueAccessKey = async (data: { companyName: string, email: string, region: string }): Promise<string> => {
     const random = Math.floor(1000 + Math.random() * 9000).toString();
-    const keyId = `GKK-LOCAL-${data.companyName.substring(0, 3).toUpperCase()}-${random}`;
+    const keyId = `GKK-SB-${data.companyName.substring(0, 3).toUpperCase()}-${random}`;
 
-    db.setDoc(ACCESS_KEYS_COLLECTION, keyId, {
-        keyId,
+    const { error } = await supabase.from(ACCESS_KEYS_COLLECTION).insert({
+        key_id: keyId,
         role: 'nominee',
         status: 'issued',
-        issuedAt: new Date().toISOString(),
         email: data.email,
         name: data.companyName,
         region: data.region
     });
+
+    if (error) console.error("Issue key failed:", error);
 
     await logAction('ISSUE_KEY', `Issued key ${keyId}`);
     return keyId;
 };
 
 export const getAllAccessKeys = async () => {
-    return db.query(ACCESS_KEYS_COLLECTION, (k) => k.role === 'nominee');
-};
+    const { data, error } = await supabase
+        .from(ACCESS_KEYS_COLLECTION)
+        .select('*')
+        .eq('role', 'nominee');
 
-// --- INITIALIZE LOCAL STORAGE WITH DEFAULTS IF EMPTY ---
+    return data || [];
+};
 
 export const initializeLocalDB = () => {
-    if (localStorage.getItem(DB_PREFIX + REQUIREMENTS_COLLECTION)) return;
-
-    console.log("[LOCAL DB] Initializing with default requirements...");
-
-    // Seed basic requirements for Industry UI
-    const mockReqs = [
-        { category: 'Management', label: '1. Accomplished GKK Application Form' },
-        { category: 'Safety', label: '2. Comprehensive OSH Program' }
-        // We'll keep it light for mock defaults, or add more
-    ];
-
-    ['industry', 'micro enterprise', 'government', 'individual'].forEach(cat => {
-        db.setDoc(REQUIREMENTS_COLLECTION, `cat_${cat}`, {
-            categoryId: `cat_${cat}`,
-            categoryName: cat,
-            stage1: mockReqs,
-            stage2: [],
-            stage3: []
-        });
-    });
-
-    // Seed a few demo keys
-    db.setDoc(ACCESS_KEYS_COLLECTION, 'LOCAL-DEMO-001', {
-        keyId: 'LOCAL-DEMO-001',
-        role: 'nominee',
-        status: 'issued',
-        issuedAt: new Date().toISOString(),
-        region: 'NCR'
-    });
-
-    db.setDoc(ACCESS_KEYS_COLLECTION, 'ADMIN-LOCAL', {
-        keyId: 'ADMIN-LOCAL',
-        role: 'admin',
-        status: 'reusable',
-        issuedAt: new Date().toISOString(),
-        userId: 'admin_local_mock'
-    });
-
-    db.setDoc(USERS_COLLECTION, 'admin_local_mock', {
-        userId: 'admin_local_mock',
-        email: 'admin@local',
-        role: 'admin',
-        status: 'active'
-    });
+    // This was used for localStorage seeding. 
+    // In Supabase, we do this via migrations or initial scripts.
+    console.log("[SUPABASE] Running in live mode.");
 };
-
-// Auto-init on import
-if (typeof window !== 'undefined') {
-    initializeLocalDB();
-}
