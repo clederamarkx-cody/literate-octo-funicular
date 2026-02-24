@@ -344,21 +344,25 @@ export const activateAccessKey = async (passKey: string, uid: string): Promise<b
 };
 
 /**
- * Verifies an access key (Pass Key) for Staff via unified Access Keys.
+ * Verifies an access key (Pass Key) for any user role via the unified Access Keys collection.
  */
-export const verifyAccessKey = async (passKey: string): Promise<{ uid: string, role: UserRole } | null> => {
-    // 2. Fallback to Firebase
-    const keysRef = collection(db, ACCESS_KEYS_COLLECTION);
-    const q = query(keysRef, where('keyId', '==', passKey), where('status', '==', 'reusable'));
-    const querySnapshot = await getDocs(q);
+export const verifyAccessKey = async (passKey: string): Promise<{ uid: string, role: UserRole, status: string } | null> => {
+    try {
+        const keysRef = collection(db, ACCESS_KEYS_COLLECTION);
+        const q = query(keysRef, where('keyId', '==', passKey));
+        const querySnapshot = await getDocs(q);
 
-    if (!querySnapshot.empty) {
-        const docSnap = querySnapshot.docs[0];
-        const data = docSnap.data();
-        return {
-            uid: data.userId || `virtual_${passKey}`, // Provide virtual uid if staff hasn't fully registered
-            role: data.role as UserRole
-        };
+        if (!querySnapshot.empty) {
+            const docSnap = querySnapshot.docs[0];
+            const data = docSnap.data();
+            return {
+                uid: data.userId || `virtual_${passKey}`,
+                role: data.role as UserRole,
+                status: data.status
+            };
+        }
+    } catch (err) {
+        console.error("Key verification failed", err);
     }
 
     return null;

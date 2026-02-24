@@ -36,20 +36,20 @@ const Login: React.FC<LoginProps> = ({ onLogin, onRegisterClick, onQuickRegister
         try {
             if (loginMethod === 'passkey') {
                 const cleanAccessCode = accessCode.trim();
-                // First check if it's an evaluator passkey
                 const evalAccess = await verifyAccessKey(cleanAccessCode);
-                if (evalAccess && onLogin) {
-                    onLogin(evalAccess.role, evalAccess.uid);
-                    return;
+                if (evalAccess) {
+                    if (evalAccess.status === 'issued') {
+                        setError("This key needs to be activated first. Please click 'Activate Your Access Key' below.");
+                        setIsLoading(false);
+                        return;
+                    }
+                    if (onLogin) {
+                        onLogin(evalAccess.role, evalAccess.uid);
+                        return;
+                    }
                 }
 
-                // Fallback to checking nominee passkey
-                const nominee = await getNomineeByPassKey(cleanAccessCode);
-                if (nominee) {
-                    if (onLogin) onLogin('nominee', nominee.id);
-                } else {
-                    setError("Invalid Invitation/Access Key. Please check your credentials.");
-                }
+                setError("Invalid Invitation/Access Key. Please check your credentials.");
             } else {
                 // Email/Password login logic
                 if (email === 'abyguel@scd.com' && password === 'scd123') {
