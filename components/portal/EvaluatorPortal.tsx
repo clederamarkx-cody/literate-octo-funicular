@@ -412,14 +412,14 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
           {userRole !== 'reu' && (
             <>
               <div className="space-y-4">
-                <div className={`rounded-[40px] border transition-all duration-300 overflow-hidden ${(selectedNominee.round2Unlocked || ['admin', 'scd', 'evaluator'].includes(userRole || '')) ? 'bg-white border-gray-200 shadow-xl' : 'bg-gray-50 border-gray-100 opacity-60'}`}>
+                <div className={`rounded-[40px] border transition-all duration-300 overflow-hidden ${(selectedNominee.round2Unlocked || ['admin', 'scd_team_leader'].includes(userRole || '')) ? 'bg-white border-gray-200 shadow-xl' : 'bg-gray-50 border-gray-100 opacity-60'}`}>
                   <div className="p-10 flex flex-col md:flex-row items-center justify-between gap-8">
                     <div className="flex items-center space-x-8">
-                      <div className={`w-16 h-16 rounded-3xl flex items-center justify-center transition-all ${(selectedNominee.round2Unlocked || ['admin', 'scd', 'evaluator'].includes(userRole || '')) ? 'bg-blue-600 text-white shadow-xl' : 'bg-gray-200 text-gray-400'}`}>{(selectedNominee.round2Unlocked || ['admin', 'scd', 'evaluator'].includes(userRole || '')) ? <Unlock size={28} /> : <Lock size={28} />}</div>
-                      <div className="text-left"><h4 className="font-bold text-gkk-navy text-xl uppercase tracking-tighter leading-none">Stage 2 Verification</h4><p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-3">{selectedNominee.round2Unlocked ? 'Reviewing national shortlist' : (['admin', 'evaluator', 'scd_team_leader'].includes(userRole || '')) ? 'Action Required: Trigger Stage 2' : 'Locked'}</p></div>
+                      <div className={`w-16 h-16 rounded-3xl flex items-center justify-center transition-all ${(selectedNominee.round2Unlocked || ['admin', 'scd_team_leader'].includes(userRole || '')) ? 'bg-blue-600 text-white shadow-xl' : 'bg-gray-200 text-gray-400'}`}>{(selectedNominee.round2Unlocked || ['admin', 'scd_team_leader'].includes(userRole || '')) ? <Unlock size={28} /> : <Lock size={28} />}</div>
+                      <div className="text-left"><h4 className="font-bold text-gkk-navy text-xl uppercase tracking-tighter leading-none">Stage 2 Verification</h4><p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-3">{selectedNominee.round2Unlocked ? 'Reviewing national shortlist' : (['admin', 'scd_team_leader'].includes(userRole || '')) ? 'Action Required: Trigger Stage 2' : 'Locked'}</p></div>
                     </div>
                     <div className="flex items-center gap-4">
-                      {(selectedNominee.round2Unlocked || ['admin', 'scd', 'evaluator'].includes(userRole || '')) && (
+                      {(selectedNominee.round2Unlocked || ['admin', 'scd_team_leader'].includes(userRole || '')) && (
                         <button
                           onClick={() => handleExportStage(2)}
                           disabled={isExporting === 2}
@@ -428,7 +428,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                           <Download size={16} /> {isExporting === 2 ? "Export..." : "Export PDFs"}
                         </button>
                       )}
-                      {(['admin', 'evaluator', 'scd_team_leader'].includes(userRole || '')) && (
+                      {(['admin', 'scd_team_leader'].includes(userRole || '')) && (
                         <button onClick={() => {
                           const newStatus = !selectedNominee.round2Unlocked;
                           if (onToggleRound2) onToggleRound2(selectedNominee.id, newStatus);
@@ -441,24 +441,24 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
 
                     </div>
                   </div>
-                  {(selectedNominee.round2Unlocked || ['admin', 'scd', 'evaluator'].includes(userRole || '')) && (
+                  {(selectedNominee.round2Unlocked || ['admin', 'scd_team_leader'].includes(userRole || '')) && (
                     <div className="border-t border-gray-100">
-                      <button onClick={() => setRound2Open(!round2Open)} className="w-full py-5 bg-gray-50/50 hover:bg-gray-100 transition-colors flex items-center justify-center text-[10px] font-bold text-gray-400 uppercase tracking-[0.4em]">{(round2Open || ['admin', 'scd_team_leader', 'evaluator'].includes(userRole || '')) ? 'Collapse Records' : 'Review Records'}{(round2Open || ['admin', 'scd_team_leader', 'evaluator'].includes(userRole || '')) ? <ChevronUp size={16} className="ml-2" /> : <ChevronDown size={16} className="ml-2" />}</button>
-                      <div className={`transition-all duration-700 ease-in-out ${(round2Open || ['admin', 'scd_team_leader', 'evaluator'].includes(userRole || '')) ? 'max-h-[2000px] p-10 bg-white' : 'max-h-0 overflow-hidden'}`}>{renderDocumentGrid(2)}</div>
+                      <button onClick={() => setRound2Open(!round2Open)} className="w-full py-5 bg-gray-50/50 hover:bg-gray-100 transition-colors flex items-center justify-center text-[10px] font-bold text-gray-400 uppercase tracking-[0.4em]">{(round2Open || ['admin', 'scd_team_leader'].includes(userRole || '')) ? 'Collapse Records' : 'Review Records'}{(round2Open || ['admin', 'scd_team_leader'].includes(userRole || '')) ? <ChevronUp size={16} className="ml-2" /> : <ChevronDown size={16} className="ml-2" />}</button>
+                      <div className={`transition-all duration-700 ease-in-out ${(round2Open || ['admin', 'scd_team_leader'].includes(userRole || '')) ? 'max-h-[2000px] p-10 bg-white' : 'max-h-0 overflow-hidden'}`}>{renderDocumentGrid(2)}</div>
                     </div>
                   )}
                 </div>
               </div>
 
               <div className="space-y-4">
-                <div className={`rounded-[40px] border transition-all duration-300 overflow-hidden ${(selectedNominee.round3Unlocked || userRole === 'admin' || userRole === 'scd_team_leader') ? 'bg-white border-gray-200 shadow-xl' : 'bg-gray-50 border-gray-100 opacity-60'}`}>
+                <div className={`rounded-[40px] border transition-all duration-300 overflow-hidden ${(selectedNominee.round3Unlocked || ['admin', 'scd_team_leader'].includes(userRole || '')) ? 'bg-white border-gray-200 shadow-xl' : 'bg-gray-50 border-gray-100 opacity-60'}`}>
                   <div className="p-10 flex flex-col md:flex-row items-center justify-between gap-8">
                     <div className="flex items-center space-x-8">
-                      <div className={`w-16 h-16 rounded-3xl flex items-center justify-center transition-all ${(selectedNominee.round3Unlocked || userRole === 'admin' || userRole === 'scd_team_leader') ? 'bg-gkk-gold text-gkk-navy shadow-xl' : 'bg-gray-200 text-gray-400'}`}>{(selectedNominee.round3Unlocked || userRole === 'admin' || userRole === 'scd_team_leader') ? <Unlock size={28} /> : <Lock size={28} />}</div>
-                      <div className="text-left"><h4 className="font-bold text-gkk-navy text-xl uppercase tracking-tighter leading-none">Stage 3 Verification</h4><p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-3">{selectedNominee.round3Unlocked ? 'National Board Final Evaluation' : (userRole === 'admin' || userRole === 'scd_team_leader') ? 'SCD Trigger Required' : 'Locked'}</p></div>
+                      <div className={`w-16 h-16 rounded-3xl flex items-center justify-center transition-all ${(selectedNominee.round3Unlocked || ['admin', 'scd_team_leader'].includes(userRole || '')) ? 'bg-gkk-gold text-gkk-navy shadow-xl' : 'bg-gray-200 text-gray-400'}`}>{(selectedNominee.round3Unlocked || ['admin', 'scd_team_leader'].includes(userRole || '')) ? <Unlock size={28} /> : <Lock size={28} />}</div>
+                      <div className="text-left"><h4 className="font-bold text-gkk-navy text-xl uppercase tracking-tighter leading-none">Stage 3 Verification</h4><p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-3">{selectedNominee.round3Unlocked ? 'National Board Final Evaluation' : (['admin', 'scd_team_leader'].includes(userRole || '')) ? 'SCD Trigger Required' : 'Locked'}</p></div>
                     </div>
                     <div className="flex items-center gap-4">
-                      {(selectedNominee.round3Unlocked || userRole === 'admin' || userRole === 'scd_team_leader') && (
+                      {(selectedNominee.round3Unlocked || ['admin', 'scd_team_leader'].includes(userRole || '')) && (
                         <button
                           onClick={() => handleExportStage(3)}
                           disabled={isExporting === 3}
@@ -467,7 +467,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                           <Download size={16} /> {isExporting === 3 ? "Export..." : "Export PDFs"}
                         </button>
                       )}
-                      {(userRole === 'admin' || userRole === 'scd') && (
+                      {(['admin', 'scd_team_leader'].includes(userRole || '')) && (
                         <button onClick={() => {
                           const newStatus = !selectedNominee.round3Unlocked;
                           if (onToggleRound3) onToggleRound3(selectedNominee.id, newStatus);
@@ -480,13 +480,14 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
 
                     </div>
                   </div>
-                  {(selectedNominee.round3Unlocked || userRole === 'admin' || userRole === 'scd_team_leader') && (
+                  {(selectedNominee.round3Unlocked || ['admin', 'scd_team_leader'].includes(userRole || '')) && (
                     <div className="border-t border-gray-100">
                       <div className="p-10 bg-white">{renderDocumentGrid(3)}</div>
                     </div>
                   )}
                 </div>
               </div>
+
             </>
           )}
         </div>
