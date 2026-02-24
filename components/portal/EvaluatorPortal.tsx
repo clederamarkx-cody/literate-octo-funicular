@@ -669,12 +669,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                 allKeys.sort((a: any, b: any) => new Date(b.created_at || b.issuedAt).getTime() - new Date(a.created_at || a.issuedAt).getTime()).map((key: any) => (
                   <tr key={key.key_id || key.keyId} className="group hover:bg-gray-50/50 transition-colors">
                     <td className="px-6 py-4">
-                      <div className="flex flex-col items-start gap-1">
-                        <div className={`w-7 h-7 rounded-lg flex items-center justify-center border ${key.status === 'activated' ? 'bg-green-50 text-green-600 border-green-100' : 'bg-amber-50 text-amber-600 border-amber-100'}`}>
-                          {key.status === 'activated' ? <CheckCircle size={12} /> : <KeyRound size={12} />}
-                        </div>
-                        <span className="font-mono font-bold text-gkk-navy uppercase text-[10px] tracking-wider select-all">{key.key_id || key.keyId}</span>
-                      </div>
+                      <span className="font-mono font-bold text-gkk-navy uppercase text-[10px] tracking-wider select-all">{key.key_id || key.keyId}</span>
                     </td>
                     <td className="px-6 py-4">
                       <span className="text-[11px] text-gkk-navy font-bold uppercase tracking-tight">{key.name || '---'}</span>
