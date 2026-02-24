@@ -31,6 +31,7 @@ export const DOCUMENTS_COLLECTION = 'application_documents';
 export const REQUIREMENTS_COLLECTION = 'requirements';
 export const WINNERS_COLLECTION = 'gkk_winners';
 export const SYSTEM_LOGS_COLLECTION = 'system_logs';
+export const STORAGE_BUCKET = 'documents';
 
 export const TEST_MODE = false;
 
@@ -323,29 +324,46 @@ export const uploadNomineeFile = async (
     onProgress?: (progress: number) => void,
     cancelToken?: { cancel?: () => void }
 ): Promise<string> => {
-    console.log("[STORAGE] Preparing upload for:", file.name);
+    console.log("[STORAGE] Preparing upload for:", file.name, "uid:", uid, "slot:", documentId);
     if (onProgress) onProgress(10);
 
     const fileExt = file.name.split('.').pop();
-    const fileName = `${uid}/${documentId}_${Date.now()}.${fileExt}`;
+    const filePath = `${uid}/${documentId}_${Date.now()}.${fileExt}`;
 
-    // Note: Assuming a 'nominee-documents' bucket exists. Plan didn't include creating it yet.
-    // For now, we use a placeholder or local URL if storage isn't set up.
-    // However, if we want full Supabase, we'd do:
-    /*
-    const { data, error } = await supabase.storage.from('nominee-documents').upload(fileName, file);
-    if (error) throw error;
-    const { data: urlData } = supabase.storage.from('nominee-documents').getPublicUrl(data.path);
-    return urlData.publicUrl;
-    */
+    // Set up cancel support
+    let isCancelled = false;
+    if (cancelToken) {
+        cancelToken.cancel = () => { isCancelled = true; };
+    }
 
-    // Since storage setup wasn't explicitly in the plan schema (only DB), 
-    // and bucket creation requires more permissions/tools, I'll stick to a local Blob for now 
-    // or return a path that would be used.
+    if (onProgress) onProgress(30);
+    if (isCancelled) throw new Error('Upload cancelled by user');
 
-    const localUrl = URL.createObjectURL(file);
+    // Upload to Supabase Storage
+    const { data, error } = await supabase.storage
+        .from(STORAGE_BUCKET)
+        .upload(filePath, file, {
+            cacheControl: '3600',
+            upsert: true
+        });
+
+    if (isCancelled) throw new Error('Upload cancelled by user');
+
+    if (error) {
+        console.error('[STORAGE] Upload failed:', error);
+        throw new Error(`Storage upload failed: ${error.message}`);
+    }
+
+    if (onProgress) onProgress(80);
+
+    // Get the public URL
+    const { data: urlData } = supabase.storage
+        .from(STORAGE_BUCKET)
+        .getPublicUrl(data.path);
+
     if (onProgress) onProgress(100);
-    return localUrl;
+    console.log('[STORAGE] Upload complete. Public URL:', urlData.publicUrl);
+    return urlData.publicUrl;
 };
 
 export const getAllNominees = async (): Promise<Nominee[]> => {
@@ -394,7 +412,12 @@ export const getAllNominees = async (): Promise<Nominee[]> => {
 };
 
 export const resolveFileUrl = async (url: string | null | undefined): Promise<string> => {
-    return url || '';
+    if (!url) return '';
+    // If it's already a full URL (from Supabase storage), return as-is
+    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+    // If it's a relative storage path, resolve it
+    const { data } = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(url);
+    return data.publicUrl;
 };
 
 export const getUserRole = async (uid: string): Promise<UserRole | null> => {
