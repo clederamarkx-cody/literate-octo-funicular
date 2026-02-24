@@ -390,18 +390,21 @@ export const activateAccessKey = async (
 };
 
 export const verifyAccessKey = async (passKey: string) => {
+    const normalizedKey = passKey.trim().toUpperCase();
     const { data, error } = await supabase
         .from(ACCESS_KEYS_COLLECTION)
         .select('*')
-        .eq('key_id', passKey)
+        .eq('key_id', normalizedKey)
         .single();
 
     if (error || !data) return null;
 
     return {
-        uid: data.user_id || `local_${passKey}`,
+        uid: data.user_id || `local_${normalizedKey}`,
         role: data.role as UserRole,
-        status: data.status
+        status: data.status,
+        email: data.email,
+        name: data.name
     };
 };
 

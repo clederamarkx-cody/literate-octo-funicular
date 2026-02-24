@@ -17,6 +17,50 @@ const NominationForm: React.FC<NominationFormProps> = ({ onBack }) => {
   const [accessKey, setAccessKey] = useState('');
   const [companyName, setCompanyName] = useState('Nominated Establishment');
 
+  const [isValidatingKey, setIsValidatingKey] = useState(false);
+  const [keyVerified, setKeyVerified] = useState(false);
+  const [discoveredEmail, setDiscoveredEmail] = useState('');
+  const [discoveredName, setDiscoveredName] = useState('');
+
+  // Smart Discovery logic
+  React.useEffect(() => {
+    const verify = async () => {
+      // Basic format check before hitting API (GKK-26-XXXX-1234)
+      if (accessKey.length >= 12) {
+        setIsValidatingKey(true);
+        try {
+          const { verifyAccessKey } = await import('../../services/dbService');
+          const data = await verifyAccessKey(accessKey);
+
+          if (data && data.status === 'issued') {
+            setKeyVerified(true);
+            setDiscoveredEmail(data.email || '');
+            setDiscoveredName(data.name || '');
+            setEmail(data.email || ''); // Pre-populate for submission
+            setCompanyName(data.name || ''); // Pre-populate for submission
+            setError(null);
+          } else if (data && data.status === 'activated') {
+            setKeyVerified(false);
+            setError("This Access Key has already been activated.");
+          } else {
+            setKeyVerified(false);
+          }
+        } catch (err) {
+          console.error("Discovery failed:", err);
+        } finally {
+          setIsValidatingKey(false);
+        }
+      } else {
+        setKeyVerified(false);
+        setDiscoveredEmail('');
+        setDiscoveredName('');
+      }
+    };
+
+    const timer = setTimeout(verify, 500);
+    return () => clearTimeout(timer);
+  }, [accessKey]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -137,22 +181,56 @@ const NominationForm: React.FC<NominationFormProps> = ({ onBack }) => {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-3 ml-1">Account Administrator Email</label>
-                <div className="relative group">
-                  <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
-                    <Mail className="h-5 w-5 text-gray-300 group-focus-within:text-gkk-gold transition-colors" />
+              {keyVerified ? (
+                <div className="bg-gray-50 border border-gray-100 p-6 rounded-3xl animate-in fade-in slide-in-from-top-2 duration-500">
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Account Details</span>
+                    <div className="px-2 py-1 bg-green-100 text-green-700 rounded-lg text-[8px] font-black uppercase">Verified Key</div>
                   </div>
-                  <input
-                    required
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full pl-14 pr-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-gkk-gold/10 focus:border-gkk-gold focus:bg-white outline-none transition-all font-medium placeholder:text-gray-300"
-                    placeholder="safety.officer@establishment.ph"
-                  />
+
+                  <div className="space-y-4">
+                    <div>
+                      <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mb-1">Establishment</p>
+                      <p className="text-sm font-bold text-gkk-navy uppercase">{discoveredName}</p>
+                    </div>
+
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 bg-white border border-gray-100 rounded-xl flex items-center justify-center text-gkk-gold">
+                        <Mail size={18} />
+                      </div>
+                      <div>
+                        <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mb-1">Assigned Administrator Email</p>
+                        <p className="text-sm font-bold text-gkk-navy">{discoveredEmail}</p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div>
+                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-3 ml-1">Account Administrator Email</label>
+                  <div className="relative group">
+                    <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                      <Mail className="h-5 w-5 text-gray-300 group-focus-within:text-gkk-gold transition-colors" />
+                    </div>
+                    <input
+                      required
+                      type="email"
+                      value={isValidatingKey ? "Discovering profile..." : email}
+                      readOnly
+                      className="w-full pl-14 pr-5 py-4 bg-gray-50/50 border border-gray-100 rounded-2xl outline-none transition-all font-medium italic text-gray-400 cursor-not-allowed"
+                      placeholder="Enter your access key above..."
+                    />
+                    {isValidatingKey && (
+                      <div className="absolute right-4 top-4">
+                        <Loader2 size={18} className="animate-spin text-gkk-gold" />
+                      </div>
+                    )}
+                  </div>
+                  {!isValidatingKey && !keyVerified && accessKey.length > 0 && (
+                    <p className="mt-3 text-[9px] text-gray-400 font-bold italic ml-1 select-none">Enter a valid access key to automatically discover your account email.</p>
+                  )}
+                </div>
+              )}
 
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
@@ -192,8 +270,8 @@ const NominationForm: React.FC<NominationFormProps> = ({ onBack }) => {
               </p>
               <button
                 type="submit"
-                disabled={isSubmitting}
-                className="w-full sm:w-auto flex items-center justify-center px-12 py-4 bg-gradient-to-r from-gkk-navy to-gkk-royalBlue text-white font-bold rounded-2xl shadow-2xl hover:shadow-gkk-navy/40 hover:-translate-y-1 disabled:opacity-50 disabled:hover:translate-y-0 transition-all text-lg"
+                disabled={isSubmitting || !keyVerified}
+                className="w-full sm:w-auto flex items-center justify-center px-12 py-4 bg-gradient-to-r from-gkk-navy to-gkk-royalBlue text-white font-bold rounded-2xl shadow-2xl hover:shadow-gkk-navy/40 hover:-translate-y-1 disabled:opacity-50 disabled:grayscale disabled:hover:translate-y-0 transition-all text-lg"
               >
                 {isSubmitting ? (
                   <>
