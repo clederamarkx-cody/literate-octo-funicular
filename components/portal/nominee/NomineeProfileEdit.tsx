@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Save, User, Building2, MapPin, Briefcase, Mail, Phone, Users } from 'lucide-react';
+import { Save, User, Building2, MapPin, Briefcase, Mail, Phone, Users, Lock } from 'lucide-react';
 
 interface NomineeProfileEditProps {
     profileData: any;
