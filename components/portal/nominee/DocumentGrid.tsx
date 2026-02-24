@@ -74,25 +74,37 @@ const DocumentGrid: React.FC<DocumentGridProps> = ({
                 const isAllCompleted = completedCount === catDocs.length;
 
                 return (
-                    <div key={`${cat.id}-${round}`} className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm flex flex-col transition-all duration-300">
-                        <button
-                            onClick={() => toggleCategory(cat.id)}
-                            className="w-full p-4 bg-gray-50 border-b border-gray-100 flex items-center justify-between hover:bg-gray-100 transition-colors"
-                        >
-                            <div className="flex items-center">
-                                <cat.icon size={18} className="text-gkk-navy mr-3" />
-                                <h4 className="font-bold text-gkk-navy text-sm uppercase tracking-wider">{cat.name}</h4>
-                                <span className={`ml-3 text-xs font-bold px-2 py-0.5 rounded-full ${isAllCompleted ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
-                                    {completedCount} / {catDocs.length}
-                                </span>
-                            </div>
-                            <div className="text-gkk-navy">
-                                {isOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-                            </div>
-                        </button>
+                    <div key={`${cat.id}-${round}`} className={`overflow-hidden transition-all duration-300 ${round === 1 ? 'bg-transparent border-0' : 'bg-white rounded-xl border border-gray-200 shadow-sm flex flex-col mb-4'}`}>
+                        {round !== 1 && (
+                            <button
+                                onClick={() => toggleCategory(cat.id)}
+                                className="w-full p-4 bg-gray-50 border-b border-gray-100 flex items-center justify-between hover:bg-gray-100 transition-colors"
+                            >
+                                <div className="flex items-center">
+                                    <cat.icon size={18} className="text-gkk-navy mr-3" />
+                                    <h4 className="font-bold text-gkk-navy text-sm uppercase tracking-wider">{cat.name}</h4>
+                                    <span className={`ml-3 text-xs font-bold px-2 py-0.5 rounded-full ${isAllCompleted ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
+                                        {completedCount} / {catDocs.length}
+                                    </span>
+                                </div>
+                                <div className="text-gkk-navy">
+                                    {isOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                                </div>
+                            </button>
+                        )}
 
-                        <div className={`transition-all duration-500 ease-in-out ${isOpen ? 'max-h-none opacity-100' : 'max-h-0 opacity-0 overflow-hidden'}`}>
-                            <div className="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 bg-gray-50/10">
+                        {round === 1 && (
+                            <div className="flex items-center mb-4 px-1">
+                                <div className="w-1.5 h-6 bg-gkk-gold mr-3 rounded-full"></div>
+                                <h4 className="font-black text-gkk-navy text-xs uppercase tracking-[0.2em]">{cat.name}</h4>
+                                <div className="ml-auto text-[10px] font-bold text-gray-400">
+                                    {completedCount} of {catDocs.length} Completed
+                                </div>
+                            </div>
+                        )}
+
+                        <div className={`transition-all duration-500 ease-in-out ${(isOpen || round === 1) ? 'max-h-none opacity-100' : 'max-h-0 opacity-0 overflow-hidden'}`}>
+                            <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 ${round === 1 ? 'mb-10' : 'p-4 bg-gray-50/10'}`}>
                                 {catDocs.map(doc => (
                                     <div key={doc.id} className={`group p-3 border rounded-2xl transition-all ${doc.status === 'uploaded' ? 'bg-green-50/20 border-green-100' : 'bg-white border-gray-100 hover:border-gkk-gold/30 hover:shadow-md'}`}>
                                         <div className="flex justify-between items-start mb-2">

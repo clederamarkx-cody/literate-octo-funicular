@@ -491,6 +491,54 @@ export const seedFirebase = async () => {
             });
         }
 
+        // 2b. Pre-activated Demo Nominee for Autofill Login
+        const demoUid = 'user_demo_8821';
+        const demoPassKey = 'NOM-2024-8821';
+        await setDoc(doc(db, ACCESS_KEYS_COLLECTION, demoPassKey), {
+            keyId: demoPassKey,
+            userId: demoUid,
+            role: 'nominee',
+            status: 'activated',
+            activatedAt: new Date().toISOString(),
+            email: 'safety@acme-industrial.ph',
+            name: 'Acme industrial Phils.',
+            region: 'Region IV-A'
+        });
+
+        await setDoc(doc(db, USERS_COLLECTION, demoUid), {
+            userId: demoUid,
+            email: 'safety@acme-industrial.ph',
+            role: 'nominee',
+            name: 'Acme industrial Phils.',
+            status: 'active',
+            createdAt: new Date().toISOString()
+        });
+
+        await setDoc(doc(db, APPLICATIONS_COLLECTION, demoUid), {
+            id: demoUid,
+            regId: demoPassKey,
+            name: 'Acme industrial Phils.',
+            email: 'safety@acme-industrial.ph',
+            role: 'nominee',
+            industry: 'Manufacturing',
+            region: 'Region IV-A',
+            status: 'in_progress',
+            submittedDate: new Date().toISOString(),
+            round2Unlocked: false, // Ensure STAGE 1 is UNLOCKED
+            round3Unlocked: false,
+            documents: [],
+            details: {
+                nomineeCategory: 'Industry',
+                employees: '250',
+                address: 'Batangas Industrial Park',
+                representative: 'Juan Dela Cruz',
+                designation: 'Safety Manager',
+                email: 'safety@acme-industrial.ph',
+                phone: '0917-123-4567',
+                safetyOfficer: 'Engr. Maria Clara'
+            }
+        });
+
         // 3. Dynamic Requirements
         const stage1Reqs = [
             { category: 'Management', label: '1. Endorsement by DOLE Regional Office' },
