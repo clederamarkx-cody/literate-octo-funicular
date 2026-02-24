@@ -562,30 +562,66 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
             <h3 className="font-serif font-bold text-xl text-gkk-navy uppercase tracking-wider">Access Key Log</h3>
             <span className="text-[10px] bg-blue-50 text-blue-600 px-3 py-1 rounded-full font-bold uppercase tracking-widest">{allKeys.length} Total Keys</span>
           </div>
-          <div className="overflow-y-auto max-h-[500px] divide-y divide-gray-50">
-            {allKeys.length === 0 ? (
-              <div className="p-10 text-center text-gray-400 font-bold uppercase tracking-widest text-xs italic">No keys issued yet.</div>
-            ) : (
-              allKeys.map((key: any) => (
-                <div key={key.keyId} className="p-6 flex items-center justify-between group">
-                  <div className="flex items-center gap-4">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center border font-bold text-xs ${key.status === 'activated' ? 'bg-green-50 text-green-600 border-green-100' : 'bg-amber-50 text-amber-600 border-amber-100'}`}>
-                      {key.status === 'activated' ? <CheckCircle size={18} /> : <KeyRound size={18} />}
-                    </div>
-                    <div>
-                      <h4 className="font-mono font-bold text-gkk-navy uppercase text-sm tracking-widest">{key.keyId}</h4>
-                      <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-1">{key.name || 'Unknown Establishment'}</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <span className={`px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest border ${key.status === 'activated' ? 'bg-green-50 text-green-600 border-green-100' : 'bg-gray-50 text-gray-400 border-gray-200'}`}>
-                      {key.status}
-                    </span>
-                    <p className="text-[8px] text-gray-300 font-bold uppercase mt-2 tracking-tighter">Issued: {new Date(key.issuedAt).toLocaleDateString()}</p>
-                  </div>
-                </div>
-              ))
-            )}
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-gray-50/50 border-b border-gray-100">
+                  <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Pass Key</th>
+                  <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Establishment / User</th>
+                  <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Email</th>
+                  <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Role</th>
+                  <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Region</th>
+                  <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Category</th>
+                  <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Status</th>
+                  <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-right">Issued</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-50">
+                {allKeys.length === 0 ? (
+                  <tr>
+                    <td colSpan={8} className="p-10 text-center text-gray-400 font-bold uppercase tracking-widest text-xs italic">No keys issued yet.</td>
+                  </tr>
+                ) : (
+                  allKeys.sort((a: any, b: any) => new Date(b.issuedAt).getTime() - new Date(a.issuedAt).getTime()).map((key: any) => (
+                    <tr key={key.keyId} className="group hover:bg-gray-50/50 transition-colors">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center border ${key.status === 'activated' ? 'bg-green-50 text-green-600 border-green-100' : 'bg-amber-50 text-amber-600 border-amber-100'}`}>
+                            {key.status === 'activated' ? <CheckCircle size={14} /> : <KeyRound size={14} />}
+                          </div>
+                          <span className="font-mono font-bold text-gkk-navy uppercase text-[11px] tracking-wider">{key.keyId}</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="text-[11px] text-gkk-navy font-bold uppercase tracking-tight">{key.name || '---'}</span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="text-[11px] text-gray-500 font-medium">{key.email || '---'}</span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="px-2 py-0.5 rounded-md bg-gray-100 text-gray-500 text-[9px] font-bold uppercase tracking-widest">
+                          {key.role.replace('_', ' ')}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="text-[10px] text-gray-400 font-bold uppercase">{key.region}</span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="text-[10px] text-gray-400 font-bold uppercase italic">{key.category || 'N/A'}</span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest border ${key.status === 'activated' ? 'bg-green-50 text-green-600 border-green-100' : 'bg-amber-50 text-amber-600 border-amber-100'}`}>
+                          {key.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <span className="text-[10px] text-gray-300 font-bold uppercase">{new Date(key.issuedAt).toLocaleDateString()}</span>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
