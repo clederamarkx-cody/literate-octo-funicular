@@ -89,6 +89,8 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
   const [allKeys, setAllKeys] = useState<any[]>([]);
   const [isIssuingKey, setIsIssuingKey] = useState(false);
   const [newKeyData, setNewKeyData] = useState({ companyName: '', email: '', region: 'NCR', role: 'nominee', category: 'Industry' });
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [issuedKeyId, setIssuedKeyId] = useState('');
 
   useEffect(() => {
     if (activeTab === 'management') {
@@ -129,7 +131,8 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
     setIsIssuingKey(true);
     try {
       const keyId = await issueAccessKey(newKeyData);
-      alert(`Key Issued Successfully: ${keyId}`);
+      setIssuedKeyId(keyId);
+      setShowSuccessModal(true);
       setNewKeyData({ companyName: '', email: '', region: 'NCR', role: 'nominee', category: 'Industry' });
       const updatedKeys = await getAllAccessKeys();
       setAllKeys(updatedKeys);
@@ -138,6 +141,11 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
     } finally {
       setIsIssuingKey(false);
     }
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    alert("Copied to clipboard!");
   };
 
   useEffect(() => {
@@ -866,6 +874,40 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                 (previewDoc.type && previewDoc.type.includes('image')) ? <img src={previewDoc.url} alt="Evidence" className="max-w-full max-h-full rounded-3xl shadow-2xl border-8 border-white" /> : <iframe src={previewDoc.url} title="Reader" className="w-full h-full rounded-3xl shadow-2xl bg-white border-0" />
               ) : <div className="text-center p-20 bg-white rounded-[40px] shadow-2xl max-w-md"><div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-8 text-gray-200"><FileIcon size={48} className="animate-pulse" /></div><h4 className="text-2xl font-bold text-gkk-navy uppercase tracking-widest text-gray-400 animate-pulse">Decrypting...</h4></div>}
             </div>
+          </div>
+        </div>
+      )}
+      {/* Success Modal */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-gkk-navy/60 backdrop-blur-sm p-4 animate-in fade-in duration-300">
+          <div className="bg-white rounded-[40px] shadow-2xl w-full max-w-lg p-10 text-center animate-in zoom-in-95 duration-300 relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-gkk-gold via-yellow-400 to-gkk-gold"></div>
+
+            <div className="w-20 h-20 bg-green-50 text-green-500 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner ring-8 ring-green-50/50">
+              <CheckCircle size={40} />
+            </div>
+
+            <h3 className="text-3xl font-serif font-bold text-gkk-navy uppercase tracking-tight mb-2">Key Issued!</h3>
+            <p className="text-gray-400 font-bold uppercase tracking-widest text-[10px] mb-8">Access key generated successfully</p>
+
+            <div className="bg-gray-50 rounded-3xl p-8 mb-8 border border-gray-100 relative group">
+              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em] mb-3">Your Unique Pass Key</p>
+              <h4 className="font-mono text-2xl font-black text-gkk-navy tracking-widest break-all px-4">{issuedKeyId}</h4>
+
+              <button
+                onClick={() => copyToClipboard(issuedKeyId)}
+                className="mt-6 flex items-center gap-2 mx-auto px-4 py-2 bg-white border border-gray-200 text-gray-400 hover:text-gkk-navy hover:border-gkk-navy transition-all rounded-xl text-[10px] font-bold uppercase tracking-widest shadow-sm"
+              >
+                <Save size={14} /> Copy to Clipboard
+              </button>
+            </div>
+
+            <button
+              onClick={() => setShowSuccessModal(false)}
+              className="w-full py-5 bg-gkk-navy text-white font-bold rounded-2xl shadow-xl shadow-gkk-navy/20 hover:bg-gkk-royalBlue transition-all uppercase tracking-widest text-xs"
+            >
+              Done & Return
+            </button>
           </div>
         </div>
       )}
