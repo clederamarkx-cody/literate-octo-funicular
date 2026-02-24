@@ -378,6 +378,49 @@ export const verifyAccessKey = async (passKey: string): Promise<{ uid: string, r
     return null;
 };
 
+
+/**
+ * Issues a new Access Key for a Nominee.
+ */
+export const issueAccessKey = async (data: { companyName: string, email: string, region: string }): Promise<string> => {
+    try {
+        // Generate a random high-entropy key
+        const random = Math.floor(1000 + Math.random() * 9000).toString();
+        const keyId = `GKK-2024-${data.companyName.substring(0, 3).toUpperCase()}-${random}`;
+
+        await setDoc(doc(db, ACCESS_KEYS_COLLECTION, keyId), {
+            keyId,
+            role: 'nominee',
+            status: 'issued',
+            issuedAt: new Date().toISOString(),
+            email: data.email,
+            name: data.companyName,
+            region: data.region
+        });
+
+        await logAction('ISSUE_KEY', `Issued key ${keyId} to ${data.companyName}`);
+        return keyId;
+    } catch (err) {
+        console.error("Failed to issue key", err);
+        throw err;
+    }
+};
+
+/**
+ * Fetches all access keys for management
+ */
+export const getAllAccessKeys = async () => {
+    try {
+        const keysRef = collection(db, ACCESS_KEYS_COLLECTION);
+        const q = query(keysRef, where('role', '==', 'nominee'));
+        const querySnapshot = await getDocs(q);
+        return querySnapshot.docs.map(doc => doc.data());
+    } catch (err) {
+        console.error("Failed to fetch keys", err);
+        return [];
+    }
+};
+
 export const seedFirebase = async () => {
     try {
         console.log("Cleaning Database (Strict Minimal Schema)...");

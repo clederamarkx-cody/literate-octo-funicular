@@ -37,11 +37,12 @@ import {
   Scale,
   FileCheck,
   FileIcon,
+  KeyRound,
   Zap,
   Upload
 } from 'lucide-react';
-import { Nominee, NomineeDocument, UserRole } from '../../types';
-import { getAllNominees, resolveFileUrl, updateDocumentEvaluation, getRequirementsByCategory } from '../../services/dbService';
+import { Nominee, NomineeDocument, UserRole, AccessKey } from '../../types';
+import { getAllNominees, resolveFileUrl, updateDocumentEvaluation, getRequirementsByCategory, issueAccessKey, getAllAccessKeys } from '../../services/dbService';
 
 interface EvaluatorPortalProps {
   onLogout: () => void;
@@ -53,7 +54,7 @@ interface EvaluatorPortalProps {
 }
 
 const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev, nomineesData: propNominees, userRole, onToggleRound2, onToggleRound3 }) => {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'entries'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'entries' | 'management'>('dashboard');
   const [view, setView] = useState<'list' | 'review'>('list');
   const [selectedNominee, setSelectedNominee] = useState<Nominee | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -83,6 +84,35 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
   const [isExporting, setIsExporting] = useState<number | null>(null);
   const [isLoadingRequirements, setIsLoadingRequirements] = useState(false);
   const [dynamicRequirements, setDynamicRequirements] = useState<any>(null);
+  const [allKeys, setAllKeys] = useState<any[]>([]);
+  const [isIssuingKey, setIsIssuingKey] = useState(false);
+  const [newKeyData, setNewKeyData] = useState({ companyName: '', email: '', region: 'NCR' });
+
+  useEffect(() => {
+    if (activeTab === 'management') {
+      const fetchKeys = async () => {
+        const keys = await getAllAccessKeys();
+        setAllKeys(keys);
+      };
+      fetchKeys();
+    }
+  }, [activeTab]);
+
+  const handleIssueKey = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsIssuingKey(true);
+    try {
+      const keyId = await issueAccessKey(newKeyData);
+      alert(`Key Issued Successfully: ${keyId}`);
+      setNewKeyData({ companyName: '', email: '', region: 'NCR' });
+      const updatedKeys = await getAllAccessKeys();
+      setAllKeys(updatedKeys);
+    } catch (err) {
+      alert("Failed to issue key.");
+    } finally {
+      setIsIssuingKey(false);
+    }
+  };
 
   useEffect(() => {
     if (selectedNominee && view === 'review') {
@@ -359,6 +389,101 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
     </div>
   );
 
+  const renderManagement = () => (
+    <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500">
+      <div className="grid lg:grid-cols-2 gap-8">
+        {/* Issuance Form */}
+        <div className="bg-white rounded-[40px] border border-gray-200 shadow-sm overflow-hidden flex flex-col">
+          <div className="p-8 border-b border-gray-100 bg-gray-50/30">
+            <h3 className="font-serif font-bold text-xl text-gkk-navy uppercase tracking-wider">Issue New Access Key</h3>
+            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-2">Generate invitation keys for new nominees.</p>
+          </div>
+          <form onSubmit={handleIssueKey} className="p-8 space-y-6">
+            <div className="space-y-4">
+              <div>
+                <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Establishment Name</label>
+                <input
+                  type="text"
+                  required
+                  value={newKeyData.companyName}
+                  onChange={(e) => setNewKeyData({ ...newKeyData, companyName: e.target.value })}
+                  className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-gkk-gold/5 focus:border-gkk-gold outline-none transition-all font-bold text-sm tracking-tight"
+                  placeholder="e.g. Acme Corp Philippines"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Administrator Email</label>
+                  <input
+                    type="email"
+                    required
+                    value={newKeyData.email}
+                    onChange={(e) => setNewKeyData({ ...newKeyData, email: e.target.value })}
+                    className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-gkk-gold/5 focus:border-gkk-gold outline-none transition-all font-bold text-sm tracking-tight"
+                    placeholder="safety@company.ph"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Assigned Region</label>
+                  <select
+                    value={newKeyData.region}
+                    onChange={(e) => setNewKeyData({ ...newKeyData, region: e.target.value })}
+                    className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-gkk-gold/5 focus:border-gkk-gold outline-none transition-all font-bold text-sm tracking-tight appearance-none"
+                  >
+                    <option value="NCR">NCR</option>
+                    <option value="Region 1">Region 1</option>
+                    <option value="Region 2">Region 2</option>
+                    <option value="Region 3">Region 3</option>
+                    <option value="Region 4A">Region 4A</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <button
+              disabled={isIssuingKey}
+              className="w-full py-4 bg-gkk-navy text-white font-bold rounded-2xl shadow-xl shadow-gkk-navy/20 hover:bg-gkk-royalBlue transition-all uppercase tracking-widest text-[10px] disabled:opacity-50"
+            >
+              {isIssuingKey ? 'Generating...' : 'Issue GKK Access Key'}
+            </button>
+          </form>
+        </div>
+
+        {/* Access Key Log */}
+        <div className="bg-white rounded-[40px] border border-gray-200 shadow-sm overflow-hidden">
+          <div className="p-8 border-b border-gray-100 bg-gray-50/30 flex justify-between items-center">
+            <h3 className="font-serif font-bold text-xl text-gkk-navy uppercase tracking-wider">Access Key Log</h3>
+            <span className="text-[10px] bg-blue-50 text-blue-600 px-3 py-1 rounded-full font-bold uppercase tracking-widest">{allKeys.length} Total Keys</span>
+          </div>
+          <div className="overflow-y-auto max-h-[500px] divide-y divide-gray-50">
+            {allKeys.length === 0 ? (
+              <div className="p-10 text-center text-gray-400 font-bold uppercase tracking-widest text-xs italic">No keys issued yet.</div>
+            ) : (
+              allKeys.map((key: any) => (
+                <div key={key.keyId} className="p-6 flex items-center justify-between group">
+                  <div className="flex items-center gap-4">
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center border font-bold text-xs ${key.status === 'activated' ? 'bg-green-50 text-green-600 border-green-100' : 'bg-amber-50 text-amber-600 border-amber-100'}`}>
+                      {key.status === 'activated' ? <CheckCircle size={18} /> : <KeyRound size={18} />}
+                    </div>
+                    <div>
+                      <h4 className="font-mono font-bold text-gkk-navy uppercase text-sm tracking-widest">{key.keyId}</h4>
+                      <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-1">{key.name || 'Unknown Establishment'}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <span className={`px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest border ${key.status === 'activated' ? 'bg-green-50 text-green-600 border-green-100' : 'bg-gray-50 text-gray-400 border-gray-200'}`}>
+                      {key.status}
+                    </span>
+                    <p className="text-[8px] text-gray-300 font-bold uppercase mt-2 tracking-tighter">Issued: {new Date(key.issuedAt).toLocaleDateString()}</p>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
   const renderReview = () => {
     if (!selectedNominee) return null;
     return (
@@ -504,6 +629,13 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
         <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
           <button onClick={() => { setActiveTab('dashboard'); setView('list'); }} className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'dashboard' ? 'bg-gkk-gold text-gkk-navy font-bold shadow-lg shadow-yellow-500/10' : 'text-gray-400 hover:bg-white/5 hover:text-white'}`}><LayoutDashboard size={20} /><span className="text-sm font-medium">Dashboard</span></button>
           <button onClick={() => { setActiveTab('entries'); setView('list'); }} className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'entries' || view === 'review' ? 'bg-gkk-gold text-gkk-navy font-bold shadow-lg shadow-yellow-500/10' : 'text-gray-400 hover:bg-white/5 hover:text-white'}`}><Users size={20} /><span className="text-sm font-medium">Nominee Queue</span></button>
+
+          {userRole === 'admin' && (
+            <button onClick={() => { setActiveTab('management'); setView('list'); }} className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'management' ? 'bg-gkk-gold text-gkk-navy font-bold shadow-lg shadow-yellow-500/10' : 'text-gray-400 hover:bg-white/5 hover:text-white'}`}>
+              <Zap size={20} />
+              <span className="text-sm font-medium">Management</span>
+            </button>
+          )}
           <div className="pt-6 mt-6 border-t border-white/5"><p className="px-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4">Board Tools</p><button onClick={onUnderDev} className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-400 hover:bg-white/5 hover:text-white transition-all"><Scale size={20} /><span className="text-sm font-medium">Scoring Matrix</span></button><button onClick={onUnderDev} className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-400 hover:bg-white/5 hover:text-white transition-all"><ShieldAlert size={20} /><span className="text-sm font-medium">Audit Logs</span></button></div>
         </nav>
       </aside>
@@ -512,7 +644,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
           <div className="flex items-center text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em]">
             <span>Validator Portal</span>
             <ChevronRight size={14} className="mx-2" />
-            <span className="text-gkk-navy">{activeTab === 'dashboard' ? 'Overview' : 'Queue'}</span>
+            <span className="text-gkk-navy">{activeTab === 'dashboard' ? 'Overview' : activeTab === 'management' ? 'Management' : 'Queue'}</span>
           </div>
 
           <div className="flex items-center space-x-4">
@@ -564,7 +696,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
             </div>
           </div>
         </header>
-        <div className="flex-1 overflow-y-auto p-8 scroll-smooth"><div className="max-w-7xl mx-auto">{view === 'list' ? (activeTab === 'dashboard' ? renderDashboard() : renderEntries()) : renderReview()}</div></div>
+        <div className="flex-1 overflow-y-auto p-8 scroll-smooth"><div className="max-w-7xl mx-auto">{view === 'list' ? (activeTab === 'dashboard' ? renderDashboard() : activeTab === 'management' ? renderManagement() : renderEntries()) : renderReview()}</div></div>
       </main>
       {/* Preview Modal */}
       {previewModalOpen && previewDoc && (
