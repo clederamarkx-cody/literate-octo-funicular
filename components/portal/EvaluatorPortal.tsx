@@ -88,7 +88,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
   const [dynamicRequirements, setDynamicRequirements] = useState<any>(null);
   const [allKeys, setAllKeys] = useState<any[]>([]);
   const [isIssuingKey, setIsIssuingKey] = useState(false);
-  const [newKeyData, setNewKeyData] = useState({ companyName: '', email: '', region: 'NCR', role: 'nominee' });
+  const [newKeyData, setNewKeyData] = useState({ companyName: '', email: '', region: 'NCR', role: 'nominee', category: 'Industry' });
 
   useEffect(() => {
     if (activeTab === 'management') {
@@ -130,7 +130,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
     try {
       const keyId = await issueAccessKey(newKeyData);
       alert(`Key Issued Successfully: ${keyId}`);
-      setNewKeyData({ companyName: '', email: '', region: 'NCR', role: 'nominee' });
+      setNewKeyData({ companyName: '', email: '', region: 'NCR', role: 'nominee', category: 'Industry' });
       const updatedKeys = await getAllAccessKeys();
       setAllKeys(updatedKeys);
     } catch (err) {
@@ -476,8 +476,8 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
         {/* Issuance Form */}
         <div className="bg-white rounded-[40px] border border-gray-200 shadow-sm overflow-hidden flex flex-col">
           <div className="p-8 border-b border-gray-100 bg-gray-50/30">
-            <h3 className="font-serif font-bold text-xl text-gkk-navy uppercase tracking-wider">Issue New Access Key</h3>
-            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-2">Generate invitation keys for new nominees.</p>
+            <h3 className="font-serif font-bold text-xl text-gkk-navy uppercase tracking-wider">GKK Access Key Generator</h3>
+            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-2">Generate invitation keys for new nominees and staff.</p>
           </div>
           <form onSubmit={handleIssueKey} className="p-8 space-y-6">
             <div className="space-y-4">
@@ -514,7 +514,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                     <option value="nominee">Nominee</option>
                     <option value="reu">REU (Regional Extension Unit)</option>
                     <option value="scd_team_leader">SCD Team Leader</option>
-                    <option value="evaluator">Regional Board Evaluator</option>
+                    <option value="evaluator">Evaluator</option>
                   </select>
                 </div>
                 <div>
@@ -530,6 +530,22 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                   </select>
                 </div>
               </div>
+
+              {newKeyData.role === 'nominee' && (
+                <div>
+                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Nominee Sector / Class</label>
+                  <select
+                    value={newKeyData.category}
+                    onChange={(e) => setNewKeyData({ ...newKeyData, category: e.target.value })}
+                    className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-gkk-gold/5 focus:border-gkk-gold outline-none transition-all font-bold text-sm tracking-tight appearance-none"
+                  >
+                    <option value="Industry">Industry</option>
+                    <option value="Individual">Individual</option>
+                    <option value="Micro Enterprise">Micro Enterprise</option>
+                    <option value="Government">Government</option>
+                  </select>
+                </div>
+              )}
             </div>
             <button
               disabled={isIssuingKey}

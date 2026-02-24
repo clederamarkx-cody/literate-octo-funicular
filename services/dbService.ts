@@ -355,7 +355,8 @@ export const activateAccessKey = async (
 
         // Conditional setup based on role
         if (role === 'nominee') {
-            await createNominee(uid, passKey, details.companyName, details.category as any, details.email);
+            const finalCategory = key.category || details.category || 'Industry';
+            await createNominee(uid, passKey, details.companyName, finalCategory as any, details.email);
         } else {
             // Admin/Evaluator roles only need a user profile
             await createUserProfile(uid, details.email, role);
@@ -393,7 +394,7 @@ export const verifyAccessKey = async (passKey: string) => {
     };
 };
 
-export const issueAccessKey = async (data: { companyName: string, email: string, region: string, role?: string }): Promise<string> => {
+export const issueAccessKey = async (data: { companyName: string, email: string, region: string, role?: string, category?: string }): Promise<string> => {
     const random = Math.floor(1000 + Math.random() * 9000).toString();
     const prefix = data.role === 'nominee' ? 'GKK-SB' : data.role ? `GKK-${data.role.toUpperCase()}` : 'GKK-SB';
     const keyId = `${prefix}-${data.companyName.substring(0, 3).toUpperCase()}-${random}`;
@@ -404,12 +405,13 @@ export const issueAccessKey = async (data: { companyName: string, email: string,
         status: 'issued',
         email: data.email,
         name: data.companyName,
-        region: data.region
+        region: data.region,
+        category: data.category
     });
 
     if (error) console.error("Issue key failed:", error);
 
-    await logAction('ISSUE_KEY', `Issued key ${keyId} for role ${data.role || 'nominee'}`);
+    await logAction('ISSUE_KEY', `Issued key ${keyId} for role ${data.role || 'nominee'} in category ${data.category || 'N/A'}`);
     return keyId;
 };
 

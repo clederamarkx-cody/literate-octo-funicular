@@ -52,6 +52,7 @@ export interface AccessKey {
   email?: string;
   region?: string;
   name?: string;
+  category?: string;
 }
 
 // 4. GKK Winners (Hall of Fame)
