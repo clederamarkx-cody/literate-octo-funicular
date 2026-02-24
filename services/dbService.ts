@@ -88,6 +88,11 @@ export const createUserProfile = async (uid: string, email: string, role: UserRo
 };
 
 export const getUserProfile = async (uid: string): Promise<User | null> => {
+    if (!uid || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(uid)) {
+        console.warn("Skipping fetch: Invalid UUID format:", uid);
+        return null;
+    }
+
     const { data, error } = await supabase
         .from(USERS_COLLECTION)
         .select('*')
@@ -108,6 +113,11 @@ export const getUserProfile = async (uid: string): Promise<User | null> => {
 };
 
 export const updateUserProfile = async (uid: string, updates: Partial<User>) => {
+    if (!uid || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(uid)) {
+        console.error("Critical: Cannot update profile. Invalid UUID format:", uid);
+        return false;
+    }
+
     const supabaseUpdates: any = { user_id: uid };
 
     // Explicit mapping to snake_case for Supabase
@@ -117,13 +127,12 @@ export const updateUserProfile = async (uid: string, updates: Partial<User>) => 
     if (updates.role !== undefined) supabaseUpdates.role = updates.role;
     if (updates.status !== undefined) supabaseUpdates.status = updates.status;
 
-    // Use upsert to handle cases where the profile row hasn't been created yet
     const { error } = await supabase
         .from(USERS_COLLECTION)
         .upsert(supabaseUpdates, { onConflict: 'user_id' });
 
     if (error) {
-        console.error("Update user profile failed:", error);
+        console.error("Update profile failed [Supabase Error]:", error.message, error.details);
         return false;
     }
 

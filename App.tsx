@@ -46,6 +46,16 @@ function App() {
       if (session) {
         try {
           const { role, uid, email } = JSON.parse(session);
+
+          // SESSION SANITIZER: Detect legacy non-UUID IDs and force a fresh login
+          const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(uid);
+          if (!isUuid && uid && !uid.includes('anonymous')) {
+            console.warn("Legacy session detected. Clearing storage for security.");
+            sessionStorage.removeItem('gkk_session');
+            window.location.reload();
+            return;
+          }
+
           setAuthUser(uid, email || '');
           if (role === 'nominee' && uid) {
             const data = await getNominee(uid);
