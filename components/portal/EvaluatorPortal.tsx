@@ -43,6 +43,7 @@ import {
 } from 'lucide-react';
 import { Nominee, NomineeDocument, UserRole, AccessKey } from '../../types';
 import { getAllNominees, resolveFileUrl, updateDocumentEvaluation, getRequirementsByCategory, issueAccessKey, getAllAccessKeys } from '../../services/dbService';
+import { PH_REGIONS } from '../../constants';
 
 interface EvaluatorPortalProps {
   onLogout: () => void;
@@ -430,11 +431,9 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                     onChange={(e) => setNewKeyData({ ...newKeyData, region: e.target.value })}
                     className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-gkk-gold/5 focus:border-gkk-gold outline-none transition-all font-bold text-sm tracking-tight appearance-none"
                   >
-                    <option value="NCR">NCR</option>
-                    <option value="Region 1">Region 1</option>
-                    <option value="Region 2">Region 2</option>
-                    <option value="Region 3">Region 3</option>
-                    <option value="Region 4A">Region 4A</option>
+                    {PH_REGIONS.map(reg => (
+                      <option key={reg} value={reg}>{reg}</option>
+                    ))}
                   </select>
                 </div>
               </div>

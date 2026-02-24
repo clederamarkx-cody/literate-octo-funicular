@@ -169,3 +169,23 @@ export const INITIAL_GKK_WINNERS = [
     achievement: 'Pioneering Safety Standards in Philippine Construction'
   }
 ];
+
+export const PH_REGIONS = [
+  'NCR',
+  'CAR',
+  'Region I',
+  'Region II',
+  'Region III',
+  'Region IV-A',
+  'Region IV-B',
+  'Region V',
+  'Region VI',
+  'Region VII',
+  'Region VIII',
+  'Region IX',
+  'Region X',
+  'Region XI',
+  'Region XII',
+  'Region XIII',
+  'BARMM'
+];
