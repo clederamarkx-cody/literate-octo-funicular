@@ -21,7 +21,8 @@ export const setAuthUser = (uid: string, email: string) => {
 
 export const ensureLocalAuth = async () => {
     if (currentUser) return currentUser;
-    currentUser = { uid: 'local_user_' + Math.random().toString(36).substring(2, 11), email: 'anonymous@local', isAnonymous: true };
+    // Generate a valid-looking UUID for the mock session
+    currentUser = { uid: '00000000-0000-4000-a000-' + Math.random().toString(16).substring(2, 14).padStart(12, '0'), email: 'anonymous@local', isAnonymous: true };
     console.log("[MOCK AUTH] Signed in as:", currentUser.uid);
     return currentUser;
 };

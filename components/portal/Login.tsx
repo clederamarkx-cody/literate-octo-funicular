@@ -53,11 +53,11 @@ const Login: React.FC<LoginProps> = ({ onLogin, onRegisterClick, onQuickRegister
             } else {
                 // Email/Password login logic
                 if (email === 'abyguel@scd.com' && password === 'scd123') {
-                    if (onLogin) onLogin('scd_team_leader', 'user_scd_mock');
+                    if (onLogin) onLogin('scd_team_leader', '6ba7b810-9dad-11d1-80b4-00c04fd430c8', email);
                     return;
                 }
                 if (email === 'reu@oshe.gov.ph' && password === 'reu123') {
-                    if (onLogin) onLogin('reu', 'user_reu_mock');
+                    if (onLogin) onLogin('reu', '6ba7b811-9dad-11d1-80b4-00c04fd430c8', email);
                     return;
                 }
 
