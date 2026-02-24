@@ -410,7 +410,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                                 onClick={() => handlePreview(doc)}
                                 className="w-full py-2.5 bg-gkk-navy text-white hover:bg-gkk-royalBlue rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-md flex items-center justify-center gap-2"
                               >
-                                <Eye size={14} /> VIEW PROOF
+                                <Eye size={14} /> VIEW DOCUMENT
                               </button>
                               <div className="flex gap-2">
                                 <button
