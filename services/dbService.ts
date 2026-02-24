@@ -603,7 +603,6 @@ export const issueAccessKey = async (data: { companyName: string, focalName: str
         status: 'issued',
         email: data.email,
         name: data.companyName,
-        focal_name: data.focalName,
         region: data.region,
         category: data.category
     });
