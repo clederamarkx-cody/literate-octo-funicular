@@ -252,14 +252,16 @@ const Login: React.FC<LoginProps> = ({ onLogin, onRegisterClick, onQuickRegister
                             Testing? <button
                                 type="button"
                                 onClick={async () => {
-                                    const confirmed = window.confirm("This will clear your local GKK data and reset ACT-001 through ACT-005. Proceed?");
+                                    const confirmed = window.confirm("CRITICAL: This will hard-reset your database to include the new 35 Industry Requirements and unlock Stage 1 for the Demo Account (NOM-2024-8821). Proceed?");
                                     if (confirmed) {
+                                        setIsLoading(true);
                                         const ok = await seedFirebase();
-                                        if (ok) alert('Database Reset & Seeded with ACT-001 through ACT-005!');
+                                        setIsLoading(false);
+                                        if (ok) alert('SUCCESS: Database reset with 35 granular requirements! Use "Autofill Demo Account" to log in.');
                                     }
                                 }}
-                                className="text-gkk-navy hover:underline"
-                            >Seed Fresh Test Data</button>
+                                className="text-gkk-navy hover:underline font-bold"
+                            >Seed Fresh Test Data (35 Requirements)</button>
                         </p>
                     </div>
                 </div>
