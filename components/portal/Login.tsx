@@ -18,15 +18,6 @@ const Login: React.FC<LoginProps> = ({ onLogin, onRegisterClick, onQuickRegister
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const handleDemoFill = () => {
-        setError(null);
-        if (loginMethod === 'email') {
-            setEmail('nominee@gkk.gov.ph');
-            setPassword('nominee');
-        } else {
-            setAccessCode('NOM-2024-8821');
-        }
-    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -221,14 +212,6 @@ const Login: React.FC<LoginProps> = ({ onLogin, onRegisterClick, onQuickRegister
                                 )}
                             </button>
 
-                            <button
-                                type="button"
-                                onClick={handleDemoFill}
-                                className="w-full py-3 px-4 border border-dashed border-gray-200 rounded-2xl text-xs font-bold text-gray-400 hover:text-gkk-navy hover:border-gkk-navy hover:bg-gray-50 transition-all flex items-center justify-center gap-2 uppercase tracking-widest"
-                            >
-                                <LayoutDashboard className="w-4 h-4" />
-                                Autofill Demo Account
-                            </button>
                         </div>
                     </form>
 

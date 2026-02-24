@@ -1,5 +1,4 @@
 import { Nominee, NomineeDocument, UserRole, User } from '../types';
-import { INITIAL_GKK_WINNERS } from '../constants';
 import { supabase } from './supabaseClient';
 
 // --- MOCK AUTH ENGINE (Simplified for integration) ---
@@ -20,10 +19,6 @@ export const setAuthUser = (uid: string, email: string) => {
 };
 
 export const ensureLocalAuth = async () => {
-    if (currentUser) return currentUser;
-    // Generate a valid-looking UUID for the mock session
-    currentUser = { uid: '00000000-0000-4000-a000-' + Math.random().toString(16).substring(2, 14).padStart(12, '0'), email: 'anonymous@local', isAnonymous: true };
-    console.log("[MOCK AUTH] Signed in as:", currentUser.uid);
     return currentUser;
 };
 
@@ -414,7 +409,7 @@ export const getGKKWinners = async (): Promise<any[]> => {
         .from(WINNERS_COLLECTION)
         .select('*');
 
-    return data && data.length > 0 ? data : INITIAL_GKK_WINNERS;
+    return data || [];
 };
 
 export const getNomineeByPassKey = async (passKey: string): Promise<Nominee | null> => {
@@ -488,7 +483,7 @@ export const verifyAccessKey = async (passKey: string) => {
     if (error || !data) return null;
 
     return {
-        uid: data.user_id || `local_${normalizedKey}`,
+        uid: data.user_id,
         role: data.role as UserRole,
         status: data.status,
         email: data.email,
@@ -538,7 +533,5 @@ export const getAllAccessKeys = async () => {
 };
 
 export const initializeLocalDB = () => {
-    // This was used for localStorage seeding. 
-    // In Supabase, we do this via migrations or initial scripts.
-    console.log("[SUPABASE] Running in live mode.");
+    // Database initialization is handled by Supabase schema.
 };
