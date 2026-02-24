@@ -118,24 +118,53 @@ export const updateUserProfile = async (uid: string, updates: Partial<User>) => 
         return false;
     }
 
-    const supabaseUpdates: any = { user_id: uid };
+    console.log("[DB] Attempting profile update for ID:", uid, "with updates:", updates);
 
-    // Explicit mapping to snake_case for Supabase
+    // 1. First, check if the record exists
+    const { data: existing } = await supabase
+        .from(USERS_COLLECTION)
+        .select('user_id')
+        .eq('user_id', uid)
+        .single();
+
+    const supabaseUpdates: any = {};
     if (updates.name !== undefined) supabaseUpdates.name = updates.name;
     if (updates.email !== undefined) supabaseUpdates.email = updates.email;
     if (updates.region !== undefined) supabaseUpdates.region = updates.region;
+
+    // Ensure role and status are valid enum values
     if (updates.role !== undefined) supabaseUpdates.role = updates.role;
     if (updates.status !== undefined) supabaseUpdates.status = updates.status;
 
-    const { error } = await supabase
-        .from(USERS_COLLECTION)
-        .upsert(supabaseUpdates, { onConflict: 'user_id' });
+    let result;
+    if (existing) {
+        // Perform UPDATE
+        result = await supabase
+            .from(USERS_COLLECTION)
+            .update(supabaseUpdates)
+            .eq('user_id', uid);
+    } else {
+        // Perform INSERT
+        supabaseUpdates.user_id = uid;
+        result = await supabase
+            .from(USERS_COLLECTION)
+            .insert(supabaseUpdates);
+    }
+
+    const { error } = result;
 
     if (error) {
-        console.error("Update profile failed [Supabase Error]:", error.message, error.details);
+        console.error("UPDATE FAILED [Detailed Error]:", {
+            message: error.message,
+            details: error.details,
+            hint: error.hint,
+            code: error.code,
+            payload: supabaseUpdates
+        });
         return false;
     }
 
+    console.log("[DB] Profile updated successfully!");
     await logAction('UPDATE_PROFILE', `Fields: ${Object.keys(updates).join(', ')}`, uid);
     return true;
 };

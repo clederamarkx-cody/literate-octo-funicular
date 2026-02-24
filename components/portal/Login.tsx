@@ -52,15 +52,6 @@ const Login: React.FC<LoginProps> = ({ onLogin, onRegisterClick, onQuickRegister
                 setError("Invalid Invitation/Access Key. Please check your credentials.");
             } else {
                 // Email/Password login logic
-                if (email === 'abyguel@scd.com' && password === 'scd123') {
-                    if (onLogin) onLogin('scd_team_leader', '6ba7b810-9dad-11d1-80b4-00c04fd430c8', email);
-                    return;
-                }
-                if (email === 'reu@oshe.gov.ph' && password === 'reu123') {
-                    if (onLogin) onLogin('reu', '6ba7b811-9dad-11d1-80b4-00c04fd430c8', email);
-                    return;
-                }
-
                 const user = await getUserByEmail(email);
                 if (user) {
                     if (onLogin) onLogin(user.role, user.uid);
