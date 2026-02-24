@@ -45,6 +45,7 @@ import { Nominee, NomineeDocument, UserRole, AccessKey, User as UserType } from 
 import { STAGE_1_REQUIREMENTS } from './NomineePortal';
 import { getAllNominees, resolveFileUrl, updateDocumentEvaluation, getRequirementsByCategory, issueAccessKey, getAllAccessKeys, getUserProfile, updateUserProfile } from '../../services/dbService';
 import StaffProfileEdit from './StaffProfileEdit';
+import { UserProfileTable } from './management/UserProfileTable';
 import { PH_REGIONS } from '../../constants';
 
 interface EvaluatorPortalProps {
@@ -696,6 +697,9 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
           </table>
         </div>
       </div>
+
+      {/* User Profiles Directory */}
+      <UserProfileTable />
     </div>
   );
 

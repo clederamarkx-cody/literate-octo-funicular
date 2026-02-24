@@ -404,6 +404,28 @@ export const getUserByEmail = async (email: string) => {
     return data ? { uid: data.user_id, role: data.role as UserRole } : null;
 };
 
+export const getAllUserProfiles = async (): Promise<User[]> => {
+    const { data, error } = await supabase
+        .from(USERS_COLLECTION)
+        .select('*')
+        .order('created_at', { ascending: false });
+
+    if (error) {
+        console.error("Fetch all user profiles failed:", error);
+        return [];
+    }
+
+    return (data || []).map(item => ({
+        userId: item.user_id,
+        email: item.email,
+        role: item.role,
+        status: item.status,
+        name: item.name,
+        region: item.region,
+        createdAt: item.created_at
+    })) as unknown as User[];
+};
+
 export const getGKKWinners = async (): Promise<any[]> => {
     const { data, error } = await supabase
         .from(WINNERS_COLLECTION)
