@@ -496,7 +496,7 @@ export const activateAccessKey = async (
     try {
         const { data: key, error: keyError } = await supabase
             .from(ACCESS_KEYS_COLLECTION)
-            .select('*, focal_name')
+            .select('*')
             .eq('key_id', normalizedKey)
             .eq('status', 'issued')
             .single();
@@ -513,7 +513,7 @@ export const activateAccessKey = async (
             email: details.email,
             role: role,
             status: 'active',
-            name: key.focal_name || details.companyName, // Focal Person Name
+            name: key.focal_name || key.name || details.companyName,
             region: key.region
         };
 
@@ -528,13 +528,13 @@ export const activateAccessKey = async (
                 reg_id: normalizedKey,
                 name: details.companyName,
                 organization_name: details.companyName,
-                focal_name: key.focal_name || details.companyName,
+                focal_name: key.focal_name || key.name || details.companyName,
                 role: 'nominee',
                 status: 'in_progress',
                 submitted_date: new Date().toISOString(),
                 details: {
                     nomineeCategory: finalCategory,
-                    representative: key.focal_name || details.companyName
+                    representative: key.focal_name || key.name || details.companyName
                 }
             });
             if (appError) {
@@ -628,6 +628,7 @@ export const issueAccessKey = async (data: { companyName: string, focalName: str
         status: 'issued',
         email: data.email,
         name: data.companyName,
+        focal_name: data.focalName,
         region: data.region,
         category: data.category
     });
