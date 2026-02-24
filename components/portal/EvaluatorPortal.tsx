@@ -100,6 +100,30 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
     }
   }, [activeTab]);
 
+  const docCategories = [
+    { id: 'Compliance', name: 'Compliance Reports', icon: FileText },
+    { id: 'Legal', name: 'Legal Documents', icon: ShieldAlert },
+    { id: 'Systems', name: 'OSH Systems & Programs', icon: Zap },
+    { id: 'Training', name: 'Training & Orientations', icon: FileText },
+    { id: 'Designation', name: 'Personnel Designation', icon: FileText },
+    { id: 'Safety', name: 'Safety Certificates', icon: ShieldAlert },
+    { id: 'Health', name: 'Health & Medical', icon: Zap },
+    { id: 'Construction', name: 'Construction Specific', icon: ShieldAlert },
+    { id: 'Excellence', name: 'Excellence Programs', icon: Zap },
+    { id: 'Management', name: 'Management & Budget', icon: FileText },
+    { id: 'Other', name: 'Other Documents', icon: FileText },
+    { id: 'General', name: 'General Requirements', icon: FileText }
+  ];
+
+  const [openCategories, setOpenCategories] = useState<Record<string, boolean>>({});
+
+  const toggleCategory = (catId: string) => {
+    setOpenCategories(prev => ({
+      ...prev,
+      [catId]: !prev[catId]
+    }));
+  };
+
   const handleIssueKey = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsIssuingKey(true);
@@ -242,87 +266,111 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
     const activeRequirements = dynamicRequirements[stageKey] || [];
 
     return (
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {['Compliance', 'Legal', 'Systems', 'Training', 'Designation', 'Safety', 'Health', 'Construction', 'Excellence', 'Management', 'Other', 'General'].map(cat => {
-          const catReqs = activeRequirements.filter((r: any) => (r.category === cat) || (!r.category && cat === 'General'));
+      <div className="space-y-4">
+        {docCategories.map(cat => {
+          const catReqs = activeRequirements.filter((r: any) => (r.category === cat.id || r.category === cat.name) || (!r.category && cat.id === 'General'));
           if (catReqs.length === 0) return null;
 
+          const isOpen = openCategories[cat.id];
+          const completedCount = catReqs.filter((req: any) => {
+            const globalIdx = activeRequirements.findIndex((r: any) => r.label === req.label);
+            const stagePrefix = round === 1 ? 'r1' : round === 2 ? 'r2' : 'r3';
+            const slotId = `${stagePrefix}-${globalIdx}`;
+            const doc = selectedNominee.documents?.find(d => d.slotId === slotId);
+            return doc?.verdict === 'pass' || doc?.verdict === 'fail';
+          }).length;
+
           return (
-            <div key={cat} className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm flex flex-col">
-              <div className="p-4 bg-gray-50 border-b border-gray-100 flex items-center">
-                <h4 className="font-bold text-gkk-navy text-[10px] uppercase tracking-[0.2em]">{cat}</h4>
-              </div>
-              <div className="p-4 flex-1 space-y-4">
-                {catReqs.map((req: any, localIdx: number) => {
-                  const globalIdx = activeRequirements.findIndex((r: any) => r.label === req.label);
-                  const stagePrefix = round === 1 ? 'r1' : round === 2 ? 'r2' : 'r3';
-                  const slotId = `${stagePrefix}-${globalIdx}`;
+            <div key={`${cat.id}-${round}`} className="bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm flex flex-col transition-all duration-300">
+              <button
+                onClick={() => toggleCategory(cat.id)}
+                className="w-full p-6 bg-gray-50/50 border-b border-gray-100 flex items-center justify-between hover:bg-gray-100 transition-colors"
+              >
+                <div className="flex items-center">
+                  <cat.icon size={22} className="text-gkk-navy mr-4" />
+                  <h4 className="font-bold text-gkk-navy text-sm uppercase tracking-wider">{cat.name}</h4>
+                  <span className={`ml-4 text-[10px] font-black px-3 py-1 rounded-full border ${completedCount === catReqs.length ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
+                    {completedCount} / {catReqs.length} EVALUATED
+                  </span>
+                </div>
+                <div className="text-gkk-navy">
+                  {isOpen ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
+                </div>
+              </button>
 
-                  const doc = selectedNominee.documents?.find(d => d.slotId === slotId);
-                  const docStatus = doc?.verdict;
+              <div className={`transition-all duration-500 ease-in-out ${isOpen ? 'max-h-none opacity-100' : 'max-h-0 opacity-0 overflow-hidden'}`}>
+                <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 bg-white">
+                  {catReqs.map((req: any, localIdx: number) => {
+                    const globalIdx = activeRequirements.findIndex((r: any) => r.label === req.label);
+                    const stagePrefix = round === 1 ? 'r1' : round === 2 ? 'r2' : 'r3';
+                    const slotId = `${stagePrefix}-${globalIdx}`;
 
-                  const handleDocVerdict = async (verdict: 'pass' | 'fail') => {
-                    const success = await updateDocumentEvaluation(selectedNominee.id, slotId, verdict);
-                    if (success) {
-                      const updatedDocs = (selectedNominee.documents || []).map(d =>
-                        d.slotId === slotId ? { ...d, verdict } : d
-                      );
-                      const updatedNominee = { ...selectedNominee, documents: updatedDocs };
-                      setSelectedNominee(updatedNominee);
-                      setLocalNominees(prev => prev.map(a => a.id === selectedNominee.id ? updatedNominee : a));
-                    }
-                  };
+                    const doc = selectedNominee.documents?.find(d => d.slotId === slotId);
+                    const docStatus = doc?.verdict;
 
-                  return (
-                    <div key={localIdx} className={`p-5 border rounded-2xl transition-all ${docStatus === 'pass' ? 'bg-green-50 border-green-200 shadow-inner' : docStatus === 'fail' ? 'bg-red-50 border-red-200 shadow-inner' : doc ? 'bg-white border-gray-100 shadow-sm' : 'bg-gray-50/50 border-gray-100'}`}>
-                      <div className="flex justify-between items-start mb-3">
-                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Evidence</span>
-                        <div className="flex gap-1.5">
-                          {docStatus === 'pass' && <span className="text-[9px] font-black text-green-600 bg-green-100 px-2 py-0.5 rounded-md">PASSED</span>}
-                          {docStatus === 'fail' && <span className="text-[9px] font-black text-red-600 bg-red-100 px-2 py-0.5 rounded-md">FAILED</span>}
-                          {doc ? <span className="text-[9px] font-black text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md">SUBMITTED</span> : <span className="text-[9px] font-black text-gray-400 bg-gray-100 px-2 py-0.5 rounded-md">EMPTY</span>}
+                    const handleDocVerdict = async (verdict: 'pass' | 'fail') => {
+                      const success = await updateDocumentEvaluation(selectedNominee.id, slotId, verdict);
+                      if (success) {
+                        const updatedDocs = (selectedNominee.documents || []).map(d =>
+                          d.slotId === slotId ? { ...d, verdict } : d
+                        );
+                        const updatedNominee = { ...selectedNominee, documents: updatedDocs };
+                        setSelectedNominee(updatedNominee);
+                        setLocalNominees(prev => prev.map(a => a.id === selectedNominee.id ? updatedNominee : a));
+                      }
+                    };
+
+                    return (
+                      <div key={localIdx} className={`p-5 border rounded-2xl transition-all ${docStatus === 'pass' ? 'bg-green-50 border-green-200 shadow-inner' : docStatus === 'fail' ? 'bg-red-50 border-red-200 shadow-inner' : doc ? 'bg-white border-gray-100 shadow-sm' : 'bg-gray-50/50 border-gray-100'}`}>
+                        <div className="flex justify-between items-start mb-3">
+                          <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Evidence</span>
+                          <div className="flex gap-1.5">
+                            {docStatus === 'pass' && <span className="text-[9px] font-black text-green-600 bg-green-100 px-2 py-0.5 rounded-md">PASSED</span>}
+                            {docStatus === 'fail' && <span className="text-[9px] font-black text-red-600 bg-red-100 px-2 py-0.5 rounded-md">FAILED</span>}
+                            {doc ? <span className="text-[9px] font-black text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md">SUBMITTED</span> : <span className="text-[9px] font-black text-gray-400 bg-gray-100 px-2 py-0.5 rounded-md">EMPTY</span>}
+                          </div>
+                        </div>
+                        <h5 className="text-sm font-bold text-gkk-navy mb-2 leading-relaxed min-h-[2.5em]">{req.label}</h5>
+                        {doc && (
+                          <p className="text-[11px] text-blue-600 truncate mb-4 font-bold bg-blue-50/50 p-2 rounded-xl border border-blue-100/30 flex items-center gap-2">
+                            <FileText size={14} className="shrink-0" /> {doc.name}
+                          </p>
+                        )}
+
+                        <div className="mt-4 space-y-3">
+                          {doc ? (
+                            <>
+                              <button
+                                onClick={() => handlePreview(doc)}
+                                className="w-full py-2.5 bg-gkk-navy text-white hover:bg-gkk-royalBlue rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-md flex items-center justify-center gap-2"
+                              >
+                                <Eye size={14} /> VIEW PROOF
+                              </button>
+                              <div className="flex gap-2">
+                                <button
+                                  onClick={() => handleDocVerdict('pass')}
+                                  className={`flex-1 py-1.5 rounded-xl text-xs font-black border transition-all ${docStatus === 'pass' ? 'bg-green-600 text-white border-green-600 shadow-md' : 'bg-white text-gray-400 border-gray-200 hover:text-green-600'}`}
+                                >
+                                  PASS
+                                </button>
+                                <button
+                                  onClick={() => handleDocVerdict('fail')}
+                                  className={`flex-1 py-1.5 rounded-xl text-xs font-black border transition-all ${docStatus === 'fail' ? 'bg-red-600 text-white border-red-600 shadow-md' : 'bg-white text-gray-400 border-gray-200 hover:text-red-600'}`}
+                                >
+                                  FAIL
+                                </button>
+                              </div>
+                            </>
+                          ) : (
+                            <div className="w-full py-2.5 bg-gray-50 border border-dashed border-gray-200 text-gray-400 rounded-xl text-[10px] font-bold uppercase tracking-widest text-center italic">
+                              Awaiting Submission
+                            </div>
+                          )}
                         </div>
                       </div>
-                      <h5 className="text-sm font-bold text-gkk-navy mb-2 leading-relaxed min-h-[2.5em]">{req.label}</h5>
-                      {doc && (
-                        <p className="text-[11px] text-blue-600 truncate mb-4 font-bold bg-blue-50/50 p-2 rounded-xl border border-blue-100/30 flex items-center gap-2">
-                          <FileText size={14} className="shrink-0" /> {doc.name}
-                        </p>
-                      )}
-
-                      <div className="mt-4 space-y-3">
-                        {doc ? (
-                          <>
-                            <button
-                              onClick={() => handlePreview(doc)}
-                              className="w-full py-2.5 bg-gkk-navy text-white hover:bg-gkk-royalBlue rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-md flex items-center justify-center gap-2"
-                            >
-                              <Eye size={14} /> VIEW PROOF
-                            </button>
-                            <div className="flex gap-2">
-                              <button
-                                onClick={() => handleDocVerdict('pass')}
-                                className={`flex-1 py-1.5 rounded-xl text-xs font-black border transition-all ${docStatus === 'pass' ? 'bg-green-600 text-white border-green-600 shadow-md' : 'bg-white text-gray-400 border-gray-200 hover:text-green-600'}`}
-                              >
-                                PASS
-                              </button>
-                              <button
-                                onClick={() => handleDocVerdict('fail')}
-                                className={`flex-1 py-1.5 rounded-xl text-xs font-black border transition-all ${docStatus === 'fail' ? 'bg-red-600 text-white border-red-600 shadow-md' : 'bg-white text-gray-400 border-gray-200 hover:text-red-600'}`}
-                              >
-                                FAIL
-                              </button>
-                            </div>
-                          </>
-                        ) : (
-                          <div className="w-full py-2.5 bg-gray-50 border border-dashed border-gray-200 text-gray-400 rounded-xl text-[10px] font-bold uppercase tracking-widest text-center italic">
-                            Awaiting Submission
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
             </div>
           );
