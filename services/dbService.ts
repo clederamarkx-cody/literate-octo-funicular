@@ -97,7 +97,7 @@ export const createNominee = async (uid: string, regId: string, name: string, no
             address: '',
             representative: '',
             designation: '',
-            email: '',
+            email: email, // Reflect the registered email here
             phone: '',
             safetyOfficer: ''
         }
@@ -351,7 +351,15 @@ export const activateAccessKey = async (
 
         if (keyError || !key) return false;
 
-        await createNominee(uid, passKey, details.companyName, details.category as any, details.email);
+        const role = (key.role as UserRole) || 'nominee';
+
+        // Conditional setup based on role
+        if (role === 'nominee') {
+            await createNominee(uid, passKey, details.companyName, details.category as any, details.email);
+        } else {
+            // Admin/Evaluator roles only need a user profile
+            await createUserProfile(uid, details.email, role);
+        }
 
         const { error: updateError } = await supabase
             .from(ACCESS_KEYS_COLLECTION)
@@ -385,13 +393,14 @@ export const verifyAccessKey = async (passKey: string) => {
     };
 };
 
-export const issueAccessKey = async (data: { companyName: string, email: string, region: string }): Promise<string> => {
+export const issueAccessKey = async (data: { companyName: string, email: string, region: string, role?: string }): Promise<string> => {
     const random = Math.floor(1000 + Math.random() * 9000).toString();
-    const keyId = `GKK-SB-${data.companyName.substring(0, 3).toUpperCase()}-${random}`;
+    const prefix = data.role === 'nominee' ? 'GKK-SB' : data.role ? `GKK-${data.role.toUpperCase()}` : 'GKK-SB';
+    const keyId = `${prefix}-${data.companyName.substring(0, 3).toUpperCase()}-${random}`;
 
     const { error } = await supabase.from(ACCESS_KEYS_COLLECTION).insert({
         key_id: keyId,
-        role: 'nominee',
+        role: data.role || 'nominee',
         status: 'issued',
         email: data.email,
         name: data.companyName,
@@ -400,7 +409,7 @@ export const issueAccessKey = async (data: { companyName: string, email: string,
 
     if (error) console.error("Issue key failed:", error);
 
-    await logAction('ISSUE_KEY', `Issued key ${keyId}`);
+    await logAction('ISSUE_KEY', `Issued key ${keyId} for role ${data.role || 'nominee'}`);
     return keyId;
 };
 

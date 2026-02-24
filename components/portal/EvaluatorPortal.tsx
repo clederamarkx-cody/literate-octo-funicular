@@ -88,7 +88,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
   const [dynamicRequirements, setDynamicRequirements] = useState<any>(null);
   const [allKeys, setAllKeys] = useState<any[]>([]);
   const [isIssuingKey, setIsIssuingKey] = useState(false);
-  const [newKeyData, setNewKeyData] = useState({ companyName: '', email: '', region: 'NCR' });
+  const [newKeyData, setNewKeyData] = useState({ companyName: '', email: '', region: 'NCR', role: 'nominee' });
 
   useEffect(() => {
     if (activeTab === 'management') {
@@ -130,7 +130,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
     try {
       const keyId = await issueAccessKey(newKeyData);
       alert(`Key Issued Successfully: ${keyId}`);
-      setNewKeyData({ companyName: '', email: '', region: 'NCR' });
+      setNewKeyData({ companyName: '', email: '', region: 'NCR', role: 'nominee' });
       const updatedKeys = await getAllAccessKeys();
       setAllKeys(updatedKeys);
     } catch (err) {
@@ -492,17 +492,30 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                   placeholder="e.g. Acme Corp Philippines"
                 />
               </div>
+              <div>
+                <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Administrator Email</label>
+                <input
+                  type="email"
+                  required
+                  value={newKeyData.email}
+                  onChange={(e) => setNewKeyData({ ...newKeyData, email: e.target.value })}
+                  className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-gkk-gold/5 focus:border-gkk-gold outline-none transition-all font-bold text-sm tracking-tight"
+                  placeholder="safety@company.ph"
+                />
+              </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Administrator Email</label>
-                  <input
-                    type="email"
-                    required
-                    value={newKeyData.email}
-                    onChange={(e) => setNewKeyData({ ...newKeyData, email: e.target.value })}
-                    className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-gkk-gold/5 focus:border-gkk-gold outline-none transition-all font-bold text-sm tracking-tight"
-                    placeholder="safety@company.ph"
-                  />
+                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Assigned Role</label>
+                  <select
+                    value={newKeyData.role}
+                    onChange={(e) => setNewKeyData({ ...newKeyData, role: e.target.value })}
+                    className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-gkk-gold/5 focus:border-gkk-gold outline-none transition-all font-bold text-sm tracking-tight appearance-none"
+                  >
+                    <option value="nominee">Nominee</option>
+                    <option value="reu">REU (Regional Expansion Unit)</option>
+                    <option value="scd_team_leader">SCD Team Leader</option>
+                    <option value="evaluator">Regional Board Evaluator</option>
+                  </select>
                 </div>
                 <div>
                   <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Assigned Region</label>
