@@ -14,6 +14,23 @@ export const APPLICATIONS_COLLECTION = 'applications';
 export const REQUIREMENTS_COLLECTION = 'requirements';
 export const WINNERS_COLLECTION = 'gkk_winners';
 export const SYSTEM_LOGS_COLLECTION = 'system_logs';
+
+/**
+ * Ensures a Firebase Auth session is active (silent anonymous sign-in).
+ * Required for secure storage operations.
+ */
+export const ensureFirebaseAuth = async () => {
+    if (auth.currentUser) return auth.currentUser;
+    try {
+        const result = await signInAnonymously(auth);
+        console.log("Silent Anonymous Auth Success", result.user.uid);
+        return result.user;
+    } catch (e) {
+        console.error("Silent Anonymous Auth Failed", e);
+        throw e;
+    }
+};
+
 /**
  * Standardized Logging for Audit Trails
  */
@@ -190,8 +207,10 @@ export const uploadNomineeFile = async (
     onProgress?: (progress: number) => void,
     cancelToken?: { cancel?: () => void }
 ): Promise<string> => {
+    // 1. Ensure Auth Session before starting upload
+    await ensureFirebaseAuth();
+
     const fileUid = `${uid}_${documentId}_${Date.now()}`;
-    // Optionally change the path if you want it aligned with applications
     const storageRef = ref(storage, `nominee_docs/${uid}/${fileUid}_${file.name}`);
     const uploadTask = uploadBytesResumable(storageRef, file);
 
@@ -205,13 +224,25 @@ export const uploadNomineeFile = async (
                 const progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
                 if (onProgress) onProgress(progress);
             },
-            (error) => {
-                console.error("Storage upload failed", error);
-                reject(error);
+            (error: any) => {
+                console.error("Firebase Storage Error:", error.code, error.message);
+                // Provide more actionable error messages
+                let userFriendlyError = error.message;
+                if (error.code === 'storage/unauthorized') {
+                    userFriendlyError = "Permission denied. Please ensure Anonymous Auth is enabled in Firebase.";
+                } else if (error.code === 'storage/canceled') {
+                    userFriendlyError = "Upload cancelled by user";
+                }
+
+                reject(new Error(userFriendlyError));
             },
             async () => {
-                const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-                resolve(downloadURL);
+                try {
+                    const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+                    resolve(downloadURL);
+                } catch (e) {
+                    reject(e);
+                }
             }
         );
     });

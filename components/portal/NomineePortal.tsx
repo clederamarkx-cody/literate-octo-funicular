@@ -398,7 +398,8 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
         console.error("Firebase Storage Upload Failed", e);
         if (!isCancelledRef.current) {
           setUploadStatus('idle');
-          setToast({ message: `Upload failed: ${e.code || e.message || 'Unknown error'}`, type: 'error' });
+          // e.message already has the user-friendly string from uploadNomineeFile
+          setToast({ message: `Upload failed: ${e.message}`, type: 'error' });
         }
       }
     }
