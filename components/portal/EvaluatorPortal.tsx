@@ -41,9 +41,10 @@ import {
   Zap,
   Upload
 } from 'lucide-react';
-import { Nominee, NomineeDocument, UserRole, AccessKey } from '../../types';
+import { Nominee, NomineeDocument, UserRole, AccessKey, User as UserType } from '../../types';
 import { STAGE_1_REQUIREMENTS } from './NomineePortal';
-import { getAllNominees, resolveFileUrl, updateDocumentEvaluation, getRequirementsByCategory, issueAccessKey, getAllAccessKeys } from '../../services/dbService';
+import { getAllNominees, resolveFileUrl, updateDocumentEvaluation, getRequirementsByCategory, issueAccessKey, getAllAccessKeys, getUserProfile, updateUserProfile } from '../../services/dbService';
+import StaffProfileEdit from './StaffProfileEdit';
 import { PH_REGIONS } from '../../constants';
 
 interface EvaluatorPortalProps {
@@ -56,7 +57,7 @@ interface EvaluatorPortalProps {
 }
 
 const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev, nomineesData: propNominees, userRole, onToggleRound2, onToggleRound3 }) => {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'entries' | 'management'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'entries' | 'management' | 'profile'>('dashboard');
   const [view, setView] = useState<'list' | 'review'>('list');
   const [selectedNominee, setSelectedNominee] = useState<Nominee | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -64,6 +65,8 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [localNominees, setLocalNominees] = useState<Nominee[]>(propNominees);
   const [isLoading, setIsLoading] = useState(true);
+  const [staffProfile, setStaffProfile] = useState<UserType | null>(null);
+  const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
 
   useEffect(() => {
     const fetchNominees = async () => {
@@ -77,6 +80,19 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
       }
     };
     fetchNominees();
+
+    // Fetch own profile
+    const fetchProfile = async () => {
+      // We assume the user is authenticated and we can get their ID
+      // For now, if userRole is passed, we might need the actual UID.
+      // App.tsx handles login, let's assume we can get it from auth.currentUser
+      const { auth } = await import('../../services/dbService');
+      if (auth.currentUser) {
+        const profile = await getUserProfile(auth.currentUser.uid);
+        setStaffProfile(profile);
+      }
+    };
+    fetchProfile();
   }, []);
   const [round2Open, setRound2Open] = useState(false);
   const [docEvaluations, setDocEvaluations] = useState<Record<string, 'pass' | 'fail'>>({});
@@ -796,7 +812,17 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
               <span className="text-sm font-medium">Management</span>
             </button>
           )}
-          <div className="pt-6 mt-6 border-t border-white/5"><p className="px-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4">Board Tools</p><button onClick={onUnderDev} className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-400 hover:bg-white/5 hover:text-white transition-all"><Scale size={20} /><span className="text-sm font-medium">Scoring Matrix</span></button><button onClick={onUnderDev} className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-400 hover:bg-white/5 hover:text-white transition-all"><ShieldAlert size={20} /><span className="text-sm font-medium">Audit Logs</span></button></div>
+          <div className="pt-6 mt-6 border-t border-white/5">
+            <p className="px-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4">Board Tools</p>
+            <button
+              onClick={() => setActiveTab('profile')}
+              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'profile' ? 'bg-gkk-gold text-gkk-navy font-bold shadow-lg shadow-yellow-500/10' : 'text-gray-400 hover:bg-white/5 hover:text-white'}`}
+            >
+              <User size={20} /><span className="text-sm font-medium">My Profile</span>
+            </button>
+            <button onClick={onUnderDev} className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-400 hover:bg-white/5 hover:text-white transition-all"><Scale size={20} /><span className="text-sm font-medium">Scoring Matrix</span></button>
+            <button onClick={onUnderDev} className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-400 hover:bg-white/5 hover:text-white transition-all"><ShieldAlert size={20} /><span className="text-sm font-medium">Audit Logs</span></button>
+          </div>
         </nav>
       </aside>
       <main className="flex-1 flex flex-col overflow-hidden">
@@ -820,12 +846,12 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                 onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
                 className="flex items-center space-x-3 group bg-gray-50 hover:bg-gray-100 p-1 rounded-2xl transition-all pr-4"
               >
-                <div className="w-10 h-10 bg-gkk-navy rounded-xl flex items-center justify-center text-white font-bold border-2 border-gkk-gold group-hover:scale-105 transition-transform">
-                  JD
+                <div className="w-10 h-10 bg-gkk-navy rounded-xl flex items-center justify-center text-white font-bold border-2 border-gkk-gold group-hover:scale-105 transition-transform uppercase">
+                  {(staffProfile?.name || 'JD').substring(0, 2)}
                 </div>
                 <div className="text-left hidden sm:block">
-                  <p className="text-xs font-bold text-gkk-navy leading-none">Judge J. Doe</p>
-                  <p className="text-[10px] text-gray-400 mt-1 uppercase tracking-tighter">Region IV-A</p>
+                  <p className="text-xs font-bold text-gkk-navy leading-none">{staffProfile?.name || 'Judge J. Doe'}</p>
+                  <p className="text-[10px] text-gray-400 mt-1 uppercase tracking-tighter">{staffProfile?.region || 'National HQ'}</p>
                 </div>
                 <ChevronDown size={14} className={`text-gray-400 transition-transform duration-300 ${isProfileDropdownOpen ? 'rotate-180' : ''}`} />
               </button>
@@ -839,7 +865,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                     <p className="text-sm font-bold text-gkk-navy mt-1 truncate">Current User</p>
                   </div>
                   <div className="px-2 space-y-1">
-                    <button onClick={onUnderDev} className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 hover:text-gkk-navy rounded-xl transition-colors">
+                    <button onClick={() => { setActiveTab('profile'); setView('list'); setIsProfileDropdownOpen(false); }} className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 hover:text-gkk-navy rounded-xl transition-colors">
                       <User size={18} className="text-gray-400" />
                       <span className="font-medium">Account Settings</span>
                     </button>
@@ -856,7 +882,28 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
             </div>
           </div>
         </header>
-        <div className="flex-1 overflow-y-auto p-8 scroll-smooth"><div className="max-w-7xl mx-auto">{view === 'list' ? (activeTab === 'dashboard' ? renderDashboard() : activeTab === 'management' ? renderManagement() : renderEntries()) : renderReview()}</div></div>
+        <div className="flex-1 overflow-y-auto p-8 scroll-smooth">
+          <div className="max-w-7xl mx-auto">
+            {view === 'list' ? (
+              activeTab === 'dashboard' ? renderDashboard() :
+                activeTab === 'management' ? renderManagement() :
+                  activeTab === 'profile' && staffProfile ? (
+                    <StaffProfileEdit
+                      userData={staffProfile}
+                      onUpdateProfile={async (updates) => {
+                        if (!staffProfile?.userId) return false;
+                        const success = await updateUserProfile(staffProfile.userId, updates);
+                        if (success) {
+                          setStaffProfile(prev => prev ? { ...prev, ...updates } : null);
+                        }
+                        return success;
+                      }}
+                      onUnderDev={onUnderDev}
+                    />
+                  ) : renderEntries()
+            ) : renderReview()}
+          </div>
+        </div>
       </main>
       {/* Preview Modal */}
       {previewModalOpen && previewDoc && (

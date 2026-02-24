@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { LayoutDashboard, FileCheck, Download, ShieldCheck } from 'lucide-react';
+import { LayoutDashboard, FileCheck, Download, ShieldCheck, Settings } from 'lucide-react';
 
 interface NomineeSidebarProps {
     activeTab: 'dashboard' | 'entry' | 'profile';
@@ -30,7 +30,7 @@ const NomineeSidebar: React.FC<NomineeSidebarProps> = ({ activeTab, setActiveTab
                     <span className="text-sm font-medium">Verify Records</span>
                 </button>
                 <button onClick={() => setActiveTab('profile')} className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'profile' ? 'bg-gkk-gold text-gkk-navy font-bold shadow-lg shadow-yellow-500/10' : 'text-gray-400 hover:bg-white/5 hover:text-white'}`}>
-                    <LayoutDashboard size={20} />
+                    <Settings size={20} />
                     <span className="text-sm font-medium">Edit Profile</span>
                 </button>
                 <div className="pt-6 mt-6 border-t border-white/5">

@@ -1,4 +1,4 @@
-import { Nominee, NomineeDocument, UserRole } from '../types';
+import { Nominee, NomineeDocument, UserRole, User } from '../types';
 import { INITIAL_GKK_WINNERS } from '../constants';
 import { supabase } from './supabaseClient';
 
@@ -78,6 +78,47 @@ export const createUserProfile = async (uid: string, email: string, role: UserRo
         console.error("User profile creation failed:", error);
         return false;
     }
+    return true;
+};
+
+export const getUserProfile = async (uid: string): Promise<User | null> => {
+    const { data, error } = await supabase
+        .from(USERS_COLLECTION)
+        .select('*')
+        .eq('user_id', uid)
+        .single();
+
+    if (error || !data) return null;
+
+    return {
+        userId: data.user_id,
+        email: data.email,
+        role: data.role,
+        status: data.status,
+        name: data.name,
+        region: data.region,
+        createdAt: data.created_at
+    } as unknown as User;
+};
+
+export const updateUserProfile = async (uid: string, updates: Partial<User>) => {
+    const supabaseUpdates: any = {};
+    if (updates.name !== undefined) supabaseUpdates.name = updates.name;
+    if (updates.email !== undefined) supabaseUpdates.email = updates.email;
+    if (updates.region !== undefined) supabaseUpdates.region = updates.region;
+    if (updates.status !== undefined) supabaseUpdates.status = updates.status;
+
+    const { error } = await supabase
+        .from(USERS_COLLECTION)
+        .update(supabaseUpdates)
+        .eq('user_id', uid);
+
+    if (error) {
+        console.error("Update user profile failed:", error);
+        return false;
+    }
+
+    await logAction('UPDATE_PROFILE', `Fields: ${Object.keys(updates).join(', ')}`, uid);
     return true;
 };
 
