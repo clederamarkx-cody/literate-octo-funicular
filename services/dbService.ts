@@ -172,7 +172,6 @@ export const createNominee = async (uid: string, regId: string, name: string, no
         id: uid,
         reg_id: regId,
         name,
-        email,
         role: 'nominee',
         industry: 'Unspecified',
         region: 'NCR',
@@ -185,7 +184,6 @@ export const createNominee = async (uid: string, regId: string, name: string, no
             address: '',
             representative: '',
             designation: '',
-            email: email,
             phone: '',
             safetyOfficer: ''
         }
@@ -203,6 +201,7 @@ export const getNominee = async (uid: string): Promise<Nominee | null> => {
         .from(APPLICATIONS_COLLECTION)
         .select(`
             *,
+            user:users!id (email),
             documents: ${DOCUMENTS_COLLECTION} (*)
         `)
         .eq('id', uid)
@@ -227,7 +226,7 @@ export const getNominee = async (uid: string): Promise<Nominee | null> => {
         industrySector: data.industry_sector,
         workforceSize: data.workforce_size,
         focalName: data.focal_name,
-        email: data.email || "",
+        email: data.user?.email || "",
         focalPhone: data.focal_phone,
         addressObj: data.address_obj,
         documents: data.documents?.map((d: any) => ({
@@ -258,7 +257,7 @@ export const updateNominee = async (uid: string, updates: Partial<Nominee>) => {
     if (updates.stage3Verdict) supabaseUpdates.stage3_verdict = updates.stage3Verdict;
     if (updates.details) supabaseUpdates.details = updates.details;
     if (updates.name) supabaseUpdates.name = updates.name;
-    if (updates.email) supabaseUpdates.email = updates.email;
+    // Email is sourced from the users table, not applications
     if (updates.region) supabaseUpdates.region = updates.region;
     if (updates.industry) supabaseUpdates.industry = updates.industry;
     if (updates.focalName) supabaseUpdates.focal_name = updates.focalName;
@@ -354,6 +353,7 @@ export const getAllNominees = async (): Promise<Nominee[]> => {
         .from(APPLICATIONS_COLLECTION)
         .select(`
             *,
+            user:users!id (email),
             documents: ${DOCUMENTS_COLLECTION} (*)
         `);
 
@@ -378,7 +378,7 @@ export const getAllNominees = async (): Promise<Nominee[]> => {
         industrySector: app.industry_sector,
         workforceSize: app.workforce_size,
         focalName: app.focal_name,
-        email: app.email || "",
+        email: app.user?.email || "",
         focalPhone: app.focal_phone,
         addressObj: app.address_obj,
         documents: app.documents?.map((d: any) => ({
@@ -503,16 +503,13 @@ export const activateAccessKey = async (
                 reg_id: normalizedKey,
                 name: details.companyName,
                 organization_name: details.companyName,
-                focal_name: key.focal_name || details.email, // Use focal name from key
-                email: details.email,
-                focal_email: details.email,
+                focal_name: key.focal_name || details.companyName,
                 role: 'nominee',
                 status: 'in_progress',
                 submitted_date: new Date().toISOString(),
                 details: {
                     nomineeCategory: finalCategory,
-                    email: details.email,
-                    representative: key.focal_name || details.email // Sync representative too
+                    representative: key.focal_name || details.companyName
                 }
             });
             if (appError) {

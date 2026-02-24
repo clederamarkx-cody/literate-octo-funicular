@@ -191,6 +191,14 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Source email from session (users table) — not from the application record
+  const sessionEmail = (() => {
+    try {
+      const session = sessionStorage.getItem('gkk_session');
+      return session ? JSON.parse(session).email || "" : "";
+    } catch { return ""; }
+  })();
+
   const profileData = {
     details: {
       companyName: nomineeData?.name || nomineeData?.organizationName || "",
@@ -201,7 +209,7 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
       nomineeCategory: nomineeData?.details?.nomineeCategory || 'Industry',
     },
     representative: nomineeData?.focalName || (nomineeData as any).representative || nomineeData?.details?.representative || "",
-    email: nomineeData?.email || "",
+    email: sessionEmail || nomineeData?.email || "",
     phone: nomineeData?.details?.phone || nomineeData?.focalPhone || "",
     safetyOfficer: nomineeData?.details?.safetyOfficer || "",
     regId: nomineeData?.regId || "",

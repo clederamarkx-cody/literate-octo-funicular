@@ -82,7 +82,6 @@ export interface Nominee {
   industrySector?: string;
   workforceSize?: number;
   focalName?: string;
-  focalEmail?: string;
   focalPhone?: string;
   addressObj?: { street: string; city: string; province: string; };
 
