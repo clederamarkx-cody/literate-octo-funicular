@@ -69,14 +69,14 @@ export const isValidRole = (role: string): role is UserRole => {
 };
 
 export const createUserProfile = async (uid: string, email: string, role: UserRole) => {
-    const { error } = await supabase.from(USERS_COLLECTION).insert({
+    const { error } = await supabase.from(USERS_COLLECTION).upsert({
         user_id: uid,
         email,
         role,
-        status: role === 'nominee' ? 'pending' : 'active'
+        status: 'active' // When created or activated via this call, it's active
     });
     if (error) {
-        console.error("User profile creation failed:", error);
+        console.error("User profile creation/update failed:", error);
         return false;
     }
     return true;
@@ -168,7 +168,7 @@ export const createNominee = async (uid: string, regId: string, name: string, no
     const userCreated = await createUserProfile(uid, email, 'nominee');
     if (!userCreated) return false;
 
-    const newApplication: any = {
+    const { error } = await supabase.from(APPLICATIONS_COLLECTION).upsert({
         id: uid,
         reg_id: regId,
         name,
@@ -185,15 +185,14 @@ export const createNominee = async (uid: string, regId: string, name: string, no
             address: '',
             representative: '',
             designation: '',
-            email: email, // Reflect the registered email here
+            email: email,
             phone: '',
             safetyOfficer: ''
         }
-    };
+    });
 
-    const { error } = await supabase.from(APPLICATIONS_COLLECTION).insert(newApplication);
     if (error) {
-        console.error("Create nominee failed:", error);
+        console.error("Nominee application creation/update failed:", error);
         return false;
     }
     return true;
@@ -466,16 +465,38 @@ export const activateAccessKey = async (
 
         const role = (key.role as UserRole) || 'nominee';
 
-        // Conditional setup based on role
+        // 1. Update User Profile to 'active'
+        const profileUpdates: any = {
+            email: details.email,
+            role: role,
+            status: 'active',
+            name: details.companyName,
+            region: key.region
+        };
+
+        const profileUpdated = await updateUserProfile(uid, profileUpdates);
+        if (!profileUpdated) return false;
+
+        // 2. Specific setup for Nominees
         if (role === 'nominee') {
             const finalCategory = key.category || details.category || 'Industry';
-            const finalCompanyName = key.name || details.companyName || 'Nominated Establishment';
-            const nomineeCreated = await createNominee(uid, normalizedKey, finalCompanyName, finalCategory as any, details.email);
-            if (!nomineeCreated) return false;
-        } else {
-            // Admin/Evaluator roles only need a user profile
-            const userCreated = await createUserProfile(uid, details.email, role);
-            if (!userCreated) return false;
+            const { error: appError } = await supabase.from(APPLICATIONS_COLLECTION).upsert({
+                id: uid,
+                reg_id: normalizedKey,
+                name: details.companyName,
+                email: details.email,
+                role: 'nominee',
+                status: 'in_progress',
+                submitted_date: new Date().toISOString(),
+                details: {
+                    nomineeCategory: finalCategory,
+                    email: details.email
+                }
+            });
+            if (appError) {
+                console.error("Nominee application activation failed:", appError);
+                return false;
+            }
         }
 
         const { error: updateError } = await supabase
@@ -515,6 +536,9 @@ export const verifyAccessKey = async (passKey: string) => {
 
 export const issueAccessKey = async (data: { companyName: string, email: string, region: string, role?: string, category?: string }): Promise<string> => {
     const random = Math.floor(1000 + Math.random() * 9000).toString();
+    // Generate a temporary ID if we don't have one, though activation usually provides the real UID.
+    // However, to show in the table immediately, we need a record.
+    const tempUserId = crypto.randomUUID();
 
     // Generate abbreviation from company name
     const words = data.companyName.trim().split(/[\s-]+/);
@@ -526,11 +550,24 @@ export const issueAccessKey = async (data: { companyName: string, email: string,
         abbreviation = data.companyName.substring(0, 4).toUpperCase();
     }
 
-    // New format: GKK-26-[Abbreviation]-[Random]
     const keyId = `GKK-26-${abbreviation}-${random}`;
 
+    // 1. Pre-create User Profile in 'pending' status
+    const { error: userError } = await supabase.from(USERS_COLLECTION).insert({
+        user_id: tempUserId,
+        email: data.email,
+        role: data.role || 'nominee',
+        status: 'pending',
+        name: data.companyName,
+        region: data.region
+    });
+
+    if (userError) console.error("Pre-creating user profile failed:", userError);
+
+    // 2. Issue the Access Key linked to the temp user ID
     const { error } = await supabase.from(ACCESS_KEYS_COLLECTION).insert({
         key_id: keyId,
+        user_id: tempUserId,
         role: data.role || 'nominee',
         status: 'issued',
         email: data.email,
@@ -541,7 +578,7 @@ export const issueAccessKey = async (data: { companyName: string, email: string,
 
     if (error) console.error("Issue key failed:", error);
 
-    await logAction('ISSUE_KEY', `Issued key ${keyId} for role ${data.role || 'nominee'} in category ${data.category || 'N/A'}`);
+    await logAction('ISSUE_KEY', `Issued key ${keyId} for role ${data.role || 'nominee'} (Pending Registration)`);
     return keyId;
 };
 
