@@ -192,14 +192,17 @@ const NomineeProfileEdit: React.FC<NomineeProfileEditProps> = ({ profileData, on
                     <div className="grid md:grid-cols-2 gap-6">
                         <div className="space-y-2 md:col-span-2">
                             <label className="text-xs font-bold text-gray-500 uppercase tracking-widest px-1">Full Name</label>
-                            <input
-                                type="text"
-                                value={formData.representative}
-                                onChange={(e) => handleChange('root', 'representative', e.target.value)}
-                                className="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:border-gkk-navy focus:ring-2 focus:ring-gkk-navy/10 outline-none transition-all font-medium text-gkk-navy bg-gray-50/50"
-                                placeholder="Enter authorized representative"
-                                required
-                            />
+                            <div className="relative">
+                                <User size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300" />
+                                <input
+                                    type="text"
+                                    value={formData.representative}
+                                    onChange={(e) => handleChange('root', 'representative', e.target.value)}
+                                    className="w-full pl-11 pr-4 py-3 rounded-2xl border border-gray-200 focus:border-gkk-navy focus:ring-2 focus:ring-gkk-navy/10 outline-none transition-all font-medium text-gkk-navy bg-gray-50/50"
+                                    placeholder="Enter authorized representative"
+                                    required
+                                />
+                            </div>
                         </div>
                         <div className="space-y-2">
                             <label className="text-xs font-bold text-gray-500 uppercase tracking-widest px-1 flex items-center justify-between">

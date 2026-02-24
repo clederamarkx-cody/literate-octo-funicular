@@ -261,6 +261,21 @@ export const updateNominee = async (uid: string, updates: Partial<Nominee>) => {
     if (updates.email) supabaseUpdates.email = updates.email;
     if (updates.region) supabaseUpdates.region = updates.region;
     if (updates.industry) supabaseUpdates.industry = updates.industry;
+    if (updates.focalName) supabaseUpdates.focal_name = updates.focalName;
+    if ((updates as any).representative) supabaseUpdates.focal_name = (updates as any).representative;
+
+    // If focal name changes, also update the master USERS table for this UID
+    if (supabaseUpdates.focal_name) {
+        await supabase
+            .from(USERS_COLLECTION)
+            .update({ name: supabaseUpdates.focal_name })
+            .eq('user_id', uid);
+    }
+
+    // If details.representative is changed, also sync focal_name
+    if (updates.details?.representative) {
+        supabaseUpdates.focal_name = updates.details.representative;
+    }
 
     const { error } = await supabase
         .from(APPLICATIONS_COLLECTION)
