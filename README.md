@@ -4,7 +4,7 @@ Welcome to the official repository for the **14th Gawad Kaligtasan at Kalusugan 
 
 ---
 
-## 🚀 Recent Update: Supabase Migration
+## Recent Update: Supabase Migration
 The system has been migrated from a Firebase/localStorage mock to a robust **Supabase** live backend. This provides:
 - **Persistent Data**: No more session loss; all data is stored in PostgreSQL.
 - **Relational Integrity**: Proper foreign keys between Users, Applications, and Documents.
@@ -12,7 +12,7 @@ The system has been migrated from a Firebase/localStorage mock to a robust **Sup
 
 ---
 
-## ✨ Features
+## Features
 
 - **Public Landing Page**: Interactive showcase of award categories, timeline, and champions.
 - **Unified Nominee Portal**: Registration via passkeys, profile management, and document submission.
@@ -25,7 +25,7 @@ The system has been migrated from a Firebase/localStorage mock to a robust **Sup
 
 ---
 
-## 🛠 Tech Stack
+## Tech Stack
 
 - **Frontend**: [React 19](https://react.dev/) + [Vite](https://vitejs.dev/)
 - **Language**: [TypeScript](https://www.typescriptlang.org/)
@@ -35,7 +35,7 @@ The system has been migrated from a Firebase/localStorage mock to a robust **Sup
 
 ---
 
-## 🔑 Demo Access
+## Demo Access
 
 For development and testing, the following credentials and keys are pre-seeded in the database:
 
@@ -47,7 +47,7 @@ For development and testing, the following credentials and keys are pre-seeded i
 
 ---
 
-## 🏁 Getting Started
+## Getting Started
 
 ### Prerequisites
 - [Node.js](https://nodejs.org/) (v18.0.0+)
@@ -76,7 +76,7 @@ For development and testing, the following credentials and keys are pre-seeded i
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 
 - `src/components/portal/`: Contains the core logic for Nominee and Evaluator dashboards.
 - `src/services/dbService.ts`: The central data access layer, now fully powered by Supabase.
@@ -85,7 +85,7 @@ For development and testing, the following credentials and keys are pre-seeded i
 
 ---
 
-## 📜 Database Overview (Live)
+## Database Overview (Live)
 
 The system utilizes 7 core tables:
 1. `users`: Profiles & roles.
