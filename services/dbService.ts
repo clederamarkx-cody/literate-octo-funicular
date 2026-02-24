@@ -107,16 +107,19 @@ export const getUserProfile = async (uid: string): Promise<User | null> => {
 };
 
 export const updateUserProfile = async (uid: string, updates: Partial<User>) => {
-    const supabaseUpdates: any = {};
+    const supabaseUpdates: any = { user_id: uid };
+
+    // Explicit mapping to snake_case for Supabase
     if (updates.name !== undefined) supabaseUpdates.name = updates.name;
     if (updates.email !== undefined) supabaseUpdates.email = updates.email;
     if (updates.region !== undefined) supabaseUpdates.region = updates.region;
+    if (updates.role !== undefined) supabaseUpdates.role = updates.role;
     if (updates.status !== undefined) supabaseUpdates.status = updates.status;
 
+    // Use upsert to handle cases where the profile row hasn't been created yet
     const { error } = await supabase
         .from(USERS_COLLECTION)
-        .update(supabaseUpdates)
-        .eq('user_id', uid);
+        .upsert(supabaseUpdates, { onConflict: 'user_id' });
 
     if (error) {
         console.error("Update user profile failed:", error);

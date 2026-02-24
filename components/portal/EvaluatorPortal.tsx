@@ -933,7 +933,8 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                         userData={staffProfile}
                         onUpdateProfile={async (updates) => {
                           if (!staffProfile?.userId) return false;
-                          const success = await updateUserProfile(staffProfile.userId, updates);
+                          // Spread staffProfile to ensure role and status are included for the upsert
+                          const success = await updateUserProfile(staffProfile.userId, { ...staffProfile, ...updates });
                           if (success) {
                             setStaffProfile(prev => prev ? { ...prev, ...updates } : null);
                           }
