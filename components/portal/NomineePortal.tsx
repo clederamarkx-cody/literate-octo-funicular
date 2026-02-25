@@ -100,6 +100,7 @@ interface DocumentSlot {
   previewUrl: string | null;
   type: string;
   round: number;
+  remarks?: string;
 }
 
 const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nomineeData: nomineeData, onDocumentUpload, onUpdateNominee: onUpdateNominee }) => {
@@ -255,7 +256,8 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
           lastUpdated: savedDoc ? (savedDoc.date || '-') : '-',
           previewUrl: savedDoc ? (savedDoc.url || null) : null,
           type: savedDoc ? (savedDoc.type || '') : '',
-          round: round
+          round: round,
+          remarks: savedDoc?.remarks || undefined
         });
       });
     };

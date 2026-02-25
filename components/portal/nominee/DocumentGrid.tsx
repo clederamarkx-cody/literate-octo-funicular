@@ -104,6 +104,13 @@ const DocumentGrid: React.FC<DocumentGridProps> = ({
                                             <div className="mb-4 h-[34px]"></div> /* Consistent Spacer */
                                         )}
 
+                                        {doc.remarks && (
+                                            <div className="mb-3 px-3 py-2 bg-amber-50 border border-amber-200/50 rounded-xl">
+                                                <span className="text-[9px] font-black text-amber-600 uppercase tracking-widest block mb-1">Evaluator Remarks</span>
+                                                <p className="text-[11px] text-amber-800 font-semibold leading-relaxed">{doc.remarks}</p>
+                                            </div>
+                                        )}
+
                                         <div className="flex gap-2 pt-3 border-t border-gray-100">
                                             {((round === 1 && nomineeData?.round2Unlocked) || (round === 2 && nomineeData?.round3Unlocked)) ? (
                                                 <div className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-gray-50 text-gray-400 rounded-xl text-[10px] font-bold border border-gray-200">
