@@ -454,12 +454,13 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
     const roundDocs = nominee.documents || [];
     const stagePrefix = round === 1 ? 'r1' : round === 2 ? 'r2' : 'r3';
 
-    const uploadedCount = stageReqs.filter((req: any, idx: number) => {
+    const evaluatedCount = stageReqs.filter((req: any, idx: number) => {
       const slotId = `${stagePrefix}-${idx}`;
-      return roundDocs.some(d => d.slotId === slotId);
+      const doc = roundDocs.find(d => d.slotId === slotId);
+      return doc?.verdict === 'pass' || doc?.verdict === 'fail';
     }).length;
 
-    return Math.round((uploadedCount / stageReqs.length) * 100);
+    return Math.round((evaluatedCount / stageReqs.length) * 100);
   };
 
   const renderProgressBar = (nominee: Nominee, round: number) => {
@@ -469,7 +470,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
     return (
       <div className="w-full">
         <div className="flex justify-between items-center mb-1.5">
-          <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Stage {round} Progress</span>
+          <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Evaluator Progress</span>
           <span className="text-[9px] font-bold text-gray-400">{progress}%</span>
         </div>
         <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
