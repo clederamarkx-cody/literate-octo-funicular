@@ -304,6 +304,20 @@ export const updateDocumentEvaluation = async (appId: string, slotId: string, ve
     return true;
 };
 
+export const updateDocumentRemarks = async (appId: string, slotId: string, remarks: string) => {
+    const { error } = await supabase
+        .from(DOCUMENTS_COLLECTION)
+        .update({ remarks })
+        .eq('application_id', appId)
+        .eq('slot_id', slotId);
+
+    if (error) {
+        console.error("Update document remarks failed:", error);
+        return false;
+    }
+    return true;
+};
+
 export const addNomineeDocument = async (uid: string, document: NomineeDocument) => {
     const { error } = await supabase.from(DOCUMENTS_COLLECTION).upsert({
         application_id: uid,

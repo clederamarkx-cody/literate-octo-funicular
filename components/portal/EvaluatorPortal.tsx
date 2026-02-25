@@ -43,7 +43,7 @@ import {
 } from 'lucide-react';
 import { Nominee, NomineeDocument, UserRole, AccessKey, User as UserType } from '../../types';
 import { STAGE_1_REQUIREMENTS } from './NomineePortal';
-import { getAllNominees, resolveFileUrl, updateDocumentEvaluation, getRequirementsByCategory, issueAccessKey, getAllAccessKeys, getUserProfile, updateUserProfile } from '../../services/dbService';
+import { getAllNominees, resolveFileUrl, updateDocumentEvaluation, updateDocumentRemarks, getRequirementsByCategory, issueAccessKey, getAllAccessKeys, getUserProfile, updateUserProfile } from '../../services/dbService';
 import StaffProfileEdit from './StaffProfileEdit';
 import { UserProfileTable } from './management/UserProfileTable';
 import { PH_REGIONS } from '../../constants';
@@ -135,6 +135,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
   }, []);
   const [round2Open, setRound2Open] = useState(false);
   const [docEvaluations, setDocEvaluations] = useState<Record<string, 'pass' | 'fail'>>({});
+  const [docRemarks, setDocRemarks] = useState<Record<string, string>>({});
   const [previewModalOpen, setPreviewModalOpen] = useState(false);
   const [isResolvingUrl, setIsResolvingUrl] = useState(false);
   const [previewDoc, setPreviewDoc] = useState<{ name: string, url: string | null, type: string } | null>(null);
@@ -425,6 +426,27 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                                 >
                                   FAIL
                                 </button>
+                              </div>
+                              <div className="mt-2">
+                                <textarea
+                                  placeholder="Add remarks for the nominee..."
+                                  value={docRemarks[slotId] ?? doc.remarks ?? ''}
+                                  onChange={(e) => setDocRemarks(prev => ({ ...prev, [slotId]: e.target.value }))}
+                                  onBlur={async () => {
+                                    const remark = docRemarks[slotId];
+                                    if (remark !== undefined && remark !== (doc.remarks ?? '')) {
+                                      await updateDocumentRemarks(selectedNominee.id, slotId, remark);
+                                      const updatedDocs = (selectedNominee.documents || []).map(d =>
+                                        d.slotId === slotId ? { ...d, remarks: remark } : d
+                                      );
+                                      const updatedNominee = { ...selectedNominee, documents: updatedDocs };
+                                      setSelectedNominee(updatedNominee);
+                                      setLocalNominees(prev => prev.map(a => a.id === selectedNominee.id ? updatedNominee : a));
+                                    }
+                                  }}
+                                  className="w-full text-[11px] font-semibold text-gray-600 border border-gray-200 rounded-xl px-3 py-2 resize-none focus:outline-none focus:border-gkk-gold/50 focus:ring-1 focus:ring-gkk-gold/20 placeholder:text-gray-300 transition-all"
+                                  rows={2}
+                                />
                               </div>
                             </>
                           ) : (
