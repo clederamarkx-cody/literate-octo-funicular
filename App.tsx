@@ -131,20 +131,20 @@ function App() {
 
   const handleToggleRound2 = useCallback(async (nomineeId: string, unlocked: boolean) => {
     try {
-      await updateNominee(nomineeId, { round2Unlocked: unlocked });
+      await updateNominee(nomineeId, { round2Unlocked: unlocked, stage2TriggeredByScd: unlocked });
     } catch (err) {
       console.error("Failed to toggle round 2 details to local database", err);
     }
-    setNominees(prev => prev.map(app => app.id === nomineeId ? { ...app, round2Unlocked: unlocked } : app));
+    setNominees(prev => prev.map(app => app.id === nomineeId ? { ...app, round2Unlocked: unlocked, stage2TriggeredByScd: unlocked } : app));
   }, []);
 
   const handleToggleRound3 = useCallback(async (nomineeId: string, unlocked: boolean) => {
     try {
-      await updateNominee(nomineeId, { round3Unlocked: unlocked });
+      await updateNominee(nomineeId, { round3Unlocked: unlocked, stage3TriggeredByScd: unlocked });
     } catch (err) {
       console.error("Failed to toggle round 3 details to local database", err);
     }
-    setNominees(prev => prev.map(app => app.id === nomineeId ? { ...app, round3Unlocked: unlocked } : app));
+    setNominees(prev => prev.map(app => app.id === nomineeId ? { ...app, round3Unlocked: unlocked, stage3TriggeredByScd: unlocked } : app));
   }, []);
 
   const isPortalView = useMemo(() => view === 'nominee-portal' || view === 'evaluator-portal', [view]);
