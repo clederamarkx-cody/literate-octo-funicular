@@ -701,7 +701,7 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
                                     <div key={doc.id} className="bg-white border border-red-200 rounded-2xl p-4 flex flex-col gap-3 shadow-sm">
                                       <div className="flex items-start justify-between gap-2">
                                         <h5 className="text-sm font-bold text-gkk-navy leading-snug">{doc.label}</h5>
-                                        <span className="shrink-0 text-[9px] font-black text-red-600 bg-red-100 px-2 py-0.5 rounded-md uppercase">Failed</span>
+                                        <span className="shrink-0 text-[9px] font-black text-red-600 bg-red-100 px-2 py-0.5 rounded-md uppercase">Incomplete</span>
                                       </div>
 
                                       {doc.fileName && (
@@ -799,7 +799,7 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
                                     <div key={doc.id} className="bg-white border border-red-200 rounded-2xl p-4 flex flex-col gap-3 shadow-sm">
                                       <div className="flex items-start justify-between gap-2">
                                         <h5 className="text-sm font-bold text-gkk-navy leading-snug">{doc.label}</h5>
-                                        <span className="shrink-0 text-[9px] font-black text-red-600 bg-red-100 px-2 py-0.5 rounded-md uppercase">Failed</span>
+                                        <span className="shrink-0 text-[9px] font-black text-red-600 bg-red-100 px-2 py-0.5 rounded-md uppercase">Incomplete</span>
                                       </div>
 
                                       {doc.fileName && (
