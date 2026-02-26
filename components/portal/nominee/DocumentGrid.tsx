@@ -14,6 +14,7 @@ interface DocumentSlot {
     type: string;
     round: number;
     remarks?: string;
+    verdict?: 'pass' | 'fail';
 }
 
 interface DocumentGridProps {
@@ -90,9 +91,21 @@ const DocumentGrid: React.FC<DocumentGridProps> = ({
                                 {catDocs.map(doc => (
                                     <div key={doc.id} className={`group p-4 border rounded-2xl transition-all ${doc.status === 'uploaded' ? 'bg-green-50/20 border-green-100' : 'bg-white border-gray-200 hover:border-gkk-gold/30 hover:shadow-lg hover:-translate-y-0.5'}`}>
                                         <div className="flex justify-between items-start mb-3">
-                                            <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md ${doc.status === 'uploaded' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
-                                                {doc.status === 'uploaded' ? 'Complete' : 'Required'}
-                                            </span>
+                                            <div className="flex items-center gap-2">
+                                                <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md ${doc.status === 'uploaded' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
+                                                    {doc.status === 'uploaded' ? 'Complete' : 'Required'}
+                                                </span>
+                                                {doc.verdict === 'fail' && (
+                                                    <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-red-100 text-red-600 animate-pulse border border-red-200">
+                                                        FAILED
+                                                    </span>
+                                                )}
+                                                {doc.verdict === 'pass' && (
+                                                    <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-600 border border-emerald-200">
+                                                        VERIFIED
+                                                    </span>
+                                                )}
+                                            </div>
                                         </div>
                                         <h5 className="text-sm font-bold text-gkk-navy mb-2 leading-relaxed min-h-[3em] line-clamp-2">{doc.label}</h5>
 
@@ -112,7 +125,7 @@ const DocumentGrid: React.FC<DocumentGridProps> = ({
                                         )}
 
                                         <div className="flex gap-2 pt-3 border-t border-gray-100">
-                                            {((round === 1 && nomineeData?.round2Unlocked) || (round === 2 && nomineeData?.round3Unlocked)) ? (
+                                            {(!doc.verdict || doc.verdict !== 'fail') && ((round === 1 && nomineeData?.round2Unlocked) || (round === 2 && nomineeData?.round3Unlocked)) ? (
                                                 <div className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-gray-50 text-gray-400 rounded-xl text-[10px] font-bold border border-gray-200">
                                                     <Lock size={12} /> <span>LOCKED</span>
                                                 </div>

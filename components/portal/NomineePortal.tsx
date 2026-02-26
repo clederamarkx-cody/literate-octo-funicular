@@ -101,6 +101,7 @@ interface DocumentSlot {
   type: string;
   round: number;
   remarks?: string;
+  verdict?: 'pass' | 'fail';
 }
 
 const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nomineeData: nomineeData, onDocumentUpload, onUpdateNominee: onUpdateNominee }) => {
@@ -264,7 +265,8 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
           previewUrl: savedDoc ? (savedDoc.url || null) : null,
           type: savedDoc ? (savedDoc.type || '') : '',
           round: round,
-          remarks: savedDoc?.remarks || undefined
+          remarks: savedDoc?.remarks || undefined,
+          verdict: savedDoc?.verdict || undefined
         });
       });
     };
@@ -289,7 +291,8 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
             lastUpdated: savedDoc.date || '-',
             previewUrl: savedDoc.url || null,
             type: savedDoc.type || '',
-            remarks: savedDoc.remarks || ''
+            remarks: savedDoc.remarks || '',
+            verdict: savedDoc.verdict || undefined
           };
         }
         return doc;
@@ -513,6 +516,43 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
           <div className="max-w-7xl mx-auto space-y-8 pb-20">
             {activeTab === 'dashboard' ? (
               <div className="animate-in fade-in duration-500 space-y-8">
+                {/* Aggregated Action Required — Failed Documents Alert */}
+                {(() => {
+                  const failedDocs = documents.filter(d => {
+                    const persisted = nomineeData?.documents?.find((nd: any) => nd.slotId === d.id);
+                    return persisted?.verdict === 'fail';
+                  });
+                  if (failedDocs.length === 0) return null;
+                  return (
+                    <div className="bg-red-50 border-2 border-red-200 rounded-3xl p-6 shadow-lg animate-pulse hover:animate-none transition-all">
+                      <div className="flex items-start gap-4">
+                        <div className="p-3 bg-red-600 text-white rounded-2xl shadow-lg">
+                          <ShieldAlert size={28} />
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="text-xl font-black text-red-600 uppercase tracking-tighter italic">Action Required: Your attention is needed</h3>
+                          <p className="text-sm font-bold text-red-800 mt-1 leading-relaxed">
+                            Evaluators have flagged <span className="underline decoration-2">{failedDocs.length} document{failedDocs.length > 1 ? 's' : ''}</span> for correction. You must upload replacements before your application can proceed further.
+                          </p>
+                          <div className="mt-4 flex flex-wrap gap-2">
+                            {failedDocs.slice(0, 3).map(doc => (
+                              <div key={doc.id} className="bg-white/80 backdrop-blur px-3 py-1.5 rounded-xl border border-red-200 text-[10px] font-black text-red-600 flex items-center gap-2">
+                                <span className="w-1.5 h-1.5 rounded-full bg-red-600 animate-ping"></span>
+                                {doc.label}
+                              </div>
+                            ))}
+                            {failedDocs.length > 3 && (
+                              <div className="bg-white/80 backdrop-blur px-3 py-1.5 rounded-xl border border-red-200 text-[10px] font-black text-red-600">
+                                + {failedDocs.length - 3} more
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
+
                 <div className="bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden relative group">
                   <div className="absolute top-0 left-0 w-2 bg-gkk-gold h-full group-hover:w-3 transition-all"></div>
                   <div className="p-8">
@@ -556,6 +596,62 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
                       </div>
                       <button onClick={() => handleStageSubmit(1)} disabled={stage1Progress === 0} className="flex items-center justify-center px-8 py-3 bg-gradient-to-r from-gkk-navy to-gkk-royalBlue text-white font-bold rounded-2xl shadow-xl hover:shadow-gkk-navy/40 hover:-translate-y-1 transition-all disabled:opacity-30 disabled:cursor-not-allowed group text-xs uppercase tracking-widest shrink-0"><Send size={16} className="mr-2 group-hover:translate-x-1 transition-transform" />Submit Stage 1</button>
                     </div>
+
+                    {/* Failed Documents — Action Required (Stage 1) */}
+                    {(() => {
+                      const failedStage1Docs = documents.filter(d => {
+                        if (d.round !== 1) return false;
+                        const persisted = nomineeData?.documents?.find((nd: any) => nd.slotId === d.id);
+                        return persisted?.verdict === 'fail';
+                      });
+                      if (failedStage1Docs.length === 0) return null;
+                      return (
+                        <div className="mb-8 rounded-2xl border border-red-200 bg-red-50/60 overflow-hidden">
+                          <div className="flex items-center gap-3 px-6 py-4 bg-red-600 text-white">
+                            <ShieldAlert size={20} className="shrink-0" />
+                            <div>
+                              <h4 className="font-bold text-sm uppercase tracking-widest">Action Required — Failed Stage 1 Documents</h4>
+                              <p className="text-[10px] font-semibold text-red-100 mt-0.5">The following documents were flagged by the evaluator. Please upload corrected replacements.</p>
+                            </div>
+                            <span className="ml-auto shrink-0 bg-white text-red-600 font-black text-xs px-3 py-1 rounded-full">{failedStage1Docs.length} Item{failedStage1Docs.length > 1 ? 's' : ''}</span>
+                          </div>
+                          <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {failedStage1Docs.map(doc => {
+                              const persisted = nomineeData?.documents?.find((nd: any) => nd.slotId === doc.id);
+                              return (
+                                <div key={doc.id} className="bg-white border border-red-200 rounded-2xl p-4 flex flex-col gap-3 shadow-sm">
+                                  <div className="flex items-start justify-between gap-2">
+                                    <h5 className="text-sm font-bold text-gkk-navy leading-snug">{doc.label}</h5>
+                                    <span className="shrink-0 text-[10px] font-black text-red-600 bg-red-100 px-2 py-0.5 rounded-md uppercase">Failed</span>
+                                  </div>
+
+                                  {doc.fileName && (
+                                    <p className="text-[11px] text-blue-600 font-bold bg-blue-50 px-2 py-1.5 rounded-xl border border-blue-100 flex items-center gap-2 truncate">
+                                      <FileText size={12} className="shrink-0" />{doc.fileName}
+                                    </p>
+                                  )}
+
+                                  {persisted?.remarks && (
+                                    <div className="px-3 py-2 bg-amber-50 border border-amber-200 rounded-xl">
+                                      <span className="text-[9px] font-black text-amber-600 uppercase tracking-widest block mb-1">Evaluator Remarks</span>
+                                      <p className="text-[11px] text-amber-800 font-semibold leading-relaxed">{persisted.remarks}</p>
+                                    </div>
+                                  )}
+
+                                  <button
+                                    onClick={() => handleOpenUpload(doc.id)}
+                                    className="mt-auto flex items-center justify-center gap-2 w-full py-2.5 bg-red-600 hover:bg-red-700 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-md"
+                                  >
+                                    <Upload size={13} /> Upload Replacement
+                                  </button>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })()}
+
                     <div className="space-y-4">
                       <DocumentGrid round={1} documents={documents} nomineeData={nomineeData} handleOpenUpload={handleOpenUpload} handlePreview={handlePreview} />
                     </div>
