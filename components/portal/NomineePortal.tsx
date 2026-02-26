@@ -532,7 +532,7 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
                         <div className="flex-1">
                           <h3 className="text-xl font-black text-red-600 uppercase tracking-tighter italic">Action Required: Your attention is needed</h3>
                           <p className="text-sm font-bold text-red-800 mt-1 leading-relaxed">
-                            Evaluators have flagged <span className="underline decoration-2">{failedDocs.length} document{failedDocs.length > 1 ? 's' : ''}</span> for correction. You must upload replacements before your application can proceed further.
+                            Evaluators have flagged <span className="underline decoration-2">{failedDocs.length} document{failedDocs.length > 1 ? 's' : ''}</span> as <span className="font-black">INCOMPLETE</span>. You must upload replacements for the required items before your application can proceed further.
                           </p>
                           <div className="mt-4 flex flex-wrap gap-2">
                             {failedDocs.slice(0, 3).map(doc => (
@@ -610,8 +610,8 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
                           <div className="flex items-center gap-3 px-6 py-4 bg-red-600 text-white">
                             <ShieldAlert size={20} className="shrink-0" />
                             <div>
-                              <h4 className="font-bold text-sm uppercase tracking-widest">Action Required — Failed Stage 1 Documents</h4>
-                              <p className="text-[10px] font-semibold text-red-100 mt-0.5">The following documents were flagged by the evaluator. Please upload corrected replacements.</p>
+                              <h4 className="font-bold text-sm uppercase tracking-widest">Action Required — Incomplete Stage 1 Documents</h4>
+                              <p className="text-[10px] font-semibold text-red-100 mt-0.5">The following documents were flagged by the evaluator. Please upload corrected replacements for these incomplete items.</p>
                             </div>
                             <span className="ml-auto shrink-0 bg-white text-red-600 font-black text-xs px-3 py-1 rounded-full">{failedStage1Docs.length} Item{failedStage1Docs.length > 1 ? 's' : ''}</span>
                           </div>
@@ -622,7 +622,7 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
                                 <div key={doc.id} className="bg-white border border-red-200 rounded-2xl p-4 flex flex-col gap-3 shadow-sm">
                                   <div className="flex items-start justify-between gap-2">
                                     <h5 className="text-sm font-bold text-gkk-navy leading-snug">{doc.label}</h5>
-                                    <span className="shrink-0 text-[10px] font-black text-red-600 bg-red-100 px-2 py-0.5 rounded-md uppercase">Failed</span>
+                                    <span className="shrink-0 text-[10px] font-black text-red-600 bg-red-100 px-2 py-0.5 rounded-md uppercase">Incomplete</span>
                                   </div>
 
                                   {doc.fileName && (
@@ -689,7 +689,7 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
                               <div className="flex items-center gap-3 px-6 py-4 bg-red-600 text-white">
                                 <ShieldAlert size={20} className="shrink-0" />
                                 <div>
-                                  <h4 className="font-bold text-sm uppercase tracking-widest">Action Required — Failed Stage 1 Documents</h4>
+                                  <h4 className="font-bold text-sm uppercase tracking-widest">Action Required — Incomplete Stage 1 Documents</h4>
                                   <p className="text-[10px] font-semibold text-red-100 mt-0.5">The following documents were flagged by the evaluator. Please upload corrected replacements.</p>
                                 </div>
                                 <span className="ml-auto shrink-0 bg-white text-red-600 font-black text-xs px-3 py-1 rounded-full">{failedStage1Docs.length} Item{failedStage1Docs.length > 1 ? 's' : ''}</span>
@@ -731,9 +731,7 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
                           );
                         })()}
 
-                        <div className="flex justify-end mb-6">
-                          <button onClick={() => handleStageSubmit(2)} disabled={stage2Progress === 0} className="flex items-center justify-center px-8 py-3 bg-gradient-to-r from-blue-600 to-blue-500 text-white font-bold rounded-2xl shadow-xl hover:shadow-blue-500/40 hover:-translate-y-1 transition-all disabled:opacity-30 disabled:cursor-not-allowed group text-xs uppercase tracking-widest"><Send size={16} className="mr-2 group-hover:translate-x-1 transition-transform" />Submit Stage 2</button>
-                        </div>
+                        {/* Submit Stage 2 removed - Stage 2 is Read-Only for Nominees */}
                         <DocumentGrid round={2} documents={documents} nomineeData={nomineeData} handleOpenUpload={handleOpenUpload} handlePreview={handlePreview} />
                       </div>
                     </div>
@@ -789,7 +787,7 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
                               <div className="flex items-center gap-3 px-6 py-4 bg-red-600 text-white">
                                 <ShieldAlert size={20} className="shrink-0" />
                                 <div>
-                                  <h4 className="font-bold text-sm uppercase tracking-widest">Action Required — Failed Stage 2 Documents</h4>
+                                  <h4 className="font-bold text-sm uppercase tracking-widest">Action Required — Incomplete Stage 2 Documents</h4>
                                   <p className="text-[10px] font-semibold text-red-100 mt-0.5">The following documents were flagged by the evaluator. Please upload corrected replacements.</p>
                                 </div>
                                 <span className="ml-auto shrink-0 bg-white text-red-600 font-black text-xs px-3 py-1 rounded-full">{failedStage2Docs.length} Item{failedStage2Docs.length > 1 ? 's' : ''}</span>

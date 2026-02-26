@@ -63,7 +63,7 @@ const DocumentGrid: React.FC<DocumentGridProps> = ({
                             </span>
                             {doc.verdict === 'fail' && (
                                 <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-red-100 text-red-600 animate-pulse border border-red-200">
-                                    FAILED
+                                    INCOMPLETE
                                 </span>
                             )}
                             {doc.verdict === 'pass' && (
@@ -91,7 +91,11 @@ const DocumentGrid: React.FC<DocumentGridProps> = ({
                     )}
 
                     <div className="flex gap-2 pt-3 border-t border-gray-100">
-                        {(!doc.verdict || doc.verdict !== 'fail') && ((round === 1 && nomineeData?.round2Unlocked) || (round === 2 && nomineeData?.round3Unlocked)) ? (
+                        {round === 2 ? (
+                            <div className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-blue-50 text-blue-600/60 rounded-xl text-[10px] font-bold border border-blue-100">
+                                <Lock size={12} /> <span>READ ONLY</span>
+                            </div>
+                        ) : (!doc.verdict || doc.verdict !== 'fail') && ((round === 1 && nomineeData?.round2Unlocked) || (round === 2 && nomineeData?.round3Unlocked)) ? (
                             <div className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-gray-50 text-gray-400 rounded-xl text-[10px] font-bold border border-gray-200">
                                 <Lock size={12} /> <span>LOCKED</span>
                             </div>
