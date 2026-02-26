@@ -34,7 +34,7 @@ import {
   ArrowLeft
 } from 'lucide-react';
 import { Nominee, NomineeDocument } from '../../types';
-import { uploadNomineeFile, resolveFileUrl, updateNominee, addNomineeDocument, getRequirementsByCategory } from '../../services/dbService';
+import { uploadNomineeFile, resolveFileUrl, updateNominee, getNominee, addNomineeDocument, getRequirementsByCategory } from '../../services/dbService';
 import OnboardingTour, { TourStep } from './OnboardingTour';
 import Toast, { ToastType } from '../ui/Toast';
 import NomineeSidebar from './nominee/NomineeSidebar';
@@ -126,8 +126,7 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
       }
 
       // Fix 4: Fresh Data on Mount - Re-fetch nomination data from Supabase
-      const { getNominee: fetchFreshNominee } = require('../../services/dbService');
-      fetchFreshNominee(nomineeData.id).then((freshData: Nominee | null) => {
+      getNominee(nomineeData.id).then((freshData: Nominee | null) => {
         if (freshData && onUpdateNominee) {
           onUpdateNominee(freshData);
         }
