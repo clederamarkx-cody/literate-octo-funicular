@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Eye, EyeOff, Shield, User, Lock, ArrowRight, LayoutDashboard, KeyRound, Zap, Loader2, Building2, AlertCircle, Mail } from 'lucide-react';
 import { getUserByEmail, getNomineeByPassKey, verifyAccessKey } from '../../services/dbService';
 interface LoginProps {
-    onLogin?: (role: string, uid?: string, email?: string) => void;
+    onLogin?: (role: string, uid?: string, email?: string) => void | Promise<void>;
     onRegisterClick?: () => void;
     onQuickRegister?: (companyName: string) => void;
     onBack?: () => void;
@@ -35,7 +35,11 @@ const Login: React.FC<LoginProps> = ({ onLogin, onRegisterClick, onQuickRegister
                         return;
                     }
                     if (onLogin) {
-                        onLogin(evalAccess.role, evalAccess.uid, evalAccess.email);
+                        try {
+                            await onLogin(evalAccess.role, evalAccess.uid, evalAccess.email);
+                        } catch (err: any) {
+                            setError(err.message || "Failed to complete login process.");
+                        }
                         return;
                     }
                 }
@@ -45,7 +49,13 @@ const Login: React.FC<LoginProps> = ({ onLogin, onRegisterClick, onQuickRegister
                 // Email/Password login logic
                 const user = await getUserByEmail(email);
                 if (user) {
-                    if (onLogin) onLogin(user.role, user.uid, email);
+                    if (onLogin) {
+                        try {
+                            await onLogin(user.role, user.uid, email);
+                        } catch (err: any) {
+                            setError(err.message || "Failed to complete login process.");
+                        }
+                    }
                 } else {
                     setError("Access restricted. No account found with this email.");
                 }

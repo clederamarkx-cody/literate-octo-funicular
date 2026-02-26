@@ -238,16 +238,19 @@ function App() {
               onRegisterClick={() => navigateTo('nominate')}
               onQuickRegister={handleQuickRegister}
               onLogin={async (role, uid, email) => {
-                sessionStorage.setItem('gkk_session', JSON.stringify({ role, uid, email }));
                 setAuthUser(uid, email || '');
                 if (role === 'nominee' && uid) {
                   const data = await getNominee(uid);
                   if (data) {
+                    sessionStorage.setItem('gkk_session', JSON.stringify({ role, uid, email }));
                     setNominees([data]);
                     setCurrentNomineeId(uid);
                     navigateTo('nominee-portal');
+                  } else {
+                    throw new Error("Nominee profile missing. If you activated your key manually, please ensure the application record exists in Supabase.");
                   }
                 } else if (['evaluator', 'scd_team_leader', 'reu', 'admin'].includes(role)) {
+                  sessionStorage.setItem('gkk_session', JSON.stringify({ role, uid, email }));
                   navigateTo('evaluator-portal');
                 }
               }}
