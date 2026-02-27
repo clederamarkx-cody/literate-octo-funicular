@@ -72,7 +72,7 @@ const GovernmentPortalView: React.FC<GovernmentPortalViewProps> = ({
                 <div className="bg-white rounded-3xl border border-gray-200 p-8 shadow-sm">
                     <div className="flex flex-col md:flex-row justify-between items-start mb-6 gap-4">
                         <div>
-                            <h3 className="text-2xl font-serif font-bold text-gkk-navy uppercase tracking-widest">Government Agency Requirements (Stage 1)</h3>
+                            <h3 className="text-2xl font-serif font-bold text-gkk-navy uppercase tracking-widest">Government Agency Requirements - Stage 1 (Submission)</h3>
                             <p className="text-sm border-l-4 border-gkk-gold pl-3 py-1 font-bold italic text-gkk-navy/80 bg-gold-50/50 mt-4">Public sector safety compliance and inter-agency OSH standard documentation.</p>
                         </div>
                         <button onClick={() => handleStageSubmit(1)} disabled={stage1Progress === 0 || !!nomineeData?.round2Unlocked} className="px-8 py-3 bg-gkk-navy text-white font-bold rounded-2xl shadow-xl hover:shadow-gkk-navy/40 hover:-translate-y-1 transition-all disabled:opacity-30 flex items-center gap-2 text-xs uppercase tracking-widest truncate">Submit Stage 1</button>
@@ -88,7 +88,7 @@ const GovernmentPortalView: React.FC<GovernmentPortalViewProps> = ({
                             <div className="text-left">
                                 <div className="flex items-center gap-3">
                                     <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${nomineeData?.round2Unlocked ? 'bg-gkk-gold text-gkk-navy' : 'bg-gray-300 text-white'}`}>2</div>
-                                    <h4 className="font-bold text-gkk-navy text-xl leading-none">Stage 2 (Technical Evaluation)</h4>
+                                    <h4 className="font-bold text-gkk-navy text-xl leading-none">Stage 2 (Document Evaluation)</h4>
                                 </div>
                                 <p className="text-xs text-gray-500 mt-2 font-bold uppercase tracking-widest">{nomineeData?.round2Unlocked ? 'Unlocked - Technical Board Review' : 'Locked'}</p>
                             </div>
@@ -107,7 +107,7 @@ const GovernmentPortalView: React.FC<GovernmentPortalViewProps> = ({
                             <div className="text-left">
                                 <div className="flex items-center gap-3">
                                     <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${nomineeData?.round3Unlocked ? 'bg-gkk-navy text-white' : 'bg-gray-300 text-white'}`}>3</div>
-                                    <h4 className="font-bold text-gkk-navy text-xl leading-none">Stage 3 (National Validation)</h4>
+                                    <h4 className="font-bold text-gkk-navy text-xl leading-none">Stage 3 (Submission of Deficiencies)</h4>
                                 </div>
                                 <p className="text-xs text-gray-500 mt-2 font-bold uppercase tracking-widest">{nomineeData?.round3Unlocked ? 'Unlocked - Final Board Deliberation' : 'Locked'}</p>
                             </div>
