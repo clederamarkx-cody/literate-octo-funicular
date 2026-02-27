@@ -588,7 +588,7 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
                   <div className="bg-white rounded-3xl border border-gray-200 p-8 shadow-sm">
                     <div className="flex flex-col md:flex-row justify-between items-start mb-6 gap-4">
                       <div>
-                        <h3 className="text-2xl font-serif font-bold text-gkk-navy uppercase tracking-widest">Stage 1</h3>
+                        <h3 className="text-2xl font-serif font-bold text-gkk-navy uppercase tracking-widest">Stage 1 (Submission)</h3>
                         <div className="mt-4 space-y-2">
                           <p className="text-sm border-l-4 border-gkk-gold pl-3 py-1 font-bold italic text-gkk-navy/80 bg-gold-50/50">1. Each specific requirement must be uploaded as a single PDF file.</p>
                           <p className="text-sm border-l-4 border-gkk-gold pl-3 py-1 font-bold italic text-gkk-navy/80 bg-gold-50/50">2. This stage focuses on the completeness of the submissions.</p>
@@ -638,12 +638,22 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
                                     </div>
                                   )}
 
-                                  <button
-                                    onClick={() => handleOpenUpload(doc.id)}
-                                    className="mt-auto flex items-center justify-center gap-2 w-full py-2.5 bg-red-600 hover:bg-red-700 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-md"
-                                  >
-                                    <Upload size={13} /> Upload Replacement
-                                  </button>
+                                  <div className="flex gap-2 mt-auto">
+                                    {doc.status === 'uploaded' && (
+                                      <button
+                                        onClick={() => handlePreview(doc)}
+                                        className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-white border border-red-200 text-red-600 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-red-50 transition-all shadow-sm"
+                                      >
+                                        <Eye size={13} /> Preview
+                                      </button>
+                                    )}
+                                    <button
+                                      onClick={() => handleOpenUpload(doc.id)}
+                                      className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-red-600 hover:bg-red-700 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-md"
+                                    >
+                                      <Upload size={13} /> Upload Replacement
+                                    </button>
+                                  </div>
                                 </div>
                               );
                             })}
@@ -661,7 +671,7 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
                       <button onClick={() => nomineeData?.round2Unlocked && setRound2Open(!round2Open)} disabled={!nomineeData?.round2Unlocked} className={`w-full p-8 flex items-center justify-between group transition-colors ${nomineeData?.round2Unlocked ? 'cursor-pointer hover:bg-blue-50/20' : 'cursor-not-allowed'}`}>
                         <div className="flex items-center space-x-6">
                           <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all ${nomineeData?.round2Unlocked ? 'bg-blue-600 text-white shadow-lg' : 'bg-gray-200 text-gray-400'}`}>{nomineeData?.round2Unlocked ? <Unlock size={24} /> : <Lock size={24} />}</div>
-                          <div className="text-left"><div className="flex items-center gap-3"><div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${nomineeData?.round2Unlocked ? 'bg-gkk-navy text-white' : 'bg-gray-300 text-white'}`}>2</div><h4 className="font-bold text-gkk-navy text-xl leading-none">Stage 2 Submission</h4></div>
+                          <div className="text-left"><div className="flex items-center gap-3"><div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${nomineeData?.round2Unlocked ? 'bg-gkk-navy text-white' : 'bg-gray-300 text-white'}`}>2</div><h4 className="font-bold text-gkk-navy text-xl leading-none">Stage 2 (Document Evaluation)</h4></div>
                             <p className="text-xs text-gray-500 mt-2 font-bold uppercase tracking-widest">{nomineeData?.round2Unlocked ? 'Unlocked - Technical Board' : 'Locked'}</p>
                             {nomineeData?.round2Unlocked && (
                               <div className="mt-4 space-y-2 max-w-lg">
@@ -717,12 +727,14 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
                                         </div>
                                       )}
 
-                                      <button
-                                        onClick={() => handleOpenUpload(doc.id)}
-                                        className="mt-auto flex items-center justify-center gap-2 w-full py-2.5 bg-red-600 hover:bg-red-700 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-md"
-                                      >
-                                        <Upload size={13} /> Upload Replacement
-                                      </button>
+                                      {doc.status === 'uploaded' && (
+                                        <button
+                                          onClick={() => handlePreview(doc)}
+                                          className="mt-auto flex items-center justify-center gap-2 w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-sm"
+                                        >
+                                          <Eye size={13} /> View Document
+                                        </button>
+                                      )}
                                     </div>
                                   );
                                 })}
@@ -752,7 +764,7 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
                           <div className="text-left">
                             <div className="flex items-center gap-3">
                               <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${nomineeData?.round3Unlocked ? 'bg-gkk-navy text-white' : 'bg-gray-300 text-white'}`}>3</div>
-                              <h4 className="font-bold text-gkk-navy text-xl leading-none">Stage 3 Submission</h4>
+                              <h4 className="font-bold text-gkk-navy text-xl leading-none">Stage 3 (Submission of Deficiencies)</h4>
                             </div>
                             <p className="text-xs text-gray-500 mt-2 font-bold uppercase tracking-widest">
                               {nomineeData?.round3Unlocked ? 'Unlocked - National Board' : 'Locked - National Level'}
@@ -815,12 +827,14 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
                                         </div>
                                       )}
 
-                                      <button
-                                        onClick={() => handleOpenUpload(doc.id)}
-                                        className="mt-auto flex items-center justify-center gap-2 w-full py-2.5 bg-red-600 hover:bg-red-700 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-md"
-                                      >
-                                        <Upload size={13} /> Upload Replacement
-                                      </button>
+                                      {doc.status === 'uploaded' && (
+                                        <button
+                                          onClick={() => handlePreview(doc)}
+                                          className="mt-auto flex items-center justify-center gap-2 w-full py-2.5 bg-white border border-red-200 text-red-600 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-red-50 transition-all shadow-sm"
+                                        >
+                                          <Eye size={13} /> View Document
+                                        </button>
+                                      )}
                                     </div>
                                   );
                                 })}
@@ -870,12 +884,14 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
                                         </div>
                                       )}
 
-                                      <button
-                                        onClick={() => handleOpenUpload(doc.id)}
-                                        className="mt-auto flex items-center justify-center gap-2 w-full py-2.5 bg-red-600 hover:bg-red-700 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-md"
-                                      >
-                                        <Upload size={13} /> Upload Replacement
-                                      </button>
+                                      {doc.status === 'uploaded' && (
+                                        <button
+                                          onClick={() => handlePreview(doc)}
+                                          className="mt-auto flex items-center justify-center gap-2 w-full py-2.5 bg-white border border-red-200 text-red-600 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-red-50 transition-all shadow-sm"
+                                        >
+                                          <Eye size={13} /> View Document
+                                        </button>
+                                      )}
                                     </div>
                                   );
                                 })}
