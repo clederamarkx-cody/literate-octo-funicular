@@ -207,17 +207,16 @@ const NomineeProfileEdit: React.FC<NomineeProfileEditProps> = ({ profileData, on
                         <div className="space-y-2">
                             <label className="text-xs font-bold text-gray-500 uppercase tracking-widest px-1 flex items-center justify-between">
                                 Email Address
-                                <span className="flex items-center gap-1 text-[8px] text-gkk-gold bg-gold-50 px-1.5 py-0.5 rounded-md border border-gkk-gold/20">
-                                    <Lock size={8} /> Verified
-                                </span>
                             </label>
                             <div className="relative">
-                                <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300" />
+                                <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                                 <input
                                     type="email"
-                                    readOnly
                                     value={formData.email}
-                                    className="w-full pl-11 pr-4 py-3 rounded-2xl border border-gray-100 bg-gray-50 text-gray-400 font-bold cursor-not-allowed outline-none"
+                                    onChange={(e) => handleChange('root', 'email', e.target.value)}
+                                    className="w-full pl-11 pr-4 py-3 rounded-2xl border border-gray-200 focus:border-gkk-navy focus:ring-2 focus:ring-gkk-navy/10 outline-none transition-all font-medium text-gkk-navy bg-gray-50/50"
+                                    placeholder="Enter email address"
+                                    required
                                 />
                             </div>
                         </div>
