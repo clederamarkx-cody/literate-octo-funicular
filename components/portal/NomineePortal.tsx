@@ -831,16 +831,16 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
                                         {doc.status === 'uploaded' && (
                                           <button
                                             onClick={() => handlePreview(doc)}
-                                            className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-white border border-red-200 text-red-600 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-red-50 transition-all shadow-sm"
+                                            className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-white border border-red-200 text-red-600 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-red-50 transition-all shadow-sm whitespace-nowrap"
                                           >
                                             <Eye size={13} /> View
                                           </button>
                                         )}
                                         <button
                                           onClick={() => handleOpenUpload(doc.id)}
-                                          className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-red-600 hover:bg-red-700 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-md"
+                                          className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-red-600 hover:bg-red-700 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-md whitespace-nowrap"
                                         >
-                                          <Upload size={13} /> Upload Replacement
+                                          <Upload size={13} /> Re-upload
                                         </button>
                                       </div>
                                     </div>
@@ -896,16 +896,16 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
                                         {doc.status === 'uploaded' && (
                                           <button
                                             onClick={() => handlePreview(doc)}
-                                            className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-white border border-red-200 text-red-600 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-red-50 transition-all shadow-sm"
+                                            className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-white border border-red-200 text-red-600 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-red-50 transition-all shadow-sm whitespace-nowrap"
                                           >
                                             <Eye size={13} /> View
                                           </button>
                                         )}
                                         <button
                                           onClick={() => handleOpenUpload(doc.id)}
-                                          className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-red-600 hover:bg-red-700 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-md"
+                                          className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-red-600 hover:bg-red-700 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-md whitespace-nowrap"
                                         >
-                                          <Upload size={13} /> Upload Replacement
+                                          <Upload size={13} /> Re-upload
                                         </button>
                                       </div>
                                     </div>
