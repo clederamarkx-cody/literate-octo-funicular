@@ -524,25 +524,25 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
                   });
                   if (failedDocs.length === 0) return null;
                   return (
-                    <div className="bg-red-50 border-2 border-red-200 rounded-3xl p-6 shadow-lg animate-pulse hover:animate-none transition-all">
+                    <div className="bg-red-50 border-2 border-red-100 rounded-3xl p-6 shadow-lg animate-pulse hover:animate-none transition-all">
                       <div className="flex items-start gap-4">
-                        <div className="p-3 bg-red-600 text-white rounded-2xl shadow-lg">
+                        <div className="p-3 bg-red-500 text-white rounded-2xl shadow-lg">
                           <ShieldAlert size={28} />
                         </div>
                         <div className="flex-1">
-                          <h3 className="text-xl font-black text-red-600 uppercase tracking-tighter italic">Action Required: Your attention is needed</h3>
+                          <h3 className="text-xl font-black text-red-500 uppercase tracking-tighter italic">Action Required: Your attention is needed</h3>
                           <p className="text-sm font-bold text-red-800 mt-1 leading-relaxed">
                             Evaluators have flagged <span className="underline decoration-2">{failedDocs.length} document{failedDocs.length > 1 ? 's' : ''}</span> as <span className="font-black">INCOMPLETE</span>. You must upload replacements for the required items before your application can proceed further.
                           </p>
                           <div className="mt-4 flex flex-wrap gap-2">
                             {failedDocs.slice(0, 3).map(doc => (
-                              <div key={doc.id} className="bg-white/80 backdrop-blur px-3 py-1.5 rounded-xl border border-red-200 text-[10px] font-black text-red-600 flex items-center gap-2">
-                                <span className="w-1.5 h-1.5 rounded-full bg-red-600 animate-ping"></span>
+                              <div key={doc.id} className="bg-white/80 backdrop-blur px-3 py-1.5 rounded-xl border border-red-100 text-[10px] font-black text-red-500 flex items-center gap-2">
+                                <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping"></span>
                                 {doc.label}
                               </div>
                             ))}
                             {failedDocs.length > 3 && (
-                              <div className="bg-white/80 backdrop-blur px-3 py-1.5 rounded-xl border border-red-200 text-[10px] font-black text-red-600">
+                              <div className="bg-white/80 backdrop-blur px-3 py-1.5 rounded-xl border border-red-100 text-[10px] font-black text-red-500">
                                 + {failedDocs.length - 3} more
                               </div>
                             )}
@@ -606,23 +606,23 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
                       });
                       if (failedStage1Docs.length === 0) return null;
                       return (
-                        <div className="mb-8 rounded-2xl border border-red-200 bg-red-50/60 overflow-hidden">
-                          <div className="flex items-center gap-3 px-6 py-4 bg-red-600 text-white">
+                        <div className="mb-8 rounded-2xl border border-red-100 bg-red-50/60 overflow-hidden">
+                          <div className="flex items-center gap-3 px-6 py-4 bg-red-500 text-white">
                             <ShieldAlert size={20} className="shrink-0" />
                             <div>
                               <h4 className="font-bold text-sm uppercase tracking-widest">Action Required — Incomplete Stage 1 Documents</h4>
                               <p className="text-[10px] font-semibold text-red-100 mt-0.5">The following documents were flagged by the evaluator. Please upload corrected replacements for these incomplete items.</p>
                             </div>
-                            <span className="ml-auto shrink-0 bg-white text-red-600 font-black text-xs px-3 py-1 rounded-full">{failedStage1Docs.length} Item{failedStage1Docs.length > 1 ? 's' : ''}</span>
+                            <span className="ml-auto shrink-0 bg-white text-red-500 font-black text-xs px-3 py-1 rounded-full">{failedStage1Docs.length} Item{failedStage1Docs.length > 1 ? 's' : ''}</span>
                           </div>
                           <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {failedStage1Docs.map(doc => {
                               const persisted = nomineeData?.documents?.find((nd: any) => nd.slotId === doc.id);
                               return (
-                                <div key={doc.id} className="bg-white border border-red-200 rounded-2xl p-4 flex flex-col gap-3 shadow-sm">
+                                <div key={doc.id} className="bg-white border border-red-100 rounded-2xl p-4 flex flex-col gap-3 shadow-sm">
                                   <div className="flex items-start justify-between gap-2">
                                     <h5 className="text-sm font-bold text-gkk-navy leading-snug">{doc.label}</h5>
-                                    <span className="shrink-0 text-[10px] font-black text-red-600 bg-red-100 px-2 py-0.5 rounded-md uppercase">Incomplete</span>
+                                    <span className="shrink-0 text-[10px] font-black text-red-500 bg-red-50 px-2 py-0.5 rounded-md uppercase">Incomplete</span>
                                   </div>
 
                                   {doc.fileName && (
@@ -642,14 +642,14 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
                                     {doc.status === 'uploaded' && (
                                       <button
                                         onClick={() => handlePreview(doc)}
-                                        className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-white border border-red-200 text-red-600 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-red-50 transition-all shadow-sm whitespace-nowrap"
+                                        className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-white border border-red-100 text-red-500 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-red-50 transition-all shadow-sm whitespace-nowrap"
                                       >
                                         <Eye size={13} /> Preview
                                       </button>
                                     )}
                                     <button
                                       onClick={() => handleOpenUpload(doc.id)}
-                                      className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-md hover:shadow-red-500/40 hover:-translate-y-0.5 whitespace-nowrap"
+                                      className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-gradient-to-r from-red-500 to-red-400 hover:from-red-600 hover:to-red-500 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-md hover:shadow-red-400/40 hover:-translate-y-0.5 whitespace-nowrap"
                                     >
                                       <Upload size={13} /> Re-upload
                                     </button>
@@ -695,23 +695,23 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
                           });
                           if (failedStage1Docs.length === 0) return null;
                           return (
-                            <div className="mb-8 rounded-2xl border border-red-200 bg-red-50/60 overflow-hidden">
-                              <div className="flex items-center gap-3 px-6 py-4 bg-red-600 text-white">
+                            <div className="mb-8 rounded-2xl border border-red-100 bg-red-50/60 overflow-hidden">
+                              <div className="flex items-center gap-3 px-6 py-4 bg-red-500 text-white">
                                 <ShieldAlert size={20} className="shrink-0" />
                                 <div>
                                   <h4 className="font-bold text-sm uppercase tracking-widest">Action Required — Incomplete Stage 1 Documents</h4>
                                   <p className="text-[10px] font-semibold text-red-100 mt-0.5">The following documents were flagged by the evaluator. Please upload corrected replacements.</p>
                                 </div>
-                                <span className="ml-auto shrink-0 bg-white text-red-600 font-black text-xs px-3 py-1 rounded-full">{failedStage1Docs.length} Item{failedStage1Docs.length > 1 ? 's' : ''}</span>
+                                <span className="ml-auto shrink-0 bg-white text-red-500 font-black text-xs px-3 py-1 rounded-full">{failedStage1Docs.length} Item{failedStage1Docs.length > 1 ? 's' : ''}</span>
                               </div>
                               <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                 {failedStage1Docs.map(doc => {
                                   const persisted = nomineeData?.documents?.find((nd: any) => nd.slotId === doc.id);
                                   return (
-                                    <div key={doc.id} className="bg-white border border-red-200 rounded-2xl p-4 flex flex-col gap-3 shadow-sm">
+                                    <div key={doc.id} className="bg-white border border-red-100 rounded-2xl p-4 flex flex-col gap-3 shadow-sm">
                                       <div className="flex items-start justify-between gap-2">
                                         <h5 className="text-sm font-bold text-gkk-navy leading-snug">{doc.label}</h5>
-                                        <span className="shrink-0 text-[9px] font-black text-red-600 bg-red-100 px-2 py-0.5 rounded-md uppercase">Incomplete</span>
+                                        <span className="shrink-0 text-[10px] font-black text-red-500 bg-red-50 px-2 py-0.5 rounded-md uppercase">Incomplete</span>
                                       </div>
 
                                       {doc.fileName && (
@@ -795,23 +795,23 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
                           });
                           if (failedStage1Docs.length === 0) return null;
                           return (
-                            <div className="mb-8 rounded-2xl border border-red-200 bg-red-50/60 overflow-hidden">
-                              <div className="flex items-center gap-3 px-6 py-4 bg-red-600 text-white">
+                            <div className="mb-8 rounded-2xl border border-red-100 bg-red-50/60 overflow-hidden">
+                              <div className="flex items-center gap-3 px-6 py-4 bg-red-500 text-white">
                                 <ShieldAlert size={20} className="shrink-0" />
                                 <div>
                                   <h4 className="font-bold text-sm uppercase tracking-widest">Action Required — Incomplete Stage 1 Documents</h4>
                                   <p className="text-[10px] font-semibold text-red-100 mt-0.5">The following documents were flagged by the evaluator. Please upload corrected replacements for these incomplete items.</p>
                                 </div>
-                                <span className="ml-auto shrink-0 bg-white text-red-600 font-black text-xs px-3 py-1 rounded-full">{failedStage1Docs.length} Item{failedStage1Docs.length > 1 ? 's' : ''}</span>
+                                <span className="ml-auto shrink-0 bg-white text-red-500 font-black text-xs px-3 py-1 rounded-full">{failedStage1Docs.length} Item{failedStage1Docs.length > 1 ? 's' : ''}</span>
                               </div>
                               <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                 {failedStage1Docs.map(doc => {
                                   const persisted = nomineeData?.documents?.find((nd: any) => nd.slotId === doc.id);
                                   return (
-                                    <div key={doc.id} className="bg-white border border-red-200 rounded-2xl p-4 flex flex-col gap-3 shadow-sm">
+                                    <div key={doc.id} className="bg-white border border-red-100 rounded-2xl p-4 flex flex-col gap-3 shadow-sm">
                                       <div className="flex items-start justify-between gap-2">
                                         <h5 className="text-sm font-bold text-gkk-navy leading-snug">{doc.label}</h5>
-                                        <span className="shrink-0 text-[10px] font-black text-red-600 bg-red-100 px-2 py-0.5 rounded-md uppercase">Incomplete</span>
+                                        <span className="shrink-0 text-[10px] font-black text-red-500 bg-red-50 px-2 py-0.5 rounded-md uppercase">Incomplete</span>
                                       </div>
 
                                       {doc.fileName && (
@@ -831,14 +831,14 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
                                         {doc.status === 'uploaded' && (
                                           <button
                                             onClick={() => handlePreview(doc)}
-                                            className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-white border border-red-200 text-red-600 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-red-50 transition-all shadow-sm whitespace-nowrap"
+                                            className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-white border border-red-100 text-red-500 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-red-50 transition-all shadow-sm whitespace-nowrap"
                                           >
                                             <Eye size={13} /> View
                                           </button>
                                         )}
                                         <button
                                           onClick={() => handleOpenUpload(doc.id)}
-                                          className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-red-600 hover:bg-red-700 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-md whitespace-nowrap"
+                                          className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-gradient-to-r from-red-500 to-red-400 hover:from-red-600 hover:to-red-500 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-md whitespace-nowrap"
                                         >
                                           <Upload size={13} /> Re-upload
                                         </button>
@@ -860,23 +860,23 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
                           });
                           if (failedStage2Docs.length === 0) return null;
                           return (
-                            <div className="mb-8 rounded-2xl border border-red-200 bg-red-50/60 overflow-hidden">
-                              <div className="flex items-center gap-3 px-6 py-4 bg-red-600 text-white">
+                            <div className="mb-8 rounded-2xl border border-red-100 bg-red-50/60 overflow-hidden">
+                              <div className="flex items-center gap-3 px-6 py-4 bg-red-500 text-white">
                                 <ShieldAlert size={20} className="shrink-0" />
                                 <div>
                                   <h4 className="font-bold text-sm uppercase tracking-widest">Action Required — Incomplete Stage 2 Documents</h4>
                                   <p className="text-[10px] font-semibold text-red-100 mt-0.5">The following documents were flagged by the evaluator. Please upload corrected replacements.</p>
                                 </div>
-                                <span className="ml-auto shrink-0 bg-white text-red-600 font-black text-xs px-3 py-1 rounded-full">{failedStage2Docs.length} Item{failedStage2Docs.length > 1 ? 's' : ''}</span>
+                                <span className="ml-auto shrink-0 bg-white text-red-500 font-black text-xs px-3 py-1 rounded-full">{failedStage2Docs.length} Item{failedStage2Docs.length > 1 ? 's' : ''}</span>
                               </div>
                               <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                 {failedStage2Docs.map(doc => {
                                   const persisted = nomineeData?.documents?.find((nd: any) => nd.slotId === doc.id);
                                   return (
-                                    <div key={doc.id} className="bg-white border border-red-200 rounded-2xl p-4 flex flex-col gap-3 shadow-sm">
+                                    <div key={doc.id} className="bg-white border border-red-100 rounded-2xl p-4 flex flex-col gap-3 shadow-sm">
                                       <div className="flex items-start justify-between gap-2">
                                         <h5 className="text-sm font-bold text-gkk-navy leading-snug">{doc.label}</h5>
-                                        <span className="shrink-0 text-[9px] font-black text-red-600 bg-red-100 px-2 py-0.5 rounded-md uppercase">Incomplete</span>
+                                        <span className="shrink-0 text-[10px] font-black text-red-500 bg-red-50 px-2 py-0.5 rounded-md uppercase">Incomplete</span>
                                       </div>
 
                                       {doc.fileName && (
@@ -896,14 +896,14 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
                                         {doc.status === 'uploaded' && (
                                           <button
                                             onClick={() => handlePreview(doc)}
-                                            className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-white border border-red-200 text-red-600 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-red-50 transition-all shadow-sm whitespace-nowrap"
+                                            className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-white border border-red-100 text-red-500 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-red-50 transition-all shadow-sm whitespace-nowrap"
                                           >
                                             <Eye size={13} /> View
                                           </button>
                                         )}
                                         <button
                                           onClick={() => handleOpenUpload(doc.id)}
-                                          className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-red-600 hover:bg-red-700 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-md whitespace-nowrap"
+                                          className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-gradient-to-r from-red-500 to-red-400 hover:from-red-600 hover:to-red-500 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-md whitespace-nowrap"
                                         >
                                           <Upload size={13} /> Re-upload
                                         </button>
