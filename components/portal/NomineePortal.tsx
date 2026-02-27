@@ -827,14 +827,22 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
                                         </div>
                                       )}
 
-                                      {doc.status === 'uploaded' && (
+                                      <div className="flex gap-2 mt-auto">
+                                        {doc.status === 'uploaded' && (
+                                          <button
+                                            onClick={() => handlePreview(doc)}
+                                            className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-white border border-red-200 text-red-600 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-red-50 transition-all shadow-sm"
+                                          >
+                                            <Eye size={13} /> View
+                                          </button>
+                                        )}
                                         <button
-                                          onClick={() => handlePreview(doc)}
-                                          className="mt-auto flex items-center justify-center gap-2 w-full py-2.5 bg-white border border-red-200 text-red-600 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-red-50 transition-all shadow-sm"
+                                          onClick={() => handleOpenUpload(doc.id)}
+                                          className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-red-600 hover:bg-red-700 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-md"
                                         >
-                                          <Eye size={13} /> View Document
+                                          <Upload size={13} /> Upload Replacement
                                         </button>
-                                      )}
+                                      </div>
                                     </div>
                                   );
                                 })}
@@ -884,14 +892,22 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
                                         </div>
                                       )}
 
-                                      {doc.status === 'uploaded' && (
+                                      <div className="flex gap-2 mt-auto">
+                                        {doc.status === 'uploaded' && (
+                                          <button
+                                            onClick={() => handlePreview(doc)}
+                                            className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-white border border-red-200 text-red-600 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-red-50 transition-all shadow-sm"
+                                          >
+                                            <Eye size={13} /> View
+                                          </button>
+                                        )}
                                         <button
-                                          onClick={() => handlePreview(doc)}
-                                          className="mt-auto flex items-center justify-center gap-2 w-full py-2.5 bg-white border border-red-200 text-red-600 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-red-50 transition-all shadow-sm"
+                                          onClick={() => handleOpenUpload(doc.id)}
+                                          className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-red-600 hover:bg-red-700 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-md"
                                         >
-                                          <Eye size={13} /> View Document
+                                          <Upload size={13} /> Upload Replacement
                                         </button>
-                                      )}
+                                      </div>
                                     </div>
                                   );
                                 })}
