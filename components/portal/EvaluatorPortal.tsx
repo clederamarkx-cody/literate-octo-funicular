@@ -176,14 +176,6 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
     { id: 'General', name: 'General Requirements', icon: FileText }
   ];
 
-  const [openCategories, setOpenCategories] = useState<Record<string, boolean>>({});
-
-  const toggleCategory = (catId: string) => {
-    setOpenCategories(prev => ({
-      ...prev,
-      [catId]: !prev[catId]
-    }));
-  };
 
   const handleIssueKey = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -338,7 +330,6 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
           const catReqs = activeRequirements.filter((r: any) => (r.category === cat.id || r.category === cat.name) || (!r.category && cat.id === 'General'));
           if (catReqs.length === 0) return null;
 
-          const isOpen = openCategories[cat.id];
           const completedCount = catReqs.filter((req: any) => {
             const globalIdx = activeRequirements.findIndex((r: any) => r.label === req.label);
             const stagePrefix = round === 1 ? 'r1' : round === 2 ? 'r2' : 'r3';
@@ -349,10 +340,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
 
           return (
             <div key={`${cat.id}-${round}`} className="bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm flex flex-col transition-all duration-300">
-              <button
-                onClick={() => toggleCategory(cat.id)}
-                className="w-full p-6 bg-gray-50/50 border-b border-gray-100 flex items-center justify-between hover:bg-gray-100 transition-colors"
-              >
+              <div className="w-full p-6 bg-gray-50/50 border-b border-gray-100 flex items-center justify-between">
                 <div className="flex items-center">
                   <cat.icon size={22} className="text-gkk-navy mr-4" />
                   <h4 className="font-bold text-gkk-navy text-sm uppercase tracking-wider">{cat.name}</h4>
@@ -360,12 +348,9 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                     {completedCount} / {catReqs.length} EVALUATED
                   </span>
                 </div>
-                <div className="text-gkk-navy">
-                  {isOpen ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
-                </div>
-              </button>
+              </div>
 
-              <div className={`transition-all duration-500 ease-in-out ${isOpen ? 'max-h-none opacity-100' : 'max-h-0 opacity-0 overflow-hidden'}`}>
+              <div className="opacity-100">
                 <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 bg-white">
                   {catReqs.map((req: any, localIdx: number) => {
                     const globalIdx = activeRequirements.findIndex((r: any) => r.label === req.label);

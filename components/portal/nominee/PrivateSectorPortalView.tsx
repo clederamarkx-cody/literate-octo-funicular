@@ -82,7 +82,7 @@ const PrivateSectorPortalView: React.FC<PrivateSectorPortalViewProps> = ({
 
                 {/* Stage 2 */}
                 <div className={`rounded-3xl border transition-all duration-300 overflow-hidden ${nomineeData?.round2Unlocked ? 'bg-white border-gray-200 shadow-xl' : 'bg-gray-50 border-gray-100 opacity-60'}`}>
-                    <button onClick={() => nomineeData?.round2Unlocked && setRound2Open(!round2Open)} disabled={!nomineeData?.round2Unlocked} className={`w-full p-8 flex items-center justify-between group transition-colors ${nomineeData?.round2Unlocked ? 'cursor-pointer hover:bg-gold-50/20' : 'cursor-not-allowed'}`}>
+                    <div className={`w-full p-8 flex items-center justify-between border-b border-gray-100`}>
                         <div className="flex items-center space-x-6">
                             <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all ${nomineeData?.round2Unlocked ? 'bg-gkk-navy text-white shadow-lg' : 'bg-gray-200 text-gray-400'}`}>{nomineeData?.round2Unlocked ? <Unlock size={24} /> : <Lock size={24} />}</div>
                             <div className="text-left">
@@ -93,18 +93,15 @@ const PrivateSectorPortalView: React.FC<PrivateSectorPortalViewProps> = ({
                                 <p className="text-xs text-gray-500 mt-2 font-bold uppercase tracking-widest">{nomineeData?.round2Unlocked ? 'Unlocked - Technical Board Review' : 'Locked'}</p>
                             </div>
                         </div>
-                        {nomineeData?.round2Unlocked && (
-                            <div className="flex items-center space-x-3 text-gkk-navy bg-gkk-navy/5 px-5 py-2 rounded-2xl font-bold uppercase tracking-widest text-[10px] group-hover:bg-gkk-navy group-hover:text-white transition-all"><span>{round2Open ? 'Hide' : 'Review'}</span>{round2Open ? <ChevronUp size={16} /> : <ChevronDown size={16} />}</div>
-                        )}
-                    </button>
-                    <div className={`transition-all duration-700 ease-in-out ${round2Open ? 'max-h-[9999px] border-t border-gray-100 p-8 bg-white' : 'max-h-0 overflow-hidden'}`}>
+                    </div>
+                    <div className="p-8 bg-white">
                         <DocumentGrid round={2} documents={documents} nomineeData={nomineeData} handleOpenUpload={handleOpenUpload} handlePreview={handlePreview} />
                     </div>
                 </div>
 
                 {/* Stage 3 */}
                 <div className={`rounded-3xl border transition-all duration-300 overflow-hidden ${nomineeData?.round3Unlocked ? 'bg-white border-gray-200 shadow-xl' : 'bg-gray-50 border-gray-100 opacity-60'}`}>
-                    <button onClick={() => nomineeData?.round3Unlocked && setRound3Open(!round3Open)} disabled={!nomineeData?.round3Unlocked} className={`w-full p-8 flex items-center justify-between group transition-colors ${nomineeData?.round3Unlocked ? 'cursor-pointer hover:bg-gold-50/20' : 'cursor-not-allowed'}`}>
+                    <div className={`w-full p-8 flex items-center justify-between border-b border-gray-100`}>
                         <div className="flex items-center space-x-6">
                             <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all ${nomineeData?.round3Unlocked ? 'bg-gkk-gold text-gkk-navy shadow-lg' : 'bg-gray-200 text-gray-400'}`}>{nomineeData?.round3Unlocked ? <Unlock size={24} /> : <Lock size={24} />}</div>
                             <div className="text-left">
@@ -115,11 +112,8 @@ const PrivateSectorPortalView: React.FC<PrivateSectorPortalViewProps> = ({
                                 <p className="text-xs text-gray-500 mt-2 font-bold uppercase tracking-widest">{nomineeData?.round3Unlocked ? 'Unlocked - Final Board Deliberation' : 'Locked'}</p>
                             </div>
                         </div>
-                        {nomineeData?.round3Unlocked && (
-                            <div className="flex items-center space-x-3 text-gkk-gold bg-gold-50 px-5 py-2 rounded-2xl font-bold uppercase tracking-widest text-[10px] group-hover:bg-gkk-gold group-hover:text-gkk-navy transition-all"><span>{round3Open ? 'Hide' : 'Review'}</span>{round3Open ? <ChevronUp size={16} /> : <ChevronDown size={16} />}</div>
-                        )}
-                    </button>
-                    <div className={`transition-all duration-700 ease-in-out ${round3Open && nomineeData?.round3Unlocked ? 'max-h-[9999px] border-t border-gray-100 p-8 bg-white' : 'max-h-0 overflow-hidden'}`}>
+                    </div>
+                    <div className="p-8 bg-white">
                         <div className="flex justify-end mb-6">
                             <button onClick={() => handleStageSubmit(3)} disabled={stage3Progress === 0} className="px-8 py-3 bg-gradient-to-r from-gkk-gold to-yellow-500 text-gkk-navy font-bold rounded-2xl shadow-xl hover:-translate-y-1 transition-all disabled:opacity-30 text-xs uppercase tracking-widest flex items-center gap-2"><Send size={16} /> Submit Deficiencies</button>
                         </div>

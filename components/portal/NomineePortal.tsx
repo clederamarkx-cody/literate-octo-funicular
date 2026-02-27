@@ -115,9 +115,6 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
   const cancelTokenRef = useRef<{ cancel?: () => void }>({});
   const isCancelledRef = useRef(false);
 
-  // Accordion State
-  const [round2Open, setRound2Open] = useState(false);
-  const [round3Open, setRound3Open] = useState(false);
 
   // Onboarding Tour State
   const [isTourOpen, setIsTourOpen] = useState(false);
@@ -564,13 +561,7 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
                     stage1Progress,
                     stage2Progress,
                     stage3Progress,
-                    handleOpenUpload,
-                    handlePreview,
-                    handleStageSubmit,
-                    round2Open,
-                    setRound2Open,
-                    round3Open,
-                    setRound3Open
+                    handleStageSubmit
                   };
 
                   switch (category) {
