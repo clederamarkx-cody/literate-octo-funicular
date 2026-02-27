@@ -102,7 +102,7 @@ const DocumentGrid: React.FC<DocumentGridProps> = ({
                         ) : (
                             <button
                                 onClick={() => handleOpenUpload(doc.id)}
-                                className={`flex-1 py-2.5 rounded-xl text-[10px] font-bold tracking-wider transition-all flex items-center justify-center gap-2 ${doc.status === 'uploaded' ? 'bg-white text-gkk-navy border border-gray-200 hover:bg-gray-50' : 'bg-gkk-navy text-white hover:bg-gkk-royalBlue shadow-md'}`}
+                                className={`flex-1 py-2.5 rounded-xl text-[10px] font-bold tracking-wider transition-all flex items-center justify-center gap-2 whitespace-nowrap ${doc.status === 'uploaded' ? 'bg-white text-gkk-navy border border-gray-200 hover:bg-gray-50' : 'bg-gkk-navy text-white hover:bg-gkk-royalBlue shadow-md'}`}
                             >
                                 <Upload size={14} />
                                 <span>{doc.status === 'uploaded' ? 'UPDATE' : 'UPLOAD PDF'}</span>
