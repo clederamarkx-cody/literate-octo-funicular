@@ -324,12 +324,23 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
   const handleOpenUpload = (id: string) => {
     const doc = documents.find(d => d.id === id);
     if (doc?.status === 'uploaded') {
-      // Fix 1: Allow re-upload of failed documents even if the stage is locked
-      const isFailed = nomineeData?.documents?.find((nd: any) => nd.slotId === doc.id)?.verdict === 'fail';
-      const isLocked = !isFailed && ((doc.round === 1 && nomineeData?.round2Unlocked) || (doc.round === 2 && nomineeData?.round3Unlocked));
+      // Strict Lock Logic:
+      // 1. Stage 1 is locked if Stage 2 is activated.
+      // 2. Stage 2 is locked if it's NOT activated OR if Stage 3 is activated.
+      // 3. Stage 3 is locked if it's NOT activated.
+      const isLocked =
+        (doc.round === 1 && nomineeData?.round2Unlocked) ||
+        (doc.round === 2 && (!nomineeData?.round2Unlocked || nomineeData?.round3Unlocked)) ||
+        (doc.round === 3 && !nomineeData?.round3Unlocked);
 
       if (isLocked) {
-        setToast({ message: `Stage ${doc.round} is now locked for board evaluation.`, type: 'info' });
+        const stageLabel = doc.round === 1 ? 'initial submission' : doc.round === 2 ? 'document evaluation' : 'deficiency submission';
+        setToast({
+          message: nomineeData?.round2Unlocked && doc.round === 1
+            ? "Stage 1 is locked because Stage 2 is now active."
+            : `Stage ${doc.round} (${stageLabel}) is currently locked.`,
+          type: 'info'
+        });
         return;
       }
     }
