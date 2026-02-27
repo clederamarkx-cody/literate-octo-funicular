@@ -4,7 +4,14 @@ Welcome to the official repository for the **14th Gawad Kaligtasan at Kalusugan 
 
 ---
 
-## Recent Update: Supabase Migration
+## Recent Updates
+
+### Access Key Activation Fix
+- **Improved Reliability**: Resolved a database constraint issue where the `applications` table failed to receive a mandatory `email` field during the activation process.
+- **Auto-Provisioning**: The system now correctly links the pre-allocated user account with the newly created application record during single-key activation.
+- **Database Integrity**: Conducted a full audit to eliminate inconsistent states between access keys, user profiles, and application records.
+
+### Supabase Migration
 The system has been migrated from a Firebase/localStorage mock to a robust **Supabase** live backend. This provides:
 - **Persistent Data**: No more session loss; all data is stored in PostgreSQL.
 - **Relational Integrity**: Proper foreign keys between Users, Applications, and Documents.
