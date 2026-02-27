@@ -324,130 +324,117 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
     const stageKey = round === 1 ? 'stage1' : round === 2 ? 'stage2' : 'stage3';
     const activeRequirements = dynamicRequirements[stageKey] || [];
 
+    const totalEvaluated = activeRequirements.filter((req: any, idx: number) => {
+      const stagePrefix = round === 1 ? 'r1' : round === 2 ? 'r2' : 'r3';
+      const slotId = `${stagePrefix}-${idx}`;
+      const doc = selectedNominee.documents?.find(d => d.slotId === slotId);
+      return doc?.verdict === 'pass' || doc?.verdict === 'fail';
+    }).length;
+
     return (
-      <div className="space-y-4">
-        {docCategories.map(cat => {
-          const catReqs = activeRequirements.filter((r: any) => (r.category === cat.id || r.category === cat.name) || (!r.category && cat.id === 'General'));
-          if (catReqs.length === 0) return null;
+      <div className="space-y-6">
+        <div className="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm flex items-center justify-between">
+          <div className="flex items-center">
+            <FileText size={22} className="text-gkk-navy mr-4" />
+            <h4 className="font-bold text-gkk-navy text-sm uppercase tracking-wider">Evaluation Checklist</h4>
+            <span className={`ml-4 text-[10px] font-black px-3 py-1 rounded-full border ${totalEvaluated === activeRequirements.length ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
+              {totalEvaluated} / {activeRequirements.length} EVALUATED
+            </span>
+          </div>
+        </div>
 
-          const completedCount = catReqs.filter((req: any) => {
-            const globalIdx = activeRequirements.findIndex((r: any) => r.label === req.label);
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {activeRequirements.map((req: any, idx: number) => {
             const stagePrefix = round === 1 ? 'r1' : round === 2 ? 'r2' : 'r3';
-            const slotId = `${stagePrefix}-${globalIdx}`;
+            const slotId = `${stagePrefix}-${idx}`;
+
             const doc = selectedNominee.documents?.find(d => d.slotId === slotId);
-            return doc?.verdict === 'pass' || doc?.verdict === 'fail';
-          }).length;
+            const docStatus = doc?.verdict;
 
-          return (
-            <div key={`${cat.id}-${round}`} className="bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm flex flex-col transition-all duration-300">
-              <div className="w-full p-6 bg-gray-50/50 border-b border-gray-100 flex items-center justify-between">
-                <div className="flex items-center">
-                  <cat.icon size={22} className="text-gkk-navy mr-4" />
-                  <h4 className="font-bold text-gkk-navy text-sm uppercase tracking-wider">{cat.name}</h4>
-                  <span className={`ml-4 text-[10px] font-black px-3 py-1 rounded-full border ${completedCount === catReqs.length ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
-                    {completedCount} / {catReqs.length} EVALUATED
-                  </span>
+            const handleDocVerdict = async (verdict: 'pass' | 'fail') => {
+              const success = await updateDocumentEvaluation(selectedNominee.id, slotId, verdict);
+              if (success) {
+                const updatedDocs = (selectedNominee.documents || []).map(d =>
+                  d.slotId === slotId ? { ...d, verdict } : d
+                );
+                const updatedNominee = { ...selectedNominee, documents: updatedDocs };
+                setSelectedNominee(updatedNominee);
+                setLocalNominees(prev => prev.map(a => a.id === selectedNominee.id ? updatedNominee : a));
+              }
+            };
+
+            return (
+              <div key={idx} className={`p-5 border rounded-2xl transition-all ${docStatus === 'pass' ? 'bg-green-50 border-green-200 shadow-inner' : docStatus === 'fail' ? 'bg-red-50 border-red-200 shadow-inner' : doc ? 'bg-white border-gray-100 shadow-sm' : 'bg-gray-50/50 border-gray-100'}`}>
+                <div className="flex justify-between items-start mb-3">
+                  <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Evidence</span>
+                  <div className="flex gap-1.5">
+                    {docStatus === 'pass' && <span className="text-[9px] font-black text-green-600 bg-green-100 px-2 py-0.5 rounded-md">PASSED</span>}
+                    {docStatus === 'fail' && <span className="text-[9px] font-black text-red-600 bg-red-100 px-2 py-0.5 rounded-md">INCOMPLETE</span>}
+                    {doc ? <span className="text-[9px] font-black text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md">SUBMITTED</span> : <span className="text-[9px] font-black text-gray-400 bg-gray-100 px-2 py-0.5 rounded-md">EMPTY</span>}
+                  </div>
                 </div>
-              </div>
+                <h5 className="text-sm font-bold text-gkk-navy mb-2 leading-relaxed min-h-[2.5em]">{req.label}</h5>
+                {doc && (
+                  <p className="text-[11px] text-blue-600 truncate mb-4 font-bold bg-blue-50/50 p-2 rounded-xl border border-blue-100/30 flex items-center gap-2">
+                    <FileText size={14} className="shrink-0" /> {doc.name}
+                  </p>
+                )}
 
-              <div className="opacity-100">
-                <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 bg-white">
-                  {catReqs.map((req: any, localIdx: number) => {
-                    const globalIdx = activeRequirements.findIndex((r: any) => r.label === req.label);
-                    const stagePrefix = round === 1 ? 'r1' : round === 2 ? 'r2' : 'r3';
-                    const slotId = `${stagePrefix}-${globalIdx}`;
-
-                    const doc = selectedNominee.documents?.find(d => d.slotId === slotId);
-                    const docStatus = doc?.verdict;
-
-                    const handleDocVerdict = async (verdict: 'pass' | 'fail') => {
-                      const success = await updateDocumentEvaluation(selectedNominee.id, slotId, verdict);
-                      if (success) {
-                        const updatedDocs = (selectedNominee.documents || []).map(d =>
-                          d.slotId === slotId ? { ...d, verdict } : d
-                        );
-                        const updatedNominee = { ...selectedNominee, documents: updatedDocs };
-                        setSelectedNominee(updatedNominee);
-                        setLocalNominees(prev => prev.map(a => a.id === selectedNominee.id ? updatedNominee : a));
-                      }
-                    };
-
-                    return (
-                      <div key={localIdx} className={`p-5 border rounded-2xl transition-all ${docStatus === 'pass' ? 'bg-green-50 border-green-200 shadow-inner' : docStatus === 'fail' ? 'bg-red-50 border-red-200 shadow-inner' : doc ? 'bg-white border-gray-100 shadow-sm' : 'bg-gray-50/50 border-gray-100'}`}>
-                        <div className="flex justify-between items-start mb-3">
-                          <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Evidence</span>
-                          <div className="flex gap-1.5">
-                            {docStatus === 'pass' && <span className="text-[9px] font-black text-green-600 bg-green-100 px-2 py-0.5 rounded-md">PASSED</span>}
-                            {docStatus === 'fail' && <span className="text-[9px] font-black text-red-600 bg-red-100 px-2 py-0.5 rounded-md">INCOMPLETE</span>}
-                            {doc ? <span className="text-[9px] font-black text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md">SUBMITTED</span> : <span className="text-[9px] font-black text-gray-400 bg-gray-100 px-2 py-0.5 rounded-md">EMPTY</span>}
-                          </div>
-                        </div>
-                        <h5 className="text-sm font-bold text-gkk-navy mb-2 leading-relaxed min-h-[2.5em]">{req.label}</h5>
-                        {doc && (
-                          <p className="text-[11px] text-blue-600 truncate mb-4 font-bold bg-blue-50/50 p-2 rounded-xl border border-blue-100/30 flex items-center gap-2">
-                            <FileText size={14} className="shrink-0" /> {doc.name}
-                          </p>
-                        )}
-
-                        <div className="mt-4 space-y-3">
-                          {doc ? (
-                            <>
-                              <button
-                                onClick={() => handlePreview(doc)}
-                                className="w-full py-2.5 bg-gkk-navy text-white hover:bg-gkk-royalBlue rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-md flex items-center justify-center gap-2"
-                              >
-                                <Eye size={14} /> VIEW DOCUMENT
-                              </button>
-                              <div className="flex gap-2">
-                                <button
-                                  onClick={() => handleDocVerdict('pass')}
-                                  className={`flex-1 py-1.5 rounded-xl text-xs font-black border transition-all ${docStatus === 'pass' ? 'bg-green-600 text-white border-green-600 shadow-md' : 'bg-white text-gray-400 border-gray-200 hover:text-green-600'}`}
-                                >
-                                  PASS
-                                </button>
-                                <button
-                                  onClick={() => handleDocVerdict('fail')}
-                                  className={`flex-1 py-1.5 rounded-xl text-xs font-black border transition-all ${docStatus === 'fail' ? 'bg-red-600 text-white border-red-600 shadow-md' : 'bg-white text-gray-400 border-gray-200 hover:text-red-600'}`}
-                                >
-                                  INCOMPLETE
-                                </button>
-                              </div>
-                              <div className="mt-2">
-                                <textarea
-                                  placeholder="Add remarks for the nominee..."
-                                  value={docRemarks[slotId] ?? doc.remarks ?? ''}
-                                  onChange={(e) => setDocRemarks(prev => ({ ...prev, [slotId]: e.target.value }))}
-                                  onBlur={async () => {
-                                    const remark = docRemarks[slotId];
-                                    if (remark !== undefined && remark !== (doc.remarks ?? '')) {
-                                      await updateDocumentRemarks(selectedNominee.id, slotId, remark);
-                                      const updatedDocs = (selectedNominee.documents || []).map(d =>
-                                        d.slotId === slotId ? { ...d, remarks: remark } : d
-                                      );
-                                      const updatedNominee = { ...selectedNominee, documents: updatedDocs };
-                                      setSelectedNominee(updatedNominee);
-                                      setLocalNominees(prev => prev.map(a => a.id === selectedNominee.id ? updatedNominee : a));
-                                    }
-                                  }}
-                                  className="w-full text-[11px] font-semibold text-gray-600 border border-gray-200 rounded-xl px-3 py-2 resize-none focus:outline-none focus:border-gkk-gold/50 focus:ring-1 focus:ring-gkk-gold/20 placeholder:text-gray-300 transition-all"
-                                  rows={2}
-                                />
-                              </div>
-                            </>
-                          ) : (
-                            <div className="w-full py-2.5 bg-gray-50 border border-dashed border-gray-200 text-gray-400 rounded-xl text-[10px] font-bold uppercase tracking-widest text-center italic">
-                              Awaiting Submission
-                            </div>
-                          )}
-                        </div>
+                <div className="mt-4 space-y-3">
+                  {doc ? (
+                    <>
+                      <button
+                        onClick={() => handlePreview(doc)}
+                        className="w-full py-2.5 bg-gkk-navy text-white hover:bg-gkk-royalBlue rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-md flex items-center justify-center gap-2"
+                      >
+                        <Eye size={14} /> VIEW DOCUMENT
+                      </button>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleDocVerdict('pass')}
+                          className={`flex-1 py-1.5 rounded-xl text-xs font-black border transition-all ${docStatus === 'pass' ? 'bg-green-600 text-white border-green-600 shadow-md' : 'bg-white text-gray-400 border-gray-200 hover:text-green-600'}`}
+                        >
+                          PASS
+                        </button>
+                        <button
+                          onClick={() => handleDocVerdict('fail')}
+                          className={`flex-1 py-1.5 rounded-xl text-xs font-black border transition-all ${docStatus === 'fail' ? 'bg-red-600 text-white border-red-600 shadow-md' : 'bg-white text-gray-400 border-gray-200 hover:text-red-600'}`}
+                        >
+                          INCOMPLETE
+                        </button>
                       </div>
-                    );
-                  })}
+                      <div className="mt-2">
+                        <textarea
+                          placeholder="Add remarks for the nominee..."
+                          value={docRemarks[slotId] ?? doc.remarks ?? ''}
+                          onChange={(e) => setDocRemarks(prev => ({ ...prev, [slotId]: e.target.value }))}
+                          onBlur={async () => {
+                            const remark = docRemarks[slotId];
+                            if (remark !== undefined && remark !== (doc.remarks ?? '')) {
+                              await updateDocumentRemarks(selectedNominee.id, slotId, remark);
+                              const updatedDocs = (selectedNominee.documents || []).map(d =>
+                                d.slotId === slotId ? { ...d, remarks: remark } : d
+                              );
+                              const updatedNominee = { ...selectedNominee, documents: updatedDocs };
+                              setSelectedNominee(updatedNominee);
+                              setLocalNominees(prev => prev.map(a => a.id === selectedNominee.id ? updatedNominee : a));
+                            }
+                          }}
+                          className="w-full text-[11px] font-semibold text-gray-600 border border-gray-200 rounded-xl px-3 py-2 resize-none focus:outline-none focus:border-gkk-gold/50 focus:ring-1 focus:ring-gkk-gold/20 placeholder:text-gray-300 transition-all"
+                          rows={2}
+                        />
+                      </div>
+                    </>
+                  ) : (
+                    <div className="w-full py-2.5 bg-gray-50 border border-dashed border-gray-200 text-gray-400 rounded-xl text-[10px] font-bold uppercase tracking-widest text-center italic">
+                      Awaiting Submission
+                    </div>
+                  )}
                 </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
     );
   };
