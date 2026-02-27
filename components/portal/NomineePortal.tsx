@@ -574,14 +574,15 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
                   };
 
                   switch (category) {
-                    case 'Government Agency':
+                    case 'Government':
+                    case 'Government Agency': // Defensive mapping
                       return <GovernmentPortalView {...props} />;
                     case 'Micro Enterprise':
                       return <MicroPortalView {...props} />;
                     case 'Individual':
                       return <IndividualPortalView {...props} />;
-                    case 'Private Sector':
-                    case 'Industry': // Legacy support
+                    case 'Industry':
+                    case 'Private Sector': // Support both
                     default:
                       return <PrivateSectorPortalView {...props} />;
                   }
@@ -676,7 +677,7 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
           />
         )
       }
-    </div >
+    </div>
   );
 };
 

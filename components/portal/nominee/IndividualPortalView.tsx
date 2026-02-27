@@ -1,5 +1,5 @@
 import React from 'react';
-import { User, MapPin, Briefcase, Award, Hash, HardHat, Unlock, Lock, ChevronUp, ChevronDown, Send } from 'lucide-react';
+import { User, MapPin, Briefcase, Award, Hash, HardHat, Unlock, Lock, ChevronUp, ChevronDown, Send, ShieldAlert, FileText, Eye, Upload } from 'lucide-react';
 import { Nominee, NomineeDocument } from '../../../types';
 import StageProgress from './StageProgress';
 import DocumentGrid from './DocumentGrid';
@@ -37,24 +37,24 @@ const IndividualPortalView: React.FC<IndividualPortalViewProps> = ({
         <div className="animate-in fade-in duration-500 space-y-8">
             {/* Header Info */}
             <div className="bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden relative group">
-                <div className="absolute top-0 left-0 w-2 bg-purple-500 h-full group-hover:w-3 transition-all"></div>
+                <div className="absolute top-0 left-0 w-2 bg-gkk-navy h-full group-hover:w-3 transition-all"></div>
                 <div className="p-8">
                     <div className="flex flex-col md:flex-row justify-between gap-10">
                         <div className="flex-1 space-y-8">
                             <div className="flex items-center space-x-5">
-                                <div className="p-4 bg-purple-50 rounded-3xl text-purple-600 ring-1 ring-purple-100 transition-colors">
+                                <div className="p-4 bg-gkk-navy/5 rounded-3xl text-gkk-navy ring-1 ring-gkk-navy/10 transition-colors">
                                     <User size={36} />
                                 </div>
                                 <div>
                                     <h2 className="text-3xl font-serif font-bold text-gkk-navy leading-tight">{nomineeData?.name}</h2>
-                                    <p className="text-gray-500 flex items-center gap-2 mt-2 font-medium"><MapPin size={14} className="text-purple-500" /> {nomineeData?.details?.region || nomineeData?.region}</p>
+                                    <p className="text-gray-500 flex items-center gap-2 mt-2 font-medium"><MapPin size={14} className="text-gkk-gold" /> {nomineeData?.details?.region || nomineeData?.region}</p>
                                 </div>
                             </div>
                             <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-                                <div className="space-y-2"><span className="text-[10px] font-bold text-gray-400 uppercase block">Profession</span><div className="flex items-center gap-2 text-sm font-bold text-gkk-navy"><Briefcase size={16} className="text-purple-500" /> {nomineeData?.details?.occupation || nomineeData?.industrySector || 'Professional'}</div></div>
-                                <div className="space-y-2"><span className="text-[10px] font-bold text-gray-400 uppercase block">Achievements</span><div className="flex items-center gap-2 text-sm font-bold text-gkk-navy"><Award size={16} className="text-purple-500" /> GKK Individual Nominee</div></div>
-                                <div className="space-y-2"><span className="text-[10px] font-bold text-gray-400 uppercase block">Nominee ID</span><div className="flex items-center gap-2 text-sm font-bold text-gkk-navy font-mono"><Hash size={16} className="text-purple-500" /> {nomineeData?.regId}</div></div>
-                                <div className="space-y-2"><span className="text-[10px] font-bold text-gray-400 uppercase block">Specialization</span><div className="flex items-center gap-2 text-sm font-bold text-gkk-navy"><HardHat size={16} className="text-purple-500" /> {nomineeData?.details?.industry || 'OSH Practitioner'}</div></div>
+                                <div className="space-y-2"><span className="text-[10px] font-bold text-gray-400 uppercase block">Profession</span><div className="flex items-center gap-2 text-sm font-bold text-gkk-navy"><Briefcase size={16} className="text-gkk-gold" /> {nomineeData?.details?.occupation || nomineeData?.industrySector || 'Professional'}</div></div>
+                                <div className="space-y-2"><span className="text-[10px] font-bold text-gray-400 uppercase block">Achievements</span><div className="flex items-center gap-2 text-sm font-bold text-gkk-navy"><Award size={16} className="text-gkk-gold" /> GKK Individual Nominee</div></div>
+                                <div className="space-y-2"><span className="text-[10px] font-bold text-gray-400 uppercase block">Nominee ID</span><div className="flex items-center gap-2 text-sm font-bold text-gkk-navy font-mono"><Hash size={16} className="text-gkk-gold" /> {nomineeData?.regId}</div></div>
+                                <div className="space-y-2"><span className="text-[10px] font-bold text-gray-400 uppercase block">Specialization</span><div className="flex items-center gap-2 text-sm font-bold text-gkk-navy"><HardHat size={16} className="text-gkk-gold" /> {nomineeData?.details?.industry || 'OSH Practitioner'}</div></div>
                             </div>
                         </div>
                         <StageProgress
@@ -73,28 +73,28 @@ const IndividualPortalView: React.FC<IndividualPortalViewProps> = ({
                     <div className="flex flex-col md:flex-row justify-between items-start mb-6 gap-4">
                         <div>
                             <h3 className="text-2xl font-serif font-bold text-gkk-navy uppercase tracking-widest">Individual Requirements (Stage 1)</h3>
-                            <p className="text-sm border-l-4 border-purple-500 pl-3 py-1 font-bold italic text-gkk-navy/80 bg-purple-50/50 mt-4">Personal credentials, OSH contributions, and safety leadership evidence.</p>
+                            <p className="text-sm border-l-4 border-gkk-gold pl-3 py-1 font-bold italic text-gkk-navy/80 bg-gold-50/50 mt-4">Personal credentials, OSH contributions, and safety leadership evidence.</p>
                         </div>
-                        <button onClick={() => handleStageSubmit(1)} disabled={stage1Progress === 0 || !!nomineeData?.round2Unlocked} className="px-8 py-3 bg-purple-600 text-white font-bold rounded-2xl shadow-xl hover:shadow-purple-600/40 hover:-translate-y-1 transition-all disabled:opacity-30 flex items-center gap-2 text-xs uppercase tracking-widest truncate">Submit Stage 1</button>
+                        <button onClick={() => handleStageSubmit(1)} disabled={stage1Progress === 0 || !!nomineeData?.round2Unlocked} className="px-8 py-3 bg-gkk-navy text-white font-bold rounded-2xl shadow-xl hover:shadow-gkk-navy/40 hover:-translate-y-1 transition-all disabled:opacity-30 flex items-center gap-2 text-xs uppercase tracking-widest truncate">Submit Stage 1</button>
                     </div>
                     <DocumentGrid round={1} documents={documents} nomineeData={nomineeData} handleOpenUpload={handleOpenUpload} handlePreview={handlePreview} />
                 </div>
 
                 {/* Stage 2 */}
                 <div className={`rounded-3xl border transition-all duration-300 overflow-hidden ${nomineeData?.round2Unlocked ? 'bg-white border-gray-200 shadow-xl' : 'bg-gray-50 border-gray-100 opacity-60'}`}>
-                    <button onClick={() => nomineeData?.round2Unlocked && setRound2Open(!round2Open)} disabled={!nomineeData?.round2Unlocked} className={`w-full p-8 flex items-center justify-between group transition-colors ${nomineeData?.round2Unlocked ? 'cursor-pointer hover:bg-purple-50/20' : 'cursor-not-allowed'}`}>
+                    <button onClick={() => nomineeData?.round2Unlocked && setRound2Open(!round2Open)} disabled={!nomineeData?.round2Unlocked} className={`w-full p-8 flex items-center justify-between group transition-colors ${nomineeData?.round2Unlocked ? 'cursor-pointer hover:bg-gold-50/20' : 'cursor-not-allowed'}`}>
                         <div className="flex items-center space-x-6">
-                            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all ${nomineeData?.round2Unlocked ? 'bg-purple-600 text-white shadow-lg' : 'bg-gray-200 text-gray-400'}`}>{nomineeData?.round2Unlocked ? <Unlock size={24} /> : <Lock size={24} />}</div>
+                            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all ${nomineeData?.round2Unlocked ? 'bg-gkk-navy text-white shadow-lg' : 'bg-gray-200 text-gray-400'}`}>{nomineeData?.round2Unlocked ? <Unlock size={24} /> : <Lock size={24} />}</div>
                             <div className="text-left">
                                 <div className="flex items-center gap-3">
-                                    <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${nomineeData?.round2Unlocked ? 'bg-gkk-navy text-white' : 'bg-gray-300 text-white'}`}>2</div>
+                                    <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${nomineeData?.round2Unlocked ? 'bg-gkk-gold text-gkk-navy' : 'bg-gray-300 text-white'}`}>2</div>
                                     <h4 className="font-bold text-gkk-navy text-xl leading-none">Stage 2 (Technical Evaluation)</h4>
                                 </div>
                                 <p className="text-xs text-gray-500 mt-2 font-bold uppercase tracking-widest">{nomineeData?.round2Unlocked ? 'Unlocked - Technical Board Review' : 'Locked'}</p>
                             </div>
                         </div>
                         {nomineeData?.round2Unlocked && (
-                            <div className="flex items-center space-x-3 text-purple-600 bg-purple-50 px-5 py-2 rounded-2xl font-bold uppercase tracking-widest text-[10px] group-hover:bg-purple-600 group-hover:text-white transition-all"><span>{round2Open ? 'Hide' : 'Review'}</span>{round2Open ? <ChevronUp size={16} /> : <ChevronDown size={16} />}</div>
+                            <div className="flex items-center space-x-3 text-gkk-navy bg-gkk-navy/5 px-5 py-2 rounded-2xl font-bold uppercase tracking-widest text-[10px] group-hover:bg-gkk-navy group-hover:text-white transition-all"><span>{round2Open ? 'Hide' : 'Review'}</span>{round2Open ? <ChevronUp size={16} /> : <ChevronDown size={16} />}</div>
                         )}
                     </button>
                     <div className={`transition-all duration-700 ease-in-out ${round2Open ? 'max-h-[9999px] border-t border-gray-100 p-8 bg-white' : 'max-h-0 overflow-hidden'}`}>
@@ -106,9 +106,7 @@ const IndividualPortalView: React.FC<IndividualPortalViewProps> = ({
                 <div className={`rounded-3xl border transition-all duration-300 overflow-hidden ${nomineeData?.round3Unlocked ? 'bg-white border-gray-200 shadow-xl' : 'bg-gray-50 border-gray-100 opacity-60'}`}>
                     <button onClick={() => nomineeData?.round3Unlocked && setRound3Open(!round3Open)} disabled={!nomineeData?.round3Unlocked} className={`w-full p-8 flex items-center justify-between group transition-colors ${nomineeData?.round3Unlocked ? 'cursor-pointer hover:bg-gold-50/20' : 'cursor-not-allowed'}`}>
                         <div className="flex items-center space-x-6">
-                            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all ${nomineeData?.round3Unlocked ? <Unlock size={24} /> : <Lock size={24} />}`}>
-                                {nomineeData?.round3Unlocked ? <Unlock size={24} className="text-gkk-gold" /> : <Lock size={24} />}
-                            </div>
+                            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all ${nomineeData?.round3Unlocked ? 'bg-gkk-gold text-gkk-navy shadow-lg' : 'bg-gray-200 text-gray-400'}`}>{nomineeData?.round3Unlocked ? <Unlock size={24} /> : <Lock size={24} />}</div>
                             <div className="text-left">
                                 <div className="flex items-center gap-3">
                                     <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${nomineeData?.round3Unlocked ? 'bg-gkk-navy text-white' : 'bg-gray-300 text-white'}`}>3</div>
@@ -123,7 +121,7 @@ const IndividualPortalView: React.FC<IndividualPortalViewProps> = ({
                     </button>
                     <div className={`transition-all duration-700 ease-in-out ${round3Open && nomineeData?.round3Unlocked ? 'max-h-[9999px] border-t border-gray-100 p-8 bg-white' : 'max-h-0 overflow-hidden'}`}>
                         <div className="flex justify-end mb-6">
-                            <button onClick={() => handleStageSubmit(3)} disabled={stage3Progress === 0} className="px-8 py-3 bg-purple-600 text-white font-bold rounded-2xl shadow-xl hover:-translate-y-1 transition-all disabled:opacity-30 text-xs uppercase tracking-widest flex items-center gap-2"><Send size={16} /> Submit Deficiencies</button>
+                            <button onClick={() => handleStageSubmit(3)} disabled={stage3Progress === 0} className="px-8 py-3 bg-gradient-to-r from-gkk-gold to-yellow-500 text-gkk-navy font-bold rounded-2xl shadow-xl hover:-translate-y-1 transition-all disabled:opacity-30 text-xs uppercase tracking-widest flex items-center gap-2"><Send size={16} /> Submit Deficiencies</button>
                         </div>
                         <DocumentGrid round={3} documents={documents} nomineeData={nomineeData} handleOpenUpload={handleOpenUpload} handlePreview={handlePreview} />
                     </div>
