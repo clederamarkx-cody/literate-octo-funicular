@@ -147,7 +147,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
   const [keyStatusFilter, setKeyStatusFilter] = useState<string>('all');
   const [keyRoleFilter, setKeyRoleFilter] = useState<string>('all');
   const [isIssuingKey, setIsIssuingKey] = useState(false);
-  const [newKeyData, setNewKeyData] = useState({ companyName: '', focalName: '', email: '', region: 'NCR', role: 'nominee', category: 'Industry' });
+  const [newKeyData, setNewKeyData] = useState({ companyName: '', focalName: '', email: '', region: 'NCR', role: 'nominee', category: 'Private Sector' });
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [issuedKeyId, setIssuedKeyId] = useState('');
 
@@ -192,7 +192,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
       const keyId = await issueAccessKey(newKeyData);
       setIssuedKeyId(keyId);
       setShowSuccessModal(true);
-      setNewKeyData({ companyName: '', focalName: '', email: '', region: 'NCR', role: 'nominee', category: 'Industry' });
+      setNewKeyData({ companyName: '', focalName: '', email: '', region: 'NCR', role: 'nominee', category: 'Private Sector' });
       const updatedKeys = await getAllAccessKeys();
       setAllKeys(updatedKeys);
     } catch (err) {
@@ -211,7 +211,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
     if (selectedNominee && view === 'review') {
       const fetchReqs = async () => {
         setIsLoadingRequirements(true);
-        const category = selectedNominee.details?.nomineeCategory || 'Industry';
+        const category = selectedNominee.details?.nomineeCategory || 'Private Sector';
         const reqs = await getRequirementsByCategory(category);
 
         // Force Stage 1 to always have the 35 requirements
@@ -639,10 +639,10 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                     onChange={(e) => setNewKeyData({ ...newKeyData, category: e.target.value })}
                     className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-gkk-gold/5 focus:border-gkk-gold outline-none transition-all font-bold text-sm tracking-tight appearance-none"
                   >
-                    <option value="Industry">Industry</option>
+                    <option value="Private Sector">Private Sector</option>
                     <option value="Individual">Individual</option>
                     <option value="Micro Enterprise">Micro Enterprise</option>
-                    <option value="Government">Government</option>
+                    <option value="Government Agency">Government Agency</option>
                   </select>
                 </div>
               ) : (

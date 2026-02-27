@@ -15,7 +15,7 @@ const NomineeProfileEdit: React.FC<NomineeProfileEditProps> = ({ profileData, on
             region: profileData?.details?.region || '',
             industry: profileData?.details?.industry || '',
             workforceSize: profileData?.details?.workforceSize || '',
-            nomineeCategory: profileData?.details?.nomineeCategory || 'private',
+            nomineeCategory: profileData?.details?.nomineeCategory || 'Private Sector',
         },
         representative: profileData?.representative || '',
         email: profileData?.email || '',
@@ -104,7 +104,7 @@ const NomineeProfileEdit: React.FC<NomineeProfileEditProps> = ({ profileData, on
                                 <input
                                     type="text"
                                     readOnly
-                                    value={formData.details.nomineeCategory ? (formData.details.nomineeCategory.charAt(0).toUpperCase() + formData.details.nomineeCategory.slice(1)) : 'Private Industry'}
+                                    value={formData.details.nomineeCategory || 'Private Sector'}
                                     className="w-full pl-11 pr-4 py-3 rounded-2xl border border-gray-100 bg-gray-50 text-gray-400 font-bold cursor-not-allowed outline-none"
                                 />
                             </div>

@@ -536,7 +536,7 @@ export const activateAccessKey = async (
 
         // 2. Specific setup for Nominees
         if (role === 'nominee') {
-            const finalCategory = key.category || details.category || 'Industry';
+            const finalCategory = key.category || details.category || 'Private Sector';
             const { error: appError } = await supabase.from(APPLICATIONS_COLLECTION).upsert({
                 id: targetUid,
                 reg_id: normalizedKey,
