@@ -791,27 +791,55 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
     if (!selectedNominee) return null;
     return (
       <div className="animate-in fade-in duration-500 space-y-8 pb-20">
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 bg-white p-6 rounded-[35px] border border-gray-200 shadow-sm sticky top-0 z-30"><div className="flex items-center gap-5"><button onClick={handleBackToList} className="p-3 bg-gray-50 text-gray-500 hover:bg-gkk-navy hover:text-white rounded-2xl transition-all border border-gray-100"><ChevronLeft size={24} /></button><div><h2 className="text-2xl font-serif font-bold text-gkk-navy leading-none uppercase tracking-tight">Review Profile</h2><div className="flex items-center gap-3 mt-3"><span className="bg-gray-100 px-3 py-0.5 rounded-full font-bold text-[9px] text-gray-500 uppercase tracking-widest">ID: {selectedNominee.regId}</span><span className={`px-3 py-0.5 rounded-full text-[9px] font-bold border uppercase tracking-widest ${getStatusColor(selectedNominee.status)}`}>{selectedNominee.status.replace('_', ' ')}</span></div></div></div><div className="flex items-center gap-3 w-full lg:w-auto"><button onClick={onUnderDev} className="flex-1 lg:flex-none flex items-center justify-center px-8 py-3 bg-gkk-navy text-white font-bold rounded-2xl hover:bg-gkk-royalBlue transition-all text-xs uppercase tracking-widest shadow-xl shadow-gkk-navy/20">Finalize</button></div></div>
-        <div className="bg-white rounded-[40px] border border-gray-200 shadow-sm overflow-hidden p-8">
-          <div className="flex flex-col md:flex-row justify-between gap-10 items-start md:items-center">
-            <div className="flex items-center space-x-6">
-              <div className="p-4 bg-gkk-navy/5 rounded-[25px] text-gkk-navy ring-1 ring-gkk-navy/10"><Building2 size={36} /></div>
-              <div>
-                <h2 className="text-3xl font-serif font-bold text-gkk-navy leading-tight uppercase tracking-tight">{selectedNominee.name}</h2>
-                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em] mt-2 flex items-center gap-2"><MapPin size={12} className="text-gkk-gold" /> {selectedNominee.region}, Philippines</p>
+        <div className="bg-white p-6 rounded-[35px] border border-gray-200 shadow-xl sticky top-0 z-30 ring-1 ring-black/5">
+          <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-8">
+            {/* Left: Actions & Identity */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
+              <button
+                onClick={handleBackToList}
+                className="p-3.5 bg-gray-50 text-gray-400 hover:bg-gkk-navy hover:text-white rounded-[20px] transition-all border border-gray-100 hover:scale-110 active:scale-95 shadow-sm shrink-0"
+              >
+                <ChevronLeft size={24} />
+              </button>
+
+              <div className="flex items-center gap-5">
+                <div className="p-4 bg-gkk-navy/5 rounded-[22px] text-gkk-navy ring-1 ring-gkk-navy/10 hidden md:block">
+                  <Building2 size={32} />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-serif font-black text-gkk-navy leading-none uppercase tracking-tight mb-2.5">
+                    {selectedNominee.name}
+                  </h2>
+                  <div className="flex flex-wrap items-center gap-2.5">
+                    <span className="bg-gray-100 px-3 py-1 rounded-full font-bold text-[9px] text-gray-500 uppercase tracking-widest border border-gray-200/50">
+                      ID: {selectedNominee.regId}
+                    </span>
+                    <span className={`px-3 py-1 rounded-full text-[9px] font-bold border uppercase tracking-widest ${getStatusColor(selectedNominee.status)}`}>
+                      {selectedNominee.status.replace('_', ' ')}
+                    </span>
+                    <div className="flex items-center gap-1.5 ml-2">
+                      <MapPin size={11} className="text-gkk-gold" />
+                      <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">
+                        {selectedNominee.region}, PH
+                      </span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
-            <div className="flex gap-4 items-center">
-              <div className="w-32 bg-gray-50 rounded-[20px] p-4 text-center border border-gray-100">
+
+            {/* Right: Consolidated Progress Trackers */}
+            <div className="flex flex-wrap gap-4 items-center bg-gray-50/50 p-2 rounded-[25px] border border-gray-100/50">
+              <div className="w-36 bg-white rounded-[20px] p-4 text-center border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
                 {renderProgressBar(selectedNominee, 1)}
               </div>
               {userRole !== 'reu' && (selectedNominee.round2Unlocked || userRole === 'admin' || userRole === 'scd_team_leader') && (
-                <div className="w-32 bg-gray-50 rounded-[20px] p-4 text-center border border-gray-100">
+                <div className="w-36 bg-white rounded-[20px] p-4 text-center border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
                   {renderProgressBar(selectedNominee, 2)}
                 </div>
               )}
               {userRole !== 'reu' && (selectedNominee.round3Unlocked || userRole === 'admin' || userRole === 'scd_team_leader') && (
-                <div className="w-32 bg-gray-50 rounded-[20px] p-4 text-center border border-gray-100">
+                <div className="w-36 bg-white rounded-[20px] p-4 text-center border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
                   {renderProgressBar(selectedNominee, 3)}
                 </div>
               )}
