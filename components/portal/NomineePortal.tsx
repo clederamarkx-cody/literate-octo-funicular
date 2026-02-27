@@ -236,10 +236,9 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
       const category = nomineeData?.details?.nomineeCategory || 'Industry';
       const reqs = await getRequirementsByCategory(category);
 
-      // Force Stage 1 to always have the 35 requirements
+      // Use dynamic requirements from DB for all stages
       const mergedReqs = {
-        ...reqs,
-        stage1: STAGE_1_REQUIREMENTS
+        ...reqs
       };
 
       setDynamicRequirements(mergedReqs);
