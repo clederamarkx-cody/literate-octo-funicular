@@ -9,7 +9,7 @@ const FailedDocumentsAlert: React.FC<FailedDocumentsAlertProps> = ({ failedDocs 
     if (failedDocs.length === 0) return null;
 
     return (
-        <div className="mt-6 bg-red-50 border border-red-100 rounded-2xl p-4 shadow-sm animate-pulse hover:animate-none transition-all">
+        <div className="mt-6 bg-red-50 border border-red-100 rounded-2xl p-4 shadow-sm transition-all text-left">
             <div className="flex items-start gap-4">
                 <div className="p-2 bg-red-500 text-white rounded-xl shadow-md">
                     <ShieldAlert size={20} />
@@ -22,7 +22,7 @@ const FailedDocumentsAlert: React.FC<FailedDocumentsAlertProps> = ({ failedDocs 
                     <div className="mt-3 flex flex-wrap gap-1.5">
                         {failedDocs.slice(0, 3).map(doc => (
                             <div key={doc.id} className="bg-white/80 backdrop-blur px-2 py-1 rounded-lg border border-red-100 text-[9px] font-black text-red-500 flex items-center gap-1.5">
-                                <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping"></span>
+                                <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
                                 {doc.label}
                             </div>
                         ))}
