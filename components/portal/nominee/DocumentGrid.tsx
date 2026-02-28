@@ -106,7 +106,24 @@ const DocumentGrid: React.FC<DocumentGridProps> = ({
                                 </p>
                                 {doc.lastUpdated && (
                                     <p className="text-[9px] text-gray-400 font-black uppercase tracking-wider px-2">
-                                        Submitted: <span className="text-gkk-navy/60">{doc.lastUpdated}</span>
+                                        Submitted: <span className="text-gkk-navy/60">
+                                            {(() => {
+                                                try {
+                                                    const d = new Date(doc.lastUpdated);
+                                                    if (isNaN(d.getTime())) return doc.lastUpdated;
+                                                    return d.toLocaleString('en-US', {
+                                                        month: 'short',
+                                                        day: 'numeric',
+                                                        year: 'numeric',
+                                                        hour: 'numeric',
+                                                        minute: '2-digit',
+                                                        hour12: true
+                                                    });
+                                                } catch (e) {
+                                                    return doc.lastUpdated;
+                                                }
+                                            })()}
+                                        </span>
                                     </p>
                                 )}
                             </div>
