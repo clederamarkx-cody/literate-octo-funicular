@@ -62,10 +62,15 @@ const OnboardingTour: React.FC<OnboardingTourProps> = ({ steps, isOpen, onComple
                     if (scrollContainer) {
                         const elRect = element.getBoundingClientRect();
                         const containerRect = scrollContainer.getBoundingClientRect();
-                        const scrollTarget = scrollContainer.scrollTop + (elRect.top - containerRect.top) - 80;
+                        // Dynamically center the element within the scroll container
+                        const offset = (containerRect.height / 2) - (elRect.height / 2);
+                        const scrollTarget = scrollContainer.scrollTop + (elRect.top - containerRect.top) - offset;
                         scrollContainer.scrollTo({ top: Math.max(0, scrollTarget), behavior: 'smooth' });
                     } else {
-                        const y = element.getBoundingClientRect().top + window.scrollY - 100;
+                        // Fallback centering for window
+                        const elRect = element.getBoundingClientRect();
+                        const offset = (window.innerHeight / 2) - (elRect.height / 2);
+                        const y = elRect.top + window.scrollY - offset;
                         window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
                     }
                 }, 50);
