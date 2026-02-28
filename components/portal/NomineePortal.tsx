@@ -411,6 +411,14 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
 
   const handleUpload = async () => {
     if (!selectedFile || !nomineeData) return;
+
+    // Strict internal policy: PDF only
+    if (selectedFile.type !== 'application/pdf' && !selectedFile.name.toLowerCase().endsWith('.pdf')) {
+      setToast({ message: "Strict Policy: Only PDF files are accepted.", type: 'error' });
+      return;
+    }
+
+    setUploadStatus('idle'); // Changed from 'encrypting' initialization to catch potential skips
     setUploadStatus('encrypting');
     setUploadProgress(0);
     isCancelledRef.current = false;

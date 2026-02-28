@@ -100,9 +100,16 @@ const DocumentGrid: React.FC<DocumentGridProps> = ({
                         <h5 className="text-sm font-bold text-gkk-navy mb-2 leading-relaxed min-h-[3em] line-clamp-2">{doc.label}</h5>
 
                         {doc.fileName ? (
-                            <p className="text-xs text-blue-600 truncate mb-4 font-bold bg-blue-50/50 p-2 rounded-xl border border-blue-100/50 flex items-center gap-2">
-                                <FileText size={14} className="shrink-0" /> {doc.fileName}
-                            </p>
+                            <div className="mb-4 space-y-1.5">
+                                <p className="text-xs text-blue-600 truncate font-bold bg-blue-50/50 p-2 rounded-xl border border-blue-100/50 flex items-center gap-2">
+                                    <FileText size={14} className="shrink-0" /> {doc.fileName}
+                                </p>
+                                {doc.lastUpdated && (
+                                    <p className="text-[9px] text-gray-400 font-black uppercase tracking-wider px-2">
+                                        Submitted: <span className="text-gkk-navy/60">{doc.lastUpdated}</span>
+                                    </p>
+                                )}
+                            </div>
                         ) : (
                             <div className="mb-4 h-[34px]"></div>
                         )}
