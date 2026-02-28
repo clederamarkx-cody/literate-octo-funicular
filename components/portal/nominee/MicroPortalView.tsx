@@ -4,7 +4,6 @@ import { Nominee, NomineeDocument } from '../../../types';
 import StageProgress from './StageProgress';
 import DocumentGrid from './DocumentGrid';
 import FailedDocumentsAlert from './FailedDocumentsAlert';
-import QuickStartGuide from './QuickStartGuide';
 
 interface MicroPortalViewProps {
     nomineeData: Nominee | null;
@@ -89,11 +88,6 @@ const MicroPortalView: React.FC<MicroPortalViewProps> = ({
             </div>
 
             <div id="documents-section" className="space-y-8 pb-20">
-                {/* Quick Start Guide for New Users */}
-                <div className="mb-8">
-                    <QuickStartGuide />
-                </div>
-
                 {/* Stage 1 */}
                 <div className="bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm transition-all duration-500">
                     <div

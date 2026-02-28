@@ -1,10 +1,9 @@
 import React from 'react';
-import { Building2, MapPin, Briefcase, Users, Hash, HardHat, Unlock, Lock, ChevronUp, ChevronDown, Send, ShieldAlert, FileText, Eye, Upload, ExternalLink, MonitorCheck, HelpCircle } from 'lucide-react';
+import { Building2, MapPin, Briefcase, Users, Hash, HardHat, Unlock, Lock, ChevronUp, ChevronDown, Send, ShieldAlert, FileText, Eye, Upload } from 'lucide-react';
 import { Nominee, NomineeDocument } from '../../../types';
 import StageProgress from './StageProgress';
 import DocumentGrid from './DocumentGrid';
 import FailedDocumentsAlert from './FailedDocumentsAlert';
-import QuickStartGuide from './QuickStartGuide';
 
 interface GovernmentPortalViewProps {
     nomineeData: Nominee | null;
@@ -89,11 +88,6 @@ const GovernmentPortalView: React.FC<GovernmentPortalViewProps> = ({
             </div>
 
             <div id="documents-section" className="space-y-8 pb-20">
-                {/* Quick Start Guide for New Users */}
-                <div className="mb-8">
-                    <QuickStartGuide />
-                </div>
-
                 {/* Stage 1 */}
                 <div className="bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm transition-all duration-500">
                     <div
