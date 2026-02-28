@@ -357,23 +357,24 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
   const handleOpenUpload = (id: string) => {
     const doc = documents.find(d => d.id === id);
     if (doc?.status === 'uploaded') {
-      // Strict Lock Logic:
-      // 1. Stage 1 is locked if Stage 2 is activated.
-      // 2. Stage 2 is locked if it's NOT activated OR if Stage 3 is activated.
-      // 3. Stage 3 is locked if it's NOT activated.
+      // Strict Lock Logic with Deficiency Exception:
+      // 1. Stage 1 is locked if Stage 2 is active, UNLESS Stage 3 is active and document FAILED.
+      // 2. Stage 2 is locked if not active OR if Stage 3 is active, UNLESS Stage 3 is active and document FAILED.
+      // 3. Stage 3 is locked if not active.
       const isLocked =
-        (doc.round === 1 && nomineeData?.round2Unlocked) ||
-        (doc.round === 2 && (!nomineeData?.round2Unlocked || nomineeData?.round3Unlocked)) ||
+        (doc.round === 1 && nomineeData?.round2Unlocked && !(nomineeData?.round3Unlocked && doc.verdict === 'fail')) ||
+        (doc.round === 2 && (!nomineeData?.round2Unlocked || (nomineeData?.round3Unlocked && doc.verdict !== 'fail'))) ||
         (doc.round === 3 && !nomineeData?.round3Unlocked);
 
       if (isLocked) {
-        const stageLabel = doc.round === 1 ? 'initial submission' : doc.round === 2 ? 'document evaluation' : 'deficiency submission';
-        setToast({
-          message: nomineeData?.round2Unlocked && doc.round === 1
-            ? "Stage 1 is locked because Stage 2 is now active."
-            : `Stage ${doc.round} (${stageLabel}) is currently locked.`,
-          type: 'info'
-        });
+        let message = `Stage ${doc.round} is currently locked.`;
+        if (nomineeData?.round2Unlocked && doc.round === 1 && !nomineeData?.round3Unlocked) {
+          message = "Stage 1 is locked because Stage 2 is now active.";
+        } else if (nomineeData?.round3Unlocked && doc.verdict !== 'fail' && doc.round < 3) {
+          message = "Only documents marked as ACTION REQUIRED can be updated in Stage 3.";
+        }
+
+        setToast({ message, type: 'info' });
         return;
       }
     }
@@ -456,7 +457,7 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
       setUploadProgress(100);
       setUploadStatus('success');
 
-      const today = new Date().toLocaleString();
+      const today = new Date().toISOString();
       const updatedDoc: NomineeDocument = {
         name: selectedFile.name,
         type: selectedFile.type,
