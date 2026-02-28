@@ -58,6 +58,7 @@ const MicroPortalView: React.FC<MicroPortalViewProps> = ({
                                 <div className="space-y-2"><span className="text-[10px] font-bold text-gray-400 uppercase block">Team Size</span><div className="flex items-center gap-2 text-sm font-bold text-gkk-navy"><Users size={16} className="text-gkk-gold" /> {nomineeData?.details?.employees || nomineeData?.workforceSize} Pax</div></div>
                                 <div className="space-y-2"><span className="text-[10px] font-bold text-gray-400 uppercase block">Registration ID</span><div className="flex items-center gap-2 text-sm font-bold text-gkk-navy font-mono"><Hash size={16} className="text-gkk-gold" /> {nomineeData?.regId}</div></div>
                                 <div className="space-y-2"><span className="text-[10px] font-bold text-gray-400 uppercase block">Safety Contact</span><div className="flex items-center gap-2 text-sm font-bold text-gkk-navy"><HardHat size={16} className="text-gkk-gold" /> {nomineeData?.details?.focalName || nomineeData?.details?.safetyOfficer || 'Owner/Proprietor'}</div></div>
+                                <div className="space-y-2"><span className="text-[10px] font-bold text-gray-400 uppercase block">Application Status</span><div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider ${nomineeData?.status === 'completed' ? 'bg-green-100 text-green-700' : 'bg-gkk-gold/10 text-gkk-gold'}`}>{nomineeData?.status?.replace('_', ' ') || 'Pending'}</div></div>
                             </div>
 
                         </div>
@@ -72,6 +73,11 @@ const MicroPortalView: React.FC<MicroPortalViewProps> = ({
             </div>
 
             <div id="documents-section" className="space-y-8 pb-20">
+                {!!nomineeData?.round3Unlocked && failedDocs.length > 0 && (
+                    <div className="animate-in slide-in-from-top-4 duration-500">
+                        <FailedDocumentsAlert failedDocs={failedDocs} />
+                    </div>
+                )}
                 {/* Stage 1 */}
                 <div className="bg-white rounded-3xl border border-gray-200 p-8 shadow-sm">
                     <div className="flex flex-col md:flex-row justify-between items-start mb-6 gap-4">
@@ -148,9 +154,6 @@ const MicroPortalView: React.FC<MicroPortalViewProps> = ({
                                 >
                                     <Send size={16} /> {nomineeData?.status === 'completed' ? 'Application Finalized' : 'Submit Deficiencies'}
                                 </button>
-                            </div>
-                            <div className="mb-8">
-                                <FailedDocumentsAlert failedDocs={failedDocs} />
                             </div>
                             <DocumentGrid round={3} documents={documents} nomineeData={nomineeData} handleOpenUpload={handleOpenUpload} handlePreview={handlePreview} />
                         </div>

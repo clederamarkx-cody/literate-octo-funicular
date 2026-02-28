@@ -115,11 +115,7 @@ const DocumentGrid: React.FC<DocumentGridProps> = ({
                         )}
 
                         <div className="flex gap-2 pt-3 border-t border-gray-100">
-                            {isLockedInThisRound ? (
-                                <div className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-gray-50 text-gray-400 rounded-xl text-[10px] font-bold border border-gray-200">
-                                    <Lock size={12} /> <span>{nomineeData?.status === 'completed' ? 'FINALIZED (READ-ONLY)' : round === 2 ? 'BANKED (READ-ONLY)' : 'LOCKED'}</span>
-                                </div>
-                            ) : (
+                            {!isLockedInThisRound && (
                                 <button
                                     onClick={() => handleOpenUpload(doc.id)}
                                     className={`flex-1 py-2.5 rounded-xl text-[10px] font-bold tracking-wider transition-all flex items-center justify-center gap-2 whitespace-nowrap ${doc.status === 'uploaded' ? 'bg-white text-gkk-navy border border-gray-200 hover:bg-gray-50' : 'bg-gkk-navy text-white hover:bg-gkk-royalBlue shadow-md'}`}
@@ -131,11 +127,11 @@ const DocumentGrid: React.FC<DocumentGridProps> = ({
                             {doc.status === 'uploaded' && (
                                 <button
                                     onClick={() => handlePreview(doc)}
-                                    className="px-3 py-2.5 bg-white text-blue-600 rounded-xl hover:bg-blue-600 hover:text-white transition-all border border-blue-200 shadow-sm flex items-center justify-center gap-2"
+                                    className={`${!isLockedInThisRound ? 'px-3' : 'flex-1'} py-2.5 bg-white text-blue-600 rounded-xl hover:bg-blue-600 hover:text-white transition-all border border-blue-200 shadow-sm flex items-center justify-center gap-2`}
                                     title="View Proof"
                                 >
                                     <Eye size={16} />
-                                    <span className="text-[10px] font-bold hidden sm:inline">VIEW</span>
+                                    <span className="text-[10px] font-bold">VIEW</span>
                                 </button>
                             )}
                         </div>
