@@ -37,9 +37,18 @@ const OnboardingTour: React.FC<OnboardingTourProps> = ({ steps, isOpen, onComple
                     // Simple debounce for scrollIntoView to avoid jumping
                     clearTimeout(timeoutId);
                     timeoutId = setTimeout(() => {
-                        // Scroll with a slight offset for sticky headers (if any)
-                        const y = element.getBoundingClientRect().top + window.scrollY - 100;
-                        window.scrollTo({ top: y, behavior: 'smooth' });
+                        const scrollContainer = document.getElementById('portal-scroll-container');
+                        if (scrollContainer) {
+                            const elRect = element.getBoundingClientRect();
+                            const containerRect = scrollContainer.getBoundingClientRect();
+                            // Calculate absolute scroll target relative to container's scroll top
+                            const scrollTarget = scrollContainer.scrollTop + (elRect.top - containerRect.top) - 80;
+                            scrollContainer.scrollTo({ top: Math.max(0, scrollTarget), behavior: 'smooth' });
+                        } else {
+                            // Fallback
+                            const y = element.getBoundingClientRect().top + window.scrollY - 100;
+                            window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+                        }
                     }, 50);
 
                 } else {
@@ -76,7 +85,7 @@ const OnboardingTour: React.FC<OnboardingTourProps> = ({ steps, isOpen, onComple
             if (targetEl) {
                 // Try to find the nearest scrollable parent. In our layout, it's typically the main tag or its children.
                 // We'll look specifically for the container with our scroll classes.
-                scrollContainer = document.querySelector('.overflow-y-auto');
+                scrollContainer = document.getElementById('portal-scroll-container');
             }
         }
 
