@@ -26,31 +26,14 @@ const OnboardingTour: React.FC<OnboardingTourProps> = ({ steps, isOpen, onComple
 
         let elementToObserve: HTMLElement | null = null;
         let resizeObserver: ResizeObserver | null = null;
-        let timeoutId: NodeJS.Timeout;
+        let scrollTimeoutId: NodeJS.Timeout;
+        let rafId: number;
 
         const updatePosition = () => {
             if (activeStep.targetId) {
                 const element = document.getElementById(activeStep.targetId);
                 if (element) {
                     setTargetRect(element.getBoundingClientRect());
-
-                    // Simple debounce for scrollIntoView to avoid jumping
-                    clearTimeout(timeoutId);
-                    timeoutId = setTimeout(() => {
-                        const scrollContainer = document.getElementById('portal-scroll-container');
-                        if (scrollContainer) {
-                            const elRect = element.getBoundingClientRect();
-                            const containerRect = scrollContainer.getBoundingClientRect();
-                            // Calculate absolute scroll target relative to container's scroll top
-                            const scrollTarget = scrollContainer.scrollTop + (elRect.top - containerRect.top) - 80;
-                            scrollContainer.scrollTo({ top: Math.max(0, scrollTarget), behavior: 'smooth' });
-                        } else {
-                            // Fallback
-                            const y = element.getBoundingClientRect().top + window.scrollY - 100;
-                            window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
-                        }
-                    }, 50);
-
                 } else {
                     setTargetRect(null); // Fallback to center if element not found
                 }
@@ -59,58 +42,72 @@ const OnboardingTour: React.FC<OnboardingTourProps> = ({ steps, isOpen, onComple
             }
         };
 
-        // Initial update
+        // Smoothly follow the element using requestAnimationFrame
+        const handleScrollOrResize = () => {
+            cancelAnimationFrame(rafId);
+            rafId = requestAnimationFrame(updatePosition);
+        };
+
+        // Initial position update
         updatePosition();
 
-        // Setup ResizeObserver for dynamic layout changes (e.g., accordions)
+        // -------------------------------------------------------------
+        // ONE-TIME AUTO SCROLL ON ACTIVE STEP CHANGE
+        // -------------------------------------------------------------
+        if (activeStep.targetId) {
+            const element = document.getElementById(activeStep.targetId);
+            if (element) {
+                scrollTimeoutId = setTimeout(() => {
+                    const scrollContainer = document.getElementById('portal-scroll-container');
+                    if (scrollContainer) {
+                        const elRect = element.getBoundingClientRect();
+                        const containerRect = scrollContainer.getBoundingClientRect();
+                        const scrollTarget = scrollContainer.scrollTop + (elRect.top - containerRect.top) - 80;
+                        scrollContainer.scrollTo({ top: Math.max(0, scrollTarget), behavior: 'smooth' });
+                    } else {
+                        const y = element.getBoundingClientRect().top + window.scrollY - 100;
+                        window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+                    }
+                }, 50);
+            }
+        }
+
+        // -------------------------------------------------------------
+        // SETUP CONTINUOUS TRACKING (Resize, Viewport, Scroll)
+        // -------------------------------------------------------------
         if (activeStep.targetId) {
             elementToObserve = document.getElementById(activeStep.targetId);
             if (elementToObserve) {
-                resizeObserver = new ResizeObserver(() => {
-                    // Debounce the observer callback
-                    clearTimeout(timeoutId);
-                    timeoutId = setTimeout(updatePosition, 10);
-                });
+                resizeObserver = new ResizeObserver(handleScrollOrResize);
                 resizeObserver.observe(elementToObserve);
             }
         }
 
-        // Fallback for global window resizes
-        window.addEventListener('resize', updatePosition);
+        window.addEventListener('resize', handleScrollOrResize);
 
-        // Find the specific scrollable container in the layout to attach the listener
         let scrollContainer: Element | null = null;
         if (activeStep.targetId) {
-            const targetEl = document.getElementById(activeStep.targetId);
-            if (targetEl) {
-                // Try to find the nearest scrollable parent. In our layout, it's typically the main tag or its children.
-                // We'll look specifically for the container with our scroll classes.
-                scrollContainer = document.getElementById('portal-scroll-container');
-            }
+            scrollContainer = document.getElementById('portal-scroll-container');
         }
 
         if (scrollContainer) {
-            // Passive listener for performance
-            scrollContainer.addEventListener('scroll', updatePosition, { passive: true });
+            scrollContainer.addEventListener('scroll', handleScrollOrResize, { passive: true });
         } else {
-            // Fallback
-            window.addEventListener('scroll', updatePosition, true);
+            window.addEventListener('scroll', handleScrollOrResize, true);
         }
 
         return () => {
-            window.removeEventListener('resize', updatePosition);
-
+            window.removeEventListener('resize', handleScrollOrResize);
             if (scrollContainer) {
-                scrollContainer.removeEventListener('scroll', updatePosition);
+                scrollContainer.removeEventListener('scroll', handleScrollOrResize);
             } else {
-                window.removeEventListener('scroll', updatePosition, true);
+                window.removeEventListener('scroll', handleScrollOrResize, true);
             }
-
-            if (resizeObserver && elementToObserve) {
-                resizeObserver.unobserve(elementToObserve);
+            if (resizeObserver) {
                 resizeObserver.disconnect();
             }
-            clearTimeout(timeoutId);
+            clearTimeout(scrollTimeoutId);
+            cancelAnimationFrame(rafId);
         };
     }, [isOpen, activeStep]);
 
