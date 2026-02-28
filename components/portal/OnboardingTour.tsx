@@ -24,12 +24,24 @@ const OnboardingTour: React.FC<OnboardingTourProps> = ({ steps, isOpen, onComple
     useEffect(() => {
         if (!isOpen || !activeStep) return;
 
+        let elementToObserve: HTMLElement | null = null;
+        let resizeObserver: ResizeObserver | null = null;
+        let timeoutId: NodeJS.Timeout;
+
         const updatePosition = () => {
             if (activeStep.targetId) {
                 const element = document.getElementById(activeStep.targetId);
                 if (element) {
                     setTargetRect(element.getBoundingClientRect());
-                    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                    // Simple debounce for scrollIntoView to avoid jumping
+                    clearTimeout(timeoutId);
+                    timeoutId = setTimeout(() => {
+                        // Scroll with a slight offset for sticky headers (if any)
+                        const y = element.getBoundingClientRect().top + window.scrollY - 100;
+                        window.scrollTo({ top: y, behavior: 'smooth' });
+                    }, 50);
+
                 } else {
                     setTargetRect(null); // Fallback to center if element not found
                 }
@@ -38,12 +50,37 @@ const OnboardingTour: React.FC<OnboardingTourProps> = ({ steps, isOpen, onComple
             }
         };
 
+        // Initial update
         updatePosition();
+
+        // Setup ResizeObserver for dynamic layout changes (e.g., accordions)
+        if (activeStep.targetId) {
+            elementToObserve = document.getElementById(activeStep.targetId);
+            if (elementToObserve) {
+                resizeObserver = new ResizeObserver(() => {
+                    // Debounce the observer callback
+                    clearTimeout(timeoutId);
+                    timeoutId = setTimeout(updatePosition, 10);
+                });
+                resizeObserver.observe(elementToObserve);
+            }
+        }
+
+        // Fallback for global window resizes
         window.addEventListener('resize', updatePosition);
-        return () => window.removeEventListener('resize', updatePosition);
+
+        return () => {
+            window.removeEventListener('resize', updatePosition);
+            if (resizeObserver && elementToObserve) {
+                resizeObserver.unobserve(elementToObserve);
+                resizeObserver.disconnect();
+            }
+            clearTimeout(timeoutId);
+        };
     }, [isOpen, activeStep]);
 
     if (!isOpen || !activeStep) return null;
+
 
     const handleNext = () => {
         if (currentStep < steps.length - 1) {

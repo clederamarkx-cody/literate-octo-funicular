@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
   LayoutDashboard,
   FileText,
@@ -161,7 +161,7 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
     }
   };
 
-  const tourSteps: TourStep[] = [
+  const tourSteps: TourStep[] = useMemo(() => [
     {
       targetId: null,
       title: <>Welcome to the 14<sup>th</sup> GKK Awards</>,
@@ -191,7 +191,8 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
       content: "This is your final correction window. Upload any required revisions or missing documents here to complete your nomination.",
       placement: "top"
     }
-  ];
+  ], []); // Empty dependency array as this content is static
+
 
   // Consent & Validation
   const [agreedDataPrivacy, setAgreedDataPrivacy] = useState(false);
@@ -339,11 +340,11 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
     }
   }, [nomineeData?.documents]);
 
-  const docCategories: { id: string, name: string, icon: React.ElementType }[] = [
+  const docCategories: { id: string, name: string, icon: React.ElementType }[] = useMemo(() => [
     { id: 'Reportorial Compliance', name: 'Compliance Reports', icon: FileCheck },
     { id: 'Legal & Administrative', name: 'Legal Docs', icon: Hash },
     { id: 'OSH Systems', name: 'OSH Management', icon: ShieldCheck },
-  ];
+  ], []);
 
   const getProgress = (round: number) => {
     if (!dynamicRequirements) return 0;
@@ -612,12 +613,14 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
             {activeTab === 'dashboard' ? (
               <div className="animate-in fade-in duration-500 space-y-8">
                 {(() => {
-                  const failedDocs = documents.filter(d => {
+                  const failedDocs = useMemo(() => documents.filter(d => {
                     const persisted = nomineeData?.documents?.find((nd: any) => nd.slotId === d.id);
                     return persisted?.verdict === 'fail';
-                  });
+                  }), [documents, nomineeData?.documents]);
+
                   const category = nomineeData?.details?.nomineeCategory || 'Private Sector';
-                  const props = {
+
+                  const props = useMemo(() => ({
                     nomineeData,
                     documents,
                     stage1Progress,
@@ -631,7 +634,11 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
                     setStage1Open,
                     stage2Open,
                     setStage2Open
-                  };
+                  }), [
+                    nomineeData, documents, stage1Progress, stage2Progress, stage3Progress,
+                    failedDocs, stage1Open, stage2Open
+                  ]);
+
 
                   switch (category) {
                     case 'Government':
