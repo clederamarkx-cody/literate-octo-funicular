@@ -69,8 +69,12 @@ const OnboardingTour: React.FC<OnboardingTourProps> = ({ steps, isOpen, onComple
         // Fallback for global window resizes
         window.addEventListener('resize', updatePosition);
 
+        // Add scroll listener with capturing to catch internal scrollable containers
+        window.addEventListener('scroll', updatePosition, true);
+
         return () => {
             window.removeEventListener('resize', updatePosition);
+            window.removeEventListener('scroll', updatePosition, true);
             if (resizeObserver && elementToObserve) {
                 resizeObserver.unobserve(elementToObserve);
                 resizeObserver.disconnect();
