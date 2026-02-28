@@ -34,15 +34,15 @@ const DocumentGrid: React.FC<DocumentGridProps> = ({
 }) => {
     // Filter logic for Document Migration:
     // Stage 1: Show only Stage 1 docs.
-    // Stage 2: Show ONLY docs from Stage 1 that have verdict === 'fail' (The Bank).
-    // Stage 3: Show Stage 3 docs + any Failed Stage 1 or Stage 2 docs.
+    // Stage 2: Show ALL docs from Stage 1 (The Results Bank).
+    // Stage 3: Show Stage 3 docs + any Failed Stage 1 or Stage 2 docs (Deficiency Correction).
     const roundDocs = documents.filter(doc => {
         if (round === 1) {
             return doc.round === 1;
         }
         if (round === 2) {
-            // Stage 2 is a "Bank" for Stage 1 failures
-            return doc.round === 1 && doc.verdict === 'fail';
+            // Stage 2 is a "Bank" for ALL Stage 1 documents
+            return doc.round === 1;
         }
         if (round === 3) {
             // Stage 3 is for Stage 3 requirements + any previous failures
@@ -57,7 +57,7 @@ const DocumentGrid: React.FC<DocumentGridProps> = ({
     if (roundDocs.length === 0 && round === 2) {
         return (
             <div className="p-8 text-center bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200">
-                <p className="text-gray-400 font-medium italic">No incomplete documents flagged from Stage 1.</p>
+                <p className="text-gray-400 font-medium italic">No documents available from Stage 1.</p>
             </div>
         );
     }
@@ -74,6 +74,9 @@ const DocumentGrid: React.FC<DocumentGridProps> = ({
                     (round === 2) ||
                     (round === 3 && !nomineeData?.round3Unlocked);
 
+                // Hide verdicts and remarks in Stage 1
+                const showVerdicts = round !== 1;
+
                 return (
                     <div key={doc.id} className={`group p-4 border rounded-2xl transition-all ${doc.status === 'uploaded' ? 'bg-green-50/20 border-green-100' : 'bg-white border-gray-200 hover:border-gkk-gold/30 hover:shadow-lg hover:-translate-y-0.5'}`}>
                         <div className="flex justify-between items-start mb-3">
@@ -81,12 +84,12 @@ const DocumentGrid: React.FC<DocumentGridProps> = ({
                                 <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md ${doc.status === 'uploaded' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
                                     {doc.status === 'uploaded' ? 'Complete' : 'Required'}
                                 </span>
-                                {doc.verdict === 'fail' && (
+                                {showVerdicts && doc.verdict === 'fail' && (
                                     <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-red-100 text-red-600 animate-pulse border border-red-200">
                                         INCOMPLETE
                                     </span>
                                 )}
-                                {doc.verdict === 'pass' && (
+                                {showVerdicts && doc.verdict === 'pass' && (
                                     <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-600 border border-emerald-200">
                                         VERIFIED
                                     </span>
@@ -103,7 +106,7 @@ const DocumentGrid: React.FC<DocumentGridProps> = ({
                             <div className="mb-4 h-[34px]"></div>
                         )}
 
-                        {doc.remarks && (
+                        {showVerdicts && doc.remarks && (
                             <div className="mb-3 px-3 py-2 bg-amber-50 border border-amber-200/50 rounded-xl">
                                 <span className="text-[9px] font-black text-amber-600 uppercase tracking-widest block mb-1">Evaluator Remarks</span>
                                 <p className="text-[11px] text-amber-800 font-semibold leading-relaxed">{doc.remarks}</p>
