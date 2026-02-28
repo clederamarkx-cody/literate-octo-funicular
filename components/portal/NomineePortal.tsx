@@ -210,11 +210,16 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
 
   // Stage Folding State
   const [stage1Open, setStage1Open] = useState(true);
+  const [stage2Open, setStage2Open] = useState(true);
 
   useEffect(() => {
     // Stage 1 is folded by default if Stage 2 or 3 is unlocked
     if (nomineeData?.round2Unlocked || nomineeData?.round3Unlocked) {
       setStage1Open(false);
+    }
+    // Stage 2 is folded by default if Stage 3 is unlocked
+    if (nomineeData?.round3Unlocked) {
+      setStage2Open(false);
     }
   }, [nomineeData?.id, nomineeData?.round2Unlocked, nomineeData?.round3Unlocked]);
 
@@ -572,7 +577,9 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
                     handlePreview,
                     failedDocs, // Pass failedDocs here
                     stage1Open,
-                    setStage1Open
+                    setStage1Open,
+                    stage2Open,
+                    setStage2Open
                   };
 
                   switch (category) {

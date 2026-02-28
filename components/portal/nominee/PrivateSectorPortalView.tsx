@@ -21,6 +21,8 @@ interface PrivateSectorPortalViewProps {
     failedDocs: any[];
     stage1Open: boolean;
     setStage1Open: (open: boolean) => void;
+    stage2Open: boolean;
+    setStage2Open: (open: boolean) => void;
 }
 
 const PrivateSectorPortalView: React.FC<PrivateSectorPortalViewProps> = ({
@@ -38,7 +40,9 @@ const PrivateSectorPortalView: React.FC<PrivateSectorPortalViewProps> = ({
     setRound3Open,
     failedDocs,
     stage1Open,
-    setStage1Open
+    setStage1Open,
+    stage2Open,
+    setStage2Open
 }) => {
     return (
         <div className="animate-in fade-in duration-500 space-y-8">
@@ -85,15 +89,17 @@ const PrivateSectorPortalView: React.FC<PrivateSectorPortalViewProps> = ({
 
             <div id="documents-section" className="space-y-8 pb-20">
                 {/* Stage 1 */}
-                <div className="bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm">
+                <div className="bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm transition-all duration-500">
                     <div
-                        className="p-8 flex flex-col md:flex-row justify-between items-start gap-4 cursor-pointer hover:bg-gray-50/50 transition-colors"
+                        className="p-8 flex flex-col md:flex-row justify-between items-start gap-4 cursor-pointer header-glass-hover"
                         onClick={() => setStage1Open(!stage1Open)}
                     >
                         <div className="flex-1">
                             <div className="flex items-center gap-4">
                                 <h3 className="text-2xl font-serif font-bold text-gkk-navy uppercase tracking-widest">Private Sector Requirements - Stage 1 (Submission)</h3>
-                                {stage1Open ? <ChevronUp size={24} className="text-gray-400" /> : <ChevronDown size={24} className="text-gray-400" />}
+                                <div className={`transition-transform duration-300 ${stage1Open ? 'rotate-180' : 'rotate-0'}`}>
+                                    <ChevronDown size={24} className="text-gray-400" />
+                                </div>
                             </div>
                             <p className="text-sm border-l-4 border-gkk-gold pl-3 py-1 font-bold italic text-gkk-navy/80 bg-gold-50/50 mt-4">Corporate safety protocols and regulatory compliance documentation.</p>
                         </div>
@@ -110,22 +116,28 @@ const PrivateSectorPortalView: React.FC<PrivateSectorPortalViewProps> = ({
                             </button>
                         )}
                     </div>
-                    {stage1Open && (
-                        <div className="px-8 pb-8 animate-in slide-in-from-top-2 duration-300">
-                            <DocumentGrid round={1} documents={documents} nomineeData={nomineeData} handleOpenUpload={handleOpenUpload} handlePreview={handlePreview} />
-                        </div>
-                    )}
+                    <div className={`collapse-transition overflow-hidden ${stage1Open ? 'max-h-[5000px] opacity-100 px-8 pb-8' : 'max-h-0 opacity-0 px-8 pb-0'}`}>
+                        <DocumentGrid round={1} documents={documents} nomineeData={nomineeData} handleOpenUpload={handleOpenUpload} handlePreview={handlePreview} />
+                    </div>
                 </div>
 
                 {/* Stage 2 */}
-                <div className={`rounded-3xl border transition-all duration-300 overflow-hidden ${nomineeData?.round2Unlocked ? 'bg-white border-gray-200 shadow-xl' : 'bg-gray-50 border-gray-100 opacity-60'}`}>
-                    <div className={`w-full p-8 flex items-center justify-between border-b border-gray-100`}>
+                <div className={`rounded-3xl border transition-all duration-500 overflow-hidden ${nomineeData?.round2Unlocked ? 'bg-white border-gray-200 shadow-xl' : 'bg-gray-50 border-gray-100 opacity-60'}`}>
+                    <div
+                        className={`w-full p-8 flex items-center justify-between border-b border-gray-100 ${nomineeData?.round2Unlocked ? 'cursor-pointer header-glass-hover' : ''}`}
+                        onClick={() => nomineeData?.round2Unlocked && setStage2Open(!stage2Open)}
+                    >
                         <div className="flex items-center space-x-6">
                             <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all ${nomineeData?.round2Unlocked ? 'bg-gkk-navy text-white shadow-lg' : 'bg-gray-200 text-gray-400'}`}>{nomineeData?.round2Unlocked ? <Unlock size={24} /> : <Lock size={24} />}</div>
                             <div className="text-left">
                                 <div className="flex items-center gap-3">
                                     <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${nomineeData?.round2Unlocked ? 'bg-gkk-gold text-gkk-navy' : 'bg-gray-300 text-white'}`}>2</div>
                                     <h4 className="font-bold text-gkk-navy text-xl leading-none">Stage 2 (Document Evaluation)</h4>
+                                    {!!nomineeData?.round2Unlocked && (
+                                        <div className={`transition-transform duration-300 ${stage2Open ? 'rotate-180' : 'rotate-0'}`}>
+                                            <ChevronDown size={20} className="text-gray-400" />
+                                        </div>
+                                    )}
                                 </div>
                                 <p className="text-xs text-gray-500 mt-2 font-bold uppercase tracking-widest leading-relaxed">
                                     {nomineeData?.round2Unlocked
@@ -136,18 +148,16 @@ const PrivateSectorPortalView: React.FC<PrivateSectorPortalViewProps> = ({
                         </div>
                     </div>
                     {/* Stage 2 Contents - Only visible if round2Unlocked is true */}
-                    {!!nomineeData?.round2Unlocked && (
-                        <div className="p-8 bg-white">
-                            <div className="mb-6 p-4 bg-blue-50/50 rounded-2xl border border-blue-100 flex items-start gap-4">
-                                <div className="p-2 bg-blue-100 text-blue-600 rounded-xl"><ShieldAlert size={18} /></div>
-                                <div>
-                                    <h5 className="text-[11px] font-black text-blue-600 uppercase tracking-widest mb-1">Evaluation Logic</h5>
-                                    <p className="text-xs text-blue-800 font-medium leading-relaxed">This section displays documents from Stage 1 that require attention. Use this for reference; corrections must be uploaded in <span className="font-bold">Stage 3</span> once triggered.</p>
-                                </div>
+                    <div className={`collapse-transition overflow-hidden ${!!nomineeData?.round2Unlocked && stage2Open ? 'max-h-[5000px] opacity-100 p-8' : 'max-h-0 opacity-0 px-8 pb-0'}`}>
+                        <div className="mb-6 p-4 bg-blue-50/50 rounded-2xl border border-blue-100 flex items-start gap-4">
+                            <div className="p-2 bg-blue-100 text-blue-600 rounded-xl"><ShieldAlert size={18} /></div>
+                            <div>
+                                <h5 className="text-[11px] font-black text-blue-600 uppercase tracking-widest mb-1">Evaluation Logic</h5>
+                                <p className="text-xs text-blue-800 font-medium leading-relaxed">This section displays documents from Stage 1 that require attention. Use this for reference; corrections must be uploaded in <span className="font-bold">Stage 3</span> once triggered.</p>
                             </div>
-                            <DocumentGrid round={2} documents={documents} nomineeData={nomineeData} handleOpenUpload={handleOpenUpload} handlePreview={handlePreview} />
                         </div>
-                    )}
+                        <DocumentGrid round={2} documents={documents} nomineeData={nomineeData} handleOpenUpload={handleOpenUpload} handlePreview={handlePreview} />
+                    </div>
                 </div>
 
                 {/* Stage 3 */}

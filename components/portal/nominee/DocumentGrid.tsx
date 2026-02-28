@@ -82,17 +82,17 @@ const DocumentGrid: React.FC<DocumentGridProps> = ({
                     <div key={doc.id} className={`group p-4 border rounded-2xl transition-all ${doc.status === 'uploaded' ? 'bg-green-50/20 border-green-100' : 'bg-white border-gray-200 hover:border-gkk-gold/30 hover:shadow-lg hover:-translate-y-0.5'}`}>
                         <div className="flex justify-between items-start mb-3">
                             <div className="flex items-center gap-2">
-                                <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md ${doc.status === 'uploaded' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
-                                    {doc.status === 'uploaded' ? 'Complete' : 'Required'}
+                                <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-lg ${doc.status === 'uploaded' ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700'}`}>
+                                    {doc.status === 'uploaded' ? 'SUBMITTED' : 'PENDING'}
                                 </span>
                                 {showVerdicts && doc.verdict === 'fail' && (
-                                    <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-red-100 text-red-600 animate-pulse border border-red-200">
-                                        INCOMPLETE
+                                    <span className="text-[10px] font-black uppercase tracking-wider px-2 py-1 rounded-lg bg-red-100 text-red-600 animate-pulse border border-red-200">
+                                        ACTION REQUIRED
                                     </span>
                                 )}
                                 {showVerdicts && doc.verdict === 'pass' && (
-                                    <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-600 border border-emerald-200">
-                                        VERIFIED
+                                    <span className="text-[10px] font-black uppercase tracking-wider px-2 py-1 rounded-lg bg-emerald-100 text-emerald-600 border border-emerald-200">
+                                        APPROVED
                                     </span>
                                 )}
                             </div>

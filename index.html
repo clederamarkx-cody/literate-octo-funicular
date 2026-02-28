@@ -1,103 +1,134 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>14th Gawad Kaligtasan at Kalusugan</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <!-- Using Montserrat as the high-fidelity web alternative to Proxima Nova -->
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              gkk: {
-                gold: '#d4ac4c',
-                goldLight: '#e4c478',
-                goldDark: '#aa8a3d',
-                navy: '#0F172A',
-                navyLight: '#1E293B',
-                royalBlue: '#1a365d',
-                red: '#8B0000',
-              }
-            },
-            fontFamily: {
-              // Proxima Nova stack using Montserrat as the primary web-delivered fallback
-              serif: ['Proxima Nova', 'Montserrat', 'Segoe UI', 'Roboto', 'sans-serif'],
-              display: ['Proxima Nova', 'Montserrat', 'Segoe UI', 'Roboto', 'sans-serif'],
-              sans: ['Proxima Nova', 'Montserrat', 'Segoe UI', 'Roboto', 'sans-serif'],
-            },
-            backgroundImage: {
-              'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-              'gold-gradient': 'linear-gradient(135deg, #d4ac4c 0%, #e4c478 50%, #aa8a3d 100%)',
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>14th Gawad Kaligtasan at Kalusugan</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- Using Montserrat as the high-fidelity web alternative to Proxima Nova -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            gkk: {
+              gold: '#d4ac4c',
+              goldLight: '#e4c478',
+              goldDark: '#aa8a3d',
+              navy: '#0F172A',
+              navyLight: '#1E293B',
+              royalBlue: '#1a365d',
+              red: '#8B0000',
             }
+          },
+          fontFamily: {
+            // Proxima Nova stack using Montserrat as the primary web-delivered fallback
+            serif: ['Proxima Nova', 'Montserrat', 'Segoe UI', 'Roboto', 'sans-serif'],
+            display: ['Proxima Nova', 'Montserrat', 'Segoe UI', 'Roboto', 'sans-serif'],
+            sans: ['Proxima Nova', 'Montserrat', 'Segoe UI', 'Roboto', 'sans-serif'],
+          },
+          backgroundImage: {
+            'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+            'gold-gradient': 'linear-gradient(135deg, #d4ac4c 0%, #e4c478 50%, #aa8a3d 100%)',
           }
         }
       }
-    </script>
-    <style>
-      body {
-        font-family: 'Proxima Nova', 'Montserrat', 'Segoe UI', 'Roboto', sans-serif;
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-        font-weight: 400;
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Proxima Nova', 'Montserrat', 'Segoe UI', 'Roboto', sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      font-weight: 400;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      font-family: 'Proxima Nova', 'Montserrat', 'Segoe UI', 'Roboto', sans-serif;
+      letter-spacing: -0.02em;
+      font-weight: 700;
+    }
+
+    .text-gold-gradient {
+      background: linear-gradient(to right, #d4ac4c, #f7e8b0, #d4ac4c);
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-size: 200% auto;
+      animation: shine 5s linear infinite;
+    }
+
+    @keyframes shine {
+      to {
+        background-position: 200% center;
       }
-      h1, h2, h3, h4, h5, h6 {
-        font-family: 'Proxima Nova', 'Montserrat', 'Segoe UI', 'Roboto', sans-serif;
-        letter-spacing: -0.02em;
-        font-weight: 700;
-      }
-      .text-gold-gradient {
-        background: linear-gradient(to right, #d4ac4c, #f7e8b0, #d4ac4c);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-size: 200% auto;
-        animation: shine 5s linear infinite;
-      }
-      @keyframes shine {
-        to {
-          background-position: 200% center;
-        }
-      }
-      .scrollbar-hide::-webkit-scrollbar {
-          display: none;
-      }
-      .scrollbar-hide {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
+    }
+
+    .scrollbar-hide::-webkit-scrollbar {
+      display: none;
+    }
+
+    .scrollbar-hide {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    /* Premium Page Transition */
+    @keyframes pageUpscale {
+      from {
+        opacity: 0;
+        transform: scale(0.98) translateY(8px);
       }
 
-      /* Premium Page Transition */
-      @keyframes pageUpscale {
-        from {
-          opacity: 0;
-          transform: scale(0.98) translateY(8px);
-        }
-        to {
-          opacity: 1;
-          transform: scale(1) translateY(0);
-        }
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
       }
-      .page-transition {
-        animation: pageUpscale 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-      }
+    }
 
-      /* Fix for doubled password reveal icons (hide native browser eye) */
-      input::-ms-reveal,
-      input::-ms-clear {
-        display: none !important;
-      }
-      input::-webkit-contacts-auto-fill-button,
-      input::-webkit-credentials-auto-fill-button {
-        visibility: hidden !important;
-        pointer-events: none !important;
-        position: absolute !important;
-        right: 0 !important;
-      }
-    </style>
+    .page-transition {
+      animation: pageUpscale 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    /* Smooth Collapse Transition */
+    .collapse-transition {
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .header-glass-hover {
+      transition: all 0.3s ease;
+    }
+
+    .header-glass-hover:hover {
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(8px);
+      box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.05);
+    }
+
+    /* Fix for doubled password reveal icons (hide native browser eye) */
+    input::-ms-reveal,
+    input::-ms-clear {
+      display: none !important;
+    }
+
+    input::-webkit-contacts-auto-fill-button,
+    input::-webkit-credentials-auto-fill-button {
+      visibility: hidden !important;
+      pointer-events: none !important;
+      position: absolute !important;
+      right: 0 !important;
+    }
+  </style>
   <script type="importmap">
 {
   "imports": {
@@ -110,8 +141,10 @@
 }
 </script>
 </head>
-  <body>
-    <div id="root"></div>
+
+<body>
+  <div id="root"></div>
   <script type="module" src="/index.tsx"></script>
 </body>
+
 </html>

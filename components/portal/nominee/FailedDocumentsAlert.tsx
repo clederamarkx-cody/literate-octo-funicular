@@ -17,7 +17,7 @@ const FailedDocumentsAlert: React.FC<FailedDocumentsAlertProps> = ({ failedDocs 
                 <div className="flex-1">
                     <h3 className="text-sm font-black text-red-500 uppercase tracking-tighter leading-none">Action Required: Your attention is needed</h3>
                     <p className="text-[11px] font-bold text-red-800 mt-1 leading-relaxed">
-                        Evaluators flagged <span className="underline">{failedDocs.length} items</span> as <span className="font-black">INCOMPLETE</span>. Upload replacements below.
+                        Evaluators flagged <span className="underline">{failedDocs.length} items</span> as <span className="font-black">ACTION REQUIRED</span>. Upload replacements below.
                     </p>
                     <div className="mt-3 flex flex-wrap gap-1.5">
                         {failedDocs.slice(0, 3).map(doc => (
