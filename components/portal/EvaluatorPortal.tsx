@@ -919,17 +919,27 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                       {['admin', 'scd_team_leader'].includes(userRole || '') ? (
                         <button
                           onClick={async () => {
-                            if (window.confirm("Are you sure you want to CLOSE this application? This will make it read-only for the nominee.")) {
-                              await updateNominee(selectedNominee.id, { status: 'completed' });
-                              const updated = { ...selectedNominee, status: 'completed' as any };
+                            const isClosing = selectedNominee.status !== 'completed';
+                            const confirmMsg = isClosing
+                              ? "Are you sure you want to CLOSE this application? This will make it read-only for the nominee."
+                              : "Are you sure you want to OPEN this application? This will allow the nominee to make further changes.";
+
+                            if (window.confirm(confirmMsg)) {
+                              const newStatus = isClosing ? 'completed' : 'under_review';
+                              await updateNominee(selectedNominee.id, { status: newStatus as any });
+                              const updated = { ...selectedNominee, status: newStatus as any };
                               setSelectedNominee(updated);
                               setLocalNominees(prev => prev.map(a => a.id === updated.id ? updated : a));
-                              setView('list');
-                              setSelectedNominee(null);
+                              if (isClosing) {
+                                setView('list');
+                                setSelectedNominee(null);
+                              }
                             }
                           }}
-                          className="px-10 py-4 rounded-[20px] font-bold transition-all shadow-xl text-[10px] tracking-widest uppercase bg-gkk-navy text-white hover:bg-gkk-royalBlue"
-                        >Close Application</button>
+                          className={`px-10 py-4 rounded-[20px] font-bold transition-all shadow-xl text-[10px] tracking-widest uppercase ${selectedNominee.status === 'completed' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100 hover:bg-emerald-100' : 'bg-gkk-navy text-white hover:bg-gkk-royalBlue'}`}
+                        >
+                          {selectedNominee.status === 'completed' ? 'Open Application' : 'Close Application'}
+                        </button>
                       ) : (
                         <button
                           onClick={() => { setView('list'); setSelectedNominee(null); }}
