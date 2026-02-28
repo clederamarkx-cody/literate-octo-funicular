@@ -572,7 +572,9 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
                     stage1Progress,
                     stage2Progress,
                     stage3Progress,
-                    handleStageSubmit
+                    handleStageSubmit,
+                    handleOpenUpload,
+                    handlePreview
                   };
 
                   switch (category) {
