@@ -343,6 +343,23 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
     if (!dynamicRequirements) return 0;
     const stageKey = round === 1 ? 'stage1' : round === 2 ? 'stage2' : 'stage3';
     const stageReqs = dynamicRequirements[stageKey] || [];
+
+    if (round === 3) {
+      // Stage 3 progress includes:
+      // 1. New documents uploaded for Stage 3 requirements
+      // 2. Previously failed documents from Round 1/2 that have been RE-UPLOADED (isCorrected)
+      const stage3ReqDocs = documents.filter(d => d.round === 3);
+      const stage3Uploaded = stage3ReqDocs.filter(d => d.status === 'uploaded').length;
+
+      const deficiencies = documents.filter(d => d.round < 3 && d.verdict === 'fail');
+      const correctedDeficiencies = deficiencies.filter(d => d.status === 'uploaded' && (d as any).isCorrected).length;
+
+      const totalItems = stage3ReqDocs.length + deficiencies.length;
+      if (totalItems === 0) return 100; // If no deficiencies and no stage 3 reqs, it's 100%
+
+      return Math.round(((stage3Uploaded + correctedDeficiencies) / totalItems) * 100);
+    }
+
     if (stageReqs.length === 0) return 0;
 
     const roundDocs = documents.filter(d => d.round === round);
@@ -458,16 +475,30 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
       setUploadStatus('success');
 
       const today = new Date().toISOString();
+      const currentDoc = documents.find(d => d.id === selectedDocId);
+      const isCorrection = currentDoc?.verdict === 'fail';
+
       const updatedDoc: NomineeDocument = {
         name: selectedFile.name,
         type: selectedFile.type,
         url: fileUrl,
         date: today,
         slotId: selectedDocId || undefined,
-        remarks: uploadRemarks
+        remarks: isCorrection ? undefined : uploadRemarks, // Clear remarks on correction
+        verdict: isCorrection ? undefined : currentDoc?.verdict // Clear failure on correction
       };
 
-      setDocuments(prev => prev.map(doc => doc.id === selectedDocId ? { ...doc, status: 'uploaded', fileName: selectedFile.name, lastUpdated: today, previewUrl: fileUrl, type: selectedFile.type, remarks: uploadRemarks } : doc));
+      setDocuments(prev => prev.map(doc => doc.id === selectedDocId ? {
+        ...doc,
+        status: 'uploaded',
+        fileName: selectedFile.name,
+        lastUpdated: today,
+        previewUrl: fileUrl,
+        type: selectedFile.type,
+        remarks: isCorrection ? undefined : uploadRemarks,
+        verdict: isCorrection ? undefined : doc.verdict,
+        isCorrected: isCorrection // Flag for Stage 3 progress logic
+      } as any : doc));
 
       await addNomineeDocument(nomineeData.id, updatedDoc);
       setTimeout(() => handleCloseUpload(), 1500);
