@@ -122,12 +122,12 @@ const OnboardingTour: React.FC<OnboardingTourProps> = ({ steps, isOpen, onComple
     return (
         <div className="fixed inset-0 z-[200] pointer-events-none">
             {/* Backdrop */}
-            <div className="absolute inset-0 bg-gkk-navy/60 backdrop-blur-[2px] pointer-events-auto transition-opacity duration-300" />
+            <div className="fixed inset-0 bg-gkk-navy/60 backdrop-blur-[2px] pointer-events-auto transition-opacity duration-300" />
 
             {/* Highlight Cutout Outline (Simulation) */}
             {!isCentered && targetRect && (
                 <div
-                    className="absolute border-4 border-gkk-gold rounded-xl pointer-events-none transition-all duration-500 ease-in-out shadow-[0_0_0_9999px_rgba(15,23,42,0.6)]" // using gkk-navy at 60% approx
+                    className="fixed border-4 border-gkk-gold rounded-xl pointer-events-none transition-all duration-300 ease-out shadow-[0_0_0_9999px_rgba(15,23,42,0.6)]" // using gkk-navy at 60% approx
                     style={{
                         top: targetRect.top - 8,
                         left: targetRect.left - 8,
@@ -139,7 +139,7 @@ const OnboardingTour: React.FC<OnboardingTourProps> = ({ steps, isOpen, onComple
 
             {/* Tour Dialog */}
             <div
-                className={`absolute bg-white rounded-2xl shadow-2xl w-80 max-w-[calc(100vw-32px)] pointer-events-auto transition-all duration-500 ease-in-out z-50 animate-in zoom-in-95 ${isCentered ? 'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2' : ''}`}
+                className={`fixed bg-white rounded-2xl shadow-2xl w-80 max-w-[calc(100vw-32px)] pointer-events-auto transition-all duration-500 ease-in-out z-50 animate-in zoom-in-95 ${isCentered ? 'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2' : ''}`}
                 style={!isCentered ? popoverStyle : {}}
             >
                 {!isCentered && activeStep.placement === 'bottom' && (
