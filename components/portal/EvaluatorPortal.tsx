@@ -219,8 +219,21 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
     }
   }, [selectedNominee?.id, view]);
 
+  // 1. First, filter by region if role is REU
+  const filteredNominees = useMemo(() => {
+    let list = [...(localNominees || [])];
+
+    // Strict Region-Based Visibility for REU
+    if (staffProfile?.role === 'reu' && staffProfile?.region) {
+      list = list.filter(app => app.region === staffProfile.region);
+    }
+
+    return list;
+  }, [localNominees, staffProfile]);
+
+  // 2. Then, sort the filtered list
   const sortedApplicants = useMemo(() => {
-    return [...(localNominees || [])].sort((a, b) => {
+    return [...filteredNominees].sort((a, b) => {
       const getLatest = (app: Nominee) => {
         const docDates = (app.documents || []).map(d => new Date(d.date || 0).getTime()).filter(t => !isNaN(t));
         const subDate = new Date(app.submittedDate || 0).getTime();
@@ -228,7 +241,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
       };
       return getLatest(b) - getLatest(a);
     });
-  }, [localNominees]);
+  }, [filteredNominees]);
 
   const nominees = sortedApplicants;
   useEffect(() => {
@@ -481,15 +494,15 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
     <div className="space-y-8 animate-in fade-in duration-500">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         <div className="bg-white p-8 rounded-[35px] border border-gray-200 shadow-sm flex items-center justify-between group hover:border-gkk-gold/30 transition-all">
-          <div><p className="text-gray-400 text-[10px] font-bold uppercase tracking-[0.2em] mb-2">My Nominees</p><h3 className="text-4xl font-serif font-bold text-gkk-navy">{nominees.length}</h3></div>
+          <div><p className="text-gray-400 text-[10px] font-bold uppercase tracking-[0.2em] mb-2">My Nominees</p><h3 className="text-4xl font-serif font-bold text-gkk-navy">{filteredNominees.length}</h3></div>
           <div className="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform"><ClipboardCheck size={28} /></div>
         </div>
         <div className="bg-white p-8 rounded-[35px] border border-gray-200 shadow-sm flex items-center justify-between group hover:border-gkk-gold/30 transition-all">
-          <div><p className="text-gray-400 text-[10px] font-bold uppercase tracking-[0.2em] mb-2">Pending Validation</p><h3 className="text-4xl font-serif font-bold text-gkk-navy">{localNominees.filter(a => a.status !== 'completed').length}</h3></div>
+          <div><p className="text-gray-400 text-[10px] font-bold uppercase tracking-[0.2em] mb-2">Pending Validation</p><h3 className="text-4xl font-serif font-bold text-gkk-navy">{filteredNominees.filter(a => a.status !== 'completed').length}</h3></div>
           <div className="w-14 h-14 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform"><Clock size={28} /></div>
         </div>
         <div className="bg-white p-8 rounded-[35px] border border-gray-200 shadow-sm flex items-center justify-between group hover:border-gkk-gold/30 transition-all">
-          <div><p className="text-gray-400 text-[10px] font-bold uppercase tracking-[0.2em] mb-2">Cycle Verified</p><h3 className="text-4xl font-serif font-bold text-gkk-navy">{localNominees.filter(a => a.status === 'completed').length}</h3></div>
+          <div><p className="text-gray-400 text-[10px] font-bold uppercase tracking-[0.2em] mb-2">Cycle Verified</p><h3 className="text-4xl font-serif font-bold text-gkk-navy">{filteredNominees.filter(a => a.status === 'completed').length}</h3></div>
           <div className="w-14 h-14 bg-green-50 text-green-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform"><CheckCircle size={28} /></div>
         </div>
       </div>
