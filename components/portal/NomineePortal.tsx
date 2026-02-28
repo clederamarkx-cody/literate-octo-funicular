@@ -161,30 +161,28 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
     }
   };
 
-  const tourSteps: TourStep[] = [
+  const tourSteps = [
     {
-      targetId: null,
-      title: <>Welcome to the 14<sup>th</sup> GKK Awards</>,
-      content: "This is your official Nominee Portal. We'll guide you through a quick tour of your dashboard so you know exactly how to secure your nomination."
+      target: "body",
+      content: "Welcome to the GKK Awards Nominee Portal. This 3-step guide will help you navigate the evaluation process for the first time.",
+      disableBeacon: true,
     },
     {
-      targetId: "readiness-meter",
-      title: "Track Your Readiness",
-      content: "This meter tracks your progress towards completing the Technical Verification. You need to hit 100% to proceed.",
-      placement: "bottom"
+      target: "#readiness-meter",
+      content: "1. Track Your Progress: This meter shows your current evaluation readiness. Your goal is to reach 100% for each stage.",
     },
     {
-      targetId: "documents-section",
-      title: "Stage 1 Submission",
-      content: "Upload your mandatory Compliance and Legal reports here. Once Stage 2 is triggered, these will be locked and sent to the Regional Board.",
-      placement: "top"
+      target: "#documents-section",
+      content: "2. Stage 1 (Submission): Start here by uploading your mandatory OSH and regulatory documents. Click the 'Upload' icon to begin.",
     },
     {
-      targetId: "round-2-lock",
-      title: "Stage 2 Submission",
-      content: "This section automatically unlocks once the Technical Board fully approves your Stage 1 documents.",
-      placement: "top"
-    }
+      target: "#documents-section",
+      content: "3. Monitor Evaluations: Use Stage 2 (Document Evaluation) to monitor Regional Board findings and Stage 3 (Submission of Deficiencies) to resolve flagged items.",
+    },
+    {
+      target: "#support-kit",
+      content: "Need help? Download the Submission Kit or review the OSH Standards in the sidebar at any time.",
+    },
   ];
 
   // Consent & Validation
