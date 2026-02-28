@@ -54,7 +54,7 @@ const PrivateSectorPortalView: React.FC<PrivateSectorPortalViewProps> = ({
                                 </div>
                             </div>
 
-                            {!!nomineeData?.round3Unlocked && failedDocs.length > 0 && (
+                            {!!nomineeData?.round3Unlocked && nomineeData?.status !== 'completed' && failedDocs.length > 0 && (
                                 <div className="animate-in slide-in-from-top-4 duration-500">
                                     <FailedDocumentsAlert failedDocs={failedDocs} />
                                 </div>
