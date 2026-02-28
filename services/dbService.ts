@@ -165,7 +165,7 @@ export const updateUserProfile = async (uid: string, updates: Partial<User>) => 
     return true;
 };
 
-export const createNominee = async (uid: string, regId: string, name: string, nomineeCategory: Nominee['details']['nomineeCategory'], email: string) => {
+export const createNominee = async (uid: string, regId: string, name: string, nomineeCategory: Nominee['details']['nomineeCategory'], email: string, region?: string) => {
     const userCreated = await createUserProfile(uid, email, 'nominee');
     if (!userCreated) return false;
 
@@ -176,7 +176,7 @@ export const createNominee = async (uid: string, regId: string, name: string, no
         email,
         role: 'nominee',
         industry: 'Unspecified',
-        region: 'NCR',
+        region: region || 'NCR',
         status: 'in_progress',
         submitted_date: new Date().toISOString(),
         round2_unlocked: false,
@@ -546,6 +546,7 @@ export const activateAccessKey = async (
                 organization_name: details.companyName,
                 focal_name: key.focal_name || key.name || details.companyName,
                 role: 'nominee',
+                region: key.region || 'NCR',
                 status: 'in_progress',
                 submitted_date: new Date().toISOString(),
                 details: {

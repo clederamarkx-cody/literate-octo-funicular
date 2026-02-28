@@ -98,7 +98,7 @@ function App() {
     try {
       const email = `contact@${companyName.replace(/[^a-zA-Z]/g, '').toLowerCase()}.demo`;
       await createUserProfile(newId, email, 'nominee');
-      const newApp = await createNominee(newId, regId, companyName, 'Industry', email);
+      const newApp = await createNominee(newId, regId, companyName, 'Industry', email, 'NCR');
 
       sessionStorage.setItem('gkk_session', JSON.stringify({ role: 'nominee', uid: newId }));
       setNominees(prev => [newApp, ...prev]);

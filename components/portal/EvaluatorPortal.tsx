@@ -123,7 +123,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
             email,
             role,
             name: email.split('@')[0].toUpperCase(),
-            region: 'NCR',
+            region: 'REGION',
             status: 'active'
           } as UserType);
         }
