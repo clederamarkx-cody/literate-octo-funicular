@@ -105,7 +105,8 @@ const MicroPortalView: React.FC<MicroPortalViewProps> = ({
                             </div>
                         </div>
                     </div>
-                    {nomineeData?.round2Unlocked && (
+                    {/* Stage 2 Contents - Only visible if activated */}
+                    {!!nomineeData?.round2Unlocked && (
                         <div className="p-8 bg-white">
                             <div className="mb-6 p-4 bg-blue-50/50 rounded-2xl border border-blue-100 flex items-start gap-4">
                                 <div className="p-2 bg-blue-100 text-blue-600 rounded-xl"><ShieldAlert size={18} /></div>
@@ -133,7 +134,8 @@ const MicroPortalView: React.FC<MicroPortalViewProps> = ({
                             </div>
                         </div>
                     </div>
-                    {nomineeData?.round3Unlocked && (
+                    {/* Stage 3 Contents - Only visible if activated */}
+                    {!!nomineeData?.round3Unlocked && (
                         <div className="p-8 bg-white">
                             <div className="flex justify-end mb-6">
                                 <button onClick={() => handleStageSubmit(3)} disabled={stage3Progress === 0} className="px-8 py-3 bg-gradient-to-r from-gkk-gold to-yellow-500 text-gkk-navy font-bold rounded-2xl shadow-xl hover:-translate-y-1 transition-all disabled:opacity-30 text-xs uppercase tracking-widest flex items-center gap-2"><Send size={16} /> Submit Deficiencies</button>
