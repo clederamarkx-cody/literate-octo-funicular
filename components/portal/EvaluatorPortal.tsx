@@ -140,6 +140,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
   const [isResolvingUrl, setIsResolvingUrl] = useState(false);
   const [previewDoc, setPreviewDoc] = useState<{ name: string, url: string | null, type: string } | null>(null);
   const [isExporting, setIsExporting] = useState<number | null>(null);
+  const [isStage1Folded, setIsStage1Folded] = useState(false);
   const [isLoadingRequirements, setIsLoadingRequirements] = useState(false);
   const [dynamicRequirements, setDynamicRequirements] = useState<any>(null);
   const [allKeys, setAllKeys] = useState<any[]>([]);
@@ -160,6 +161,14 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
       fetchKeys();
     }
   }, [activeTab]);
+
+  useEffect(() => {
+    if (selectedNominee?.round2Unlocked) {
+      setIsStage1Folded(true);
+    } else {
+      setIsStage1Folded(false);
+    }
+  }, [selectedNominee?.id, selectedNominee?.round2Unlocked]);
 
   const docCategories = [
     { id: 'Compliance', name: 'Compliance Reports', icon: FileText },
@@ -834,19 +843,33 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
 
         <div className="space-y-8">
           <div className="flex justify-between items-start">
-            <div>
-              <h3 className="text-2xl font-serif font-bold text-gkk-navy uppercase tracking-widest">Stage 1 Documents</h3>
-              <p className="text-xs text-gray-500 mt-2 font-bold uppercase tracking-widest italic opacity-60">Evaluate the initial compliance records.</p>
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => setIsStage1Folded(!isStage1Folded)}
+                className="p-2 hover:bg-gray-100 rounded-xl transition-colors text-gkk-navy/40 hover:text-gkk-navy"
+              >
+                {isStage1Folded ? <ChevronDown size={24} /> : <ChevronUp size={24} />}
+              </button>
+              <div>
+                <h3 className="text-2xl font-serif font-bold text-gkk-navy uppercase tracking-widest leading-none">Stage 1 (Submission)</h3>
+                {!isStage1Folded && <p className="text-xs text-gray-500 mt-2 font-bold uppercase tracking-widest italic opacity-60">Evaluate the initial compliance records.</p>}
+              </div>
             </div>
-            <button
-              onClick={() => handleExportStage(1)}
-              disabled={isExporting === 1}
-              className="px-6 py-3 bg-white border border-gray-200 text-gray-600 font-bold rounded-2xl hover:bg-gray-50 transition-all text-[10px] uppercase tracking-widest flex items-center gap-2 shadow-sm"
-            >
-              <Download size={14} /> {isExporting === 1 ? "Exporting..." : "Export PDFs"}
-            </button>
+            {!isStage1Folded && (
+              <button
+                onClick={() => handleExportStage(1)}
+                disabled={isExporting === 1}
+                className="px-6 py-3 bg-white border border-gray-200 text-gray-600 font-bold rounded-2xl hover:bg-gray-50 transition-all text-[10px] uppercase tracking-widest flex items-center gap-2 shadow-sm"
+              >
+                <Download size={14} /> {isExporting === 1 ? "Exporting..." : "Export PDFs"}
+              </button>
+            )}
           </div>
-          <div className="space-y-4">{renderDocumentGrid(1)}</div>
+          {!isStage1Folded && (
+            <div className="animate-in slide-in-from-top-2 duration-300">
+              <div className="space-y-4">{renderDocumentGrid(1)}</div>
+            </div>
+          )}
 
 
 
@@ -857,7 +880,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                   <div className="p-10 flex flex-col md:flex-row items-center justify-between gap-8">
                     <div className="flex items-center space-x-8">
                       <div className={`w-16 h-16 rounded-3xl flex items-center justify-center transition-all ${(selectedNominee.round2Unlocked || ['admin', 'scd_team_leader'].includes(userRole || '')) ? 'bg-blue-600 text-white shadow-xl' : 'bg-gray-200 text-gray-400'}`}>{(selectedNominee.round2Unlocked || ['admin', 'scd_team_leader'].includes(userRole || '')) ? <Unlock size={28} /> : <Lock size={28} />}</div>
-                      <div className="text-left"><h4 className="font-bold text-gkk-navy text-xl uppercase tracking-tighter leading-none">Stage 2 Verification</h4><p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-3">{selectedNominee.round2Unlocked ? 'Reviewing national shortlist' : (['admin', 'scd_team_leader'].includes(userRole || '')) ? 'Action Required: Trigger Stage 2' : 'Locked'}</p></div>
+                      <div className="text-left"><h4 className="font-bold text-gkk-navy text-xl uppercase tracking-tighter leading-none">Stage 2 (Evaluation)</h4><p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-3">{selectedNominee.round2Unlocked ? 'Reviewing national shortlist' : (['admin', 'scd_team_leader'].includes(userRole || '')) ? 'Action Required: Trigger Stage 2' : 'Locked'}</p></div>
                     </div>
                     <div className="flex items-center gap-4">
                       {(selectedNominee.round2Unlocked || ['admin', 'scd_team_leader'].includes(userRole || '')) && (
@@ -895,7 +918,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                   <div className="p-10 flex flex-col md:flex-row items-center justify-between gap-8">
                     <div className="flex items-center space-x-8">
                       <div className={`w-16 h-16 rounded-3xl flex items-center justify-center transition-all ${(selectedNominee.round3Unlocked || ['admin', 'scd_team_leader'].includes(userRole || '')) ? 'bg-gkk-gold text-gkk-navy shadow-xl' : 'bg-gray-200 text-gray-400'}`}>{(selectedNominee.round3Unlocked || ['admin', 'scd_team_leader'].includes(userRole || '')) ? <Unlock size={28} /> : <Lock size={28} />}</div>
-                      <div className="text-left"><h4 className="font-bold text-gkk-navy text-xl uppercase tracking-tighter leading-none">Stage 3 Verification</h4><p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-3">{selectedNominee.round3Unlocked ? 'National Board Final Evaluation' : (['admin', 'scd_team_leader'].includes(userRole || '')) ? 'SCD Trigger Required' : 'Locked'}</p></div>
+                      <div className="text-left"><h4 className="font-bold text-gkk-navy text-xl uppercase tracking-tighter leading-none">Stage 3 (Deficiencies)</h4><p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-3">{selectedNominee.round3Unlocked ? 'National Board Final Evaluation' : (['admin', 'scd_team_leader'].includes(userRole || '')) ? 'SCD Trigger Required' : 'Locked'}</p></div>
                     </div>
                     <div className="flex items-center gap-4">
                       {(selectedNominee.round3Unlocked || ['admin', 'scd_team_leader'].includes(userRole || '')) && (
