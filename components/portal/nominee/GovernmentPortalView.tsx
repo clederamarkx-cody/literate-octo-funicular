@@ -60,7 +60,7 @@ const GovernmentPortalView: React.FC<GovernmentPortalViewProps> = ({
                                 <div className="space-y-2"><span className="text-[10px] font-bold text-gray-400 uppercase block">OSH Lead</span><div className="flex items-center gap-2 text-sm font-bold text-gkk-navy"><HardHat size={16} className="text-gkk-gold" /> {nomineeData?.details?.safetyOfficer}</div></div>
                             </div>
 
-                            {(nomineeData?.round2Unlocked || nomineeData?.round3Unlocked) && (
+                            {!!nomineeData?.round3Unlocked && (
                                 <FailedDocumentsAlert failedDocs={failedDocs} />
                             )}
                         </div>

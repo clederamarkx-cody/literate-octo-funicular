@@ -60,7 +60,7 @@ const MicroPortalView: React.FC<MicroPortalViewProps> = ({
                                 <div className="space-y-2"><span className="text-[10px] font-bold text-gray-400 uppercase block">Safety Contact</span><div className="flex items-center gap-2 text-sm font-bold text-gkk-navy"><HardHat size={16} className="text-gkk-gold" /> {nomineeData?.details?.focalName || nomineeData?.details?.safetyOfficer || 'Owner/Proprietor'}</div></div>
                             </div>
 
-                            {(nomineeData?.round2Unlocked || nomineeData?.round3Unlocked) && (
+                            {!!nomineeData?.round3Unlocked && (
                                 <FailedDocumentsAlert failedDocs={failedDocs} />
                             )}
                         </div>
