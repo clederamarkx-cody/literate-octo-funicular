@@ -69,12 +69,34 @@ const OnboardingTour: React.FC<OnboardingTourProps> = ({ steps, isOpen, onComple
         // Fallback for global window resizes
         window.addEventListener('resize', updatePosition);
 
-        // Add scroll listener with capturing to catch internal scrollable containers
-        window.addEventListener('scroll', updatePosition, true);
+        // Find the specific scrollable container in the layout to attach the listener
+        let scrollContainer: Element | null = null;
+        if (activeStep.targetId) {
+            const targetEl = document.getElementById(activeStep.targetId);
+            if (targetEl) {
+                // Try to find the nearest scrollable parent. In our layout, it's typically the main tag or its children.
+                // We'll look specifically for the container with our scroll classes.
+                scrollContainer = document.querySelector('.overflow-y-auto');
+            }
+        }
+
+        if (scrollContainer) {
+            // Passive listener for performance
+            scrollContainer.addEventListener('scroll', updatePosition, { passive: true });
+        } else {
+            // Fallback
+            window.addEventListener('scroll', updatePosition, true);
+        }
 
         return () => {
             window.removeEventListener('resize', updatePosition);
-            window.removeEventListener('scroll', updatePosition, true);
+
+            if (scrollContainer) {
+                scrollContainer.removeEventListener('scroll', updatePosition);
+            } else {
+                window.removeEventListener('scroll', updatePosition, true);
+            }
+
             if (resizeObserver && elementToObserve) {
                 resizeObserver.unobserve(elementToObserve);
                 resizeObserver.disconnect();
