@@ -534,6 +534,10 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
 
   const handleStageSubmit = (stage: number) => {
     const progress = getProgress(stage);
+    if (stage === 3 && progress < 100) {
+      setToast({ message: "Incomplete Submission. Please resolve all deficiencies before submitting.", type: 'warning' });
+      return;
+    }
     if (progress === 0) {
       setToast({ message: `Incomplete Submission. Please upload at least one required document for Stage ${stage}.`, type: 'warning' });
       return;

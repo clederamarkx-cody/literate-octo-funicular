@@ -181,7 +181,7 @@ const GovernmentPortalView: React.FC<GovernmentPortalViewProps> = ({
                                 <div className="flex justify-end mb-6">
                                     <button
                                         onClick={() => handleStageSubmit(3)}
-                                        disabled={stage3Progress === 0}
+                                        disabled={stage3Progress < 100}
                                         className="px-8 py-3 bg-gradient-to-r from-gkk-gold to-yellow-500 text-gkk-navy font-bold rounded-2xl shadow-xl hover:-translate-y-1 transition-all disabled:opacity-30 text-xs uppercase tracking-widest flex items-center gap-2"
                                     >
                                         <Send size={16} /> Submit Deficiencies
