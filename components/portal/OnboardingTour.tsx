@@ -131,18 +131,26 @@ const OnboardingTour: React.FC<OnboardingTourProps> = ({ steps, isOpen, onComple
 
     // Calculate popover styles based on target rect and placement
     let popoverStyle: React.CSSProperties = {};
+    let currentPlacement = activeStep.placement || 'bottom';
 
     if (!isCentered && targetRect) {
         const margin = 16;
-        const placement = activeStep.placement || 'bottom';
+        const dialogEstimatedHeight = 250; // Approximating popup height to detect clipping
 
-        if (placement === 'bottom') {
+        // Auto-flip placement if it would clip outside the viewport
+        if (currentPlacement === 'top' && (targetRect.top - margin - dialogEstimatedHeight) < 0) {
+            currentPlacement = 'bottom';
+        } else if (currentPlacement === 'bottom' && (targetRect.bottom + margin + dialogEstimatedHeight) > window.innerHeight) {
+            currentPlacement = 'top';
+        }
+
+        if (currentPlacement === 'bottom') {
             popoverStyle = {
                 top: targetRect.bottom + margin,
                 left: targetRect.left + (targetRect.width / 2),
                 transform: 'translateX(-50%)' // Center relative to target
             };
-        } else if (placement === 'top') {
+        } else if (currentPlacement === 'top') {
             popoverStyle = {
                 top: targetRect.top - margin,
                 left: targetRect.left + (targetRect.width / 2),
@@ -175,10 +183,10 @@ const OnboardingTour: React.FC<OnboardingTourProps> = ({ steps, isOpen, onComple
                 className={`fixed bg-white rounded-2xl shadow-2xl w-80 max-w-[calc(100vw-32px)] pointer-events-auto transition-all duration-500 ease-in-out z-50 animate-in zoom-in-95 ${isCentered ? 'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2' : ''}`}
                 style={!isCentered ? popoverStyle : {}}
             >
-                {!isCentered && activeStep.placement === 'bottom' && (
+                {!isCentered && currentPlacement === 'bottom' && (
                     <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-b-[12px] border-b-white z-10" />
                 )}
-                {!isCentered && activeStep.placement === 'top' && (
+                {!isCentered && currentPlacement === 'top' && (
                     <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-t-[12px] border-t-white z-10" />
                 )}
 
