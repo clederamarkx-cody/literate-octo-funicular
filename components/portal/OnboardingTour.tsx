@@ -62,16 +62,28 @@ const OnboardingTour: React.FC<OnboardingTourProps> = ({ steps, isOpen, onComple
                     if (scrollContainer) {
                         const elRect = element.getBoundingClientRect();
                         const containerRect = scrollContainer.getBoundingClientRect();
-                        // Dynamically center the element within the scroll container
-                        const offset = (containerRect.height / 2) - (elRect.height / 2);
-                        const scrollTarget = scrollContainer.scrollTop + (elRect.top - containerRect.top) - offset;
+
+                        let scrollTarget = 0;
+                        if (elRect.height > containerRect.height * 0.8) {
+                            // Elements taller than 80% of container: Scroll so their top edge is near top of screen
+                            scrollTarget = scrollContainer.scrollTop + (elRect.top - containerRect.top) - 100;
+                        } else {
+                            // Dynamically center the element within the scroll container
+                            const offset = (containerRect.height / 2) - (elRect.height / 2);
+                            scrollTarget = scrollContainer.scrollTop + (elRect.top - containerRect.top) - offset;
+                        }
                         scrollContainer.scrollTo({ top: Math.max(0, scrollTarget), behavior: 'smooth' });
                     } else {
                         // Fallback centering for window
                         const elRect = element.getBoundingClientRect();
-                        const offset = (window.innerHeight / 2) - (elRect.height / 2);
-                        const y = elRect.top + window.scrollY - offset;
-                        window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+                        let scrollTarget = 0;
+                        if (elRect.height > window.innerHeight * 0.8) {
+                            scrollTarget = elRect.top + window.scrollY - 100;
+                        } else {
+                            const offset = (window.innerHeight / 2) - (elRect.height / 2);
+                            scrollTarget = elRect.top + window.scrollY - offset;
+                        }
+                        window.scrollTo({ top: Math.max(0, scrollTarget), behavior: 'smooth' });
                     }
                 }, 50);
             }
@@ -136,23 +148,44 @@ const OnboardingTour: React.FC<OnboardingTourProps> = ({ steps, isOpen, onComple
     if (!isCentered && targetRect) {
         const margin = 16;
         const dialogEstimatedHeight = 250; // Approximating popup height to detect clipping
+        const topSpace = targetRect.top;
+        const bottomSpace = window.innerHeight - targetRect.bottom;
 
         // Auto-flip placement if it would clip outside the viewport
-        if (currentPlacement === 'top' && (targetRect.top - margin - dialogEstimatedHeight) < 0) {
-            currentPlacement = 'bottom';
-        } else if (currentPlacement === 'bottom' && (targetRect.bottom + margin + dialogEstimatedHeight) > window.innerHeight) {
-            currentPlacement = 'top';
+        if (currentPlacement === 'top' && (topSpace - margin - dialogEstimatedHeight) < 0) {
+            if (bottomSpace > topSpace) currentPlacement = 'bottom';
+        } else if (currentPlacement === 'bottom' && (bottomSpace - margin - dialogEstimatedHeight) < 0) {
+            if (topSpace > bottomSpace) currentPlacement = 'top';
         }
 
+        // Apply clamping so the popup NEVER renders off-screen, even for huge elements
+        let dialogTop = 0;
+
         if (currentPlacement === 'bottom') {
+            dialogTop = targetRect.bottom + margin;
+
+            // Clamp to bottom of viewport
+            const maxBottom = window.innerHeight - dialogEstimatedHeight - margin;
+            if (dialogTop > maxBottom && targetRect.top < maxBottom) {
+                dialogTop = maxBottom; // Pin to bottom of viewport, floating over the element
+            }
+
             popoverStyle = {
-                top: targetRect.bottom + margin,
+                top: dialogTop,
                 left: targetRect.left + (targetRect.width / 2),
                 transform: 'translateX(-50%)' // Center relative to target
             };
         } else if (currentPlacement === 'top') {
+            dialogTop = targetRect.top - margin;
+
+            // Clamp to top of viewport (remember transform -100% subtracts dialog height)
+            const minTop = margin + dialogEstimatedHeight;
+            if (dialogTop < minTop && targetRect.bottom > minTop) {
+                dialogTop = minTop; // Pin to top of viewport, floating over the element
+            }
+
             popoverStyle = {
-                top: targetRect.top - margin,
+                top: dialogTop,
                 left: targetRect.left + (targetRect.width / 2),
                 transform: 'translate(-50%, -100%)'
             };
