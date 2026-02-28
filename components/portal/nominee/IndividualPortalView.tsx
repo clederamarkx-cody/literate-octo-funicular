@@ -53,6 +53,13 @@ const IndividualPortalView: React.FC<IndividualPortalViewProps> = ({
                                     <p className="text-gray-500 flex items-center gap-2 mt-2 font-medium"><MapPin size={14} className="text-gkk-gold" /> {nomineeData?.details?.region || nomineeData?.region}</p>
                                 </div>
                             </div>
+
+                            {!!nomineeData?.round3Unlocked && failedDocs.length > 0 && (
+                                <div className="animate-in slide-in-from-top-4 duration-500">
+                                    <FailedDocumentsAlert failedDocs={failedDocs} />
+                                </div>
+                            )}
+
                             <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
                                 <div className="space-y-2"><span className="text-[10px] font-bold text-gray-400 uppercase block">Profession</span><div className="flex items-center gap-2 text-sm font-bold text-gkk-navy"><Briefcase size={16} className="text-gkk-gold" /> {nomineeData?.details?.occupation || nomineeData?.industrySector || 'Professional'}</div></div>
                                 <div className="space-y-2"><span className="text-[10px] font-bold text-gray-400 uppercase block">Achievements</span><div className="flex items-center gap-2 text-sm font-bold text-gkk-navy"><Award size={16} className="text-gkk-gold" /> GKK Individual Nominee</div></div>
@@ -73,11 +80,6 @@ const IndividualPortalView: React.FC<IndividualPortalViewProps> = ({
             </div>
 
             <div id="documents-section" className="space-y-8 pb-20">
-                {!!nomineeData?.round3Unlocked && failedDocs.length > 0 && (
-                    <div className="animate-in slide-in-from-top-4 duration-500">
-                        <FailedDocumentsAlert failedDocs={failedDocs} />
-                    </div>
-                )}
                 {/* Stage 1 */}
                 <div className="bg-white rounded-3xl border border-gray-200 p-8 shadow-sm">
                     <div className="flex flex-col md:flex-row justify-between items-start mb-6 gap-4">
