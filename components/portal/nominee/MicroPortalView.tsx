@@ -60,7 +60,9 @@ const MicroPortalView: React.FC<MicroPortalViewProps> = ({
                                 <div className="space-y-2"><span className="text-[10px] font-bold text-gray-400 uppercase block">Safety Contact</span><div className="flex items-center gap-2 text-sm font-bold text-gkk-navy"><HardHat size={16} className="text-gkk-gold" /> {nomineeData?.details?.focalName || nomineeData?.details?.safetyOfficer || 'Owner/Proprietor'}</div></div>
                             </div>
 
-                            <FailedDocumentsAlert failedDocs={failedDocs} />
+                            {(nomineeData?.round2Unlocked || nomineeData?.round3Unlocked) && (
+                                <FailedDocumentsAlert failedDocs={failedDocs} />
+                            )}
                         </div>
                         <StageProgress
                             stage1Progress={stage1Progress}
@@ -103,16 +105,18 @@ const MicroPortalView: React.FC<MicroPortalViewProps> = ({
                             </div>
                         </div>
                     </div>
-                    <div className="p-8 bg-white">
-                        <div className="mb-6 p-4 bg-blue-50/50 rounded-2xl border border-blue-100 flex items-start gap-4">
-                            <div className="p-2 bg-blue-100 text-blue-600 rounded-xl"><ShieldAlert size={18} /></div>
-                            <div>
-                                <h5 className="text-[11px] font-black text-blue-600 uppercase tracking-widest mb-1">Evaluation Bank Logic</h5>
-                                <p className="text-xs text-blue-800 font-medium leading-relaxed">This section displays documents from Stage 1 that require attention. Use this for reference; corrections must be uploaded in <span className="font-bold">Stage 3</span> once triggered.</p>
+                    {nomineeData?.round2Unlocked && (
+                        <div className="p-8 bg-white">
+                            <div className="mb-6 p-4 bg-blue-50/50 rounded-2xl border border-blue-100 flex items-start gap-4">
+                                <div className="p-2 bg-blue-100 text-blue-600 rounded-xl"><ShieldAlert size={18} /></div>
+                                <div>
+                                    <h5 className="text-[11px] font-black text-blue-600 uppercase tracking-widest mb-1">Evaluation Bank Logic</h5>
+                                    <p className="text-xs text-blue-800 font-medium leading-relaxed">This section displays documents from Stage 1 that require attention. Use this for reference; corrections must be uploaded in <span className="font-bold">Stage 3</span> once triggered.</p>
+                                </div>
                             </div>
+                            <DocumentGrid round={2} documents={documents} nomineeData={nomineeData} handleOpenUpload={handleOpenUpload} handlePreview={handlePreview} />
                         </div>
-                        <DocumentGrid round={2} documents={documents} nomineeData={nomineeData} handleOpenUpload={handleOpenUpload} handlePreview={handlePreview} />
-                    </div>
+                    )}
                 </div>
 
                 {/* Stage 3 */}
@@ -129,12 +133,14 @@ const MicroPortalView: React.FC<MicroPortalViewProps> = ({
                             </div>
                         </div>
                     </div>
-                    <div className="p-8 bg-white">
-                        <div className="flex justify-end mb-6">
-                            <button onClick={() => handleStageSubmit(3)} disabled={stage3Progress === 0} className="px-8 py-3 bg-gradient-to-r from-gkk-gold to-yellow-500 text-gkk-navy font-bold rounded-2xl shadow-xl hover:-translate-y-1 transition-all disabled:opacity-30 text-xs uppercase tracking-widest flex items-center gap-2"><Send size={16} /> Submit Deficiencies</button>
+                    {nomineeData?.round3Unlocked && (
+                        <div className="p-8 bg-white">
+                            <div className="flex justify-end mb-6">
+                                <button onClick={() => handleStageSubmit(3)} disabled={stage3Progress === 0} className="px-8 py-3 bg-gradient-to-r from-gkk-gold to-yellow-500 text-gkk-navy font-bold rounded-2xl shadow-xl hover:-translate-y-1 transition-all disabled:opacity-30 text-xs uppercase tracking-widest flex items-center gap-2"><Send size={16} /> Submit Deficiencies</button>
+                            </div>
+                            <DocumentGrid round={3} documents={documents} nomineeData={nomineeData} handleOpenUpload={handleOpenUpload} handlePreview={handlePreview} />
                         </div>
-                        <DocumentGrid round={3} documents={documents} nomineeData={nomineeData} handleOpenUpload={handleOpenUpload} handlePreview={handlePreview} />
-                    </div>
+                    )}
                 </div>
             </div>
         </div>
