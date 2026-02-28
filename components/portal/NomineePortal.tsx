@@ -174,15 +174,21 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
       placement: "bottom"
     },
     {
-      targetId: "documents-section",
-      title: "Stage 1 Submission",
+      targetId: "round-1-lock",
+      title: "Stage 1 (Submission)",
       content: "Upload your mandatory Compliance and Legal reports here. Once Stage 2 is triggered, these will be locked and sent to the Regional Board.",
       placement: "top"
     },
     {
       targetId: "round-2-lock",
-      title: "Stage 2 Submission",
-      content: "This section automatically unlocks once the Technical Board fully approves your Stage 1 documents.",
+      title: "Stage 2 (Document Evaluation)",
+      content: "Monitor the evaluation findings from the Regional Board here. Once completed, any deficiencies can be resolved in Stage 3.",
+      placement: "top"
+    },
+    {
+      targetId: "round-3-lock",
+      title: "Stage 3 (Submission of Deficiencies)",
+      content: "This is your final correction window. Upload any required revisions or missing documents here to complete your nomination.",
       placement: "top"
     }
   ];

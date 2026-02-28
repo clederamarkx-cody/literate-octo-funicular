@@ -89,7 +89,7 @@ const PrivateSectorPortalView: React.FC<PrivateSectorPortalViewProps> = ({
 
             <div id="documents-section" className="space-y-8 pb-20">
                 {/* Stage 1 */}
-                <div className="bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm transition-all duration-500">
+                <div id="round-1-lock" className="bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm transition-all duration-500">
                     <div
                         className="p-8 flex flex-col md:flex-row justify-between items-start gap-4 cursor-pointer header-glass-hover"
                         onClick={() => setStage1Open(!stage1Open)}
@@ -122,7 +122,7 @@ const PrivateSectorPortalView: React.FC<PrivateSectorPortalViewProps> = ({
                 </div>
 
                 {/* Stage 2 */}
-                <div className={`rounded-3xl border transition-all duration-500 overflow-hidden ${nomineeData?.round2Unlocked ? 'bg-white border-gray-200 shadow-xl' : 'bg-gray-50 border-gray-100 opacity-60'}`}>
+                <div id="round-2-lock" className={`rounded-3xl border transition-all duration-500 overflow-hidden ${nomineeData?.round2Unlocked ? 'bg-white border-gray-200 shadow-xl' : 'bg-gray-50 border-gray-100 opacity-60'}`}>
                     <div
                         className={`w-full p-8 flex items-center justify-between border-b border-gray-100 ${nomineeData?.round2Unlocked ? 'cursor-pointer header-glass-hover' : ''}`}
                         onClick={() => nomineeData?.round2Unlocked && setStage2Open(!stage2Open)}
@@ -161,7 +161,7 @@ const PrivateSectorPortalView: React.FC<PrivateSectorPortalViewProps> = ({
                 </div>
 
                 {/* Stage 3 */}
-                <div className={`rounded-3xl border transition-all duration-300 overflow-hidden ${nomineeData?.round3Unlocked ? 'bg-white border-gray-200 shadow-xl' : 'bg-gray-50 border-gray-100 opacity-60'}`}>
+                <div id="round-3-lock" className={`rounded-3xl border transition-all duration-300 overflow-hidden ${nomineeData?.round3Unlocked ? 'bg-white border-gray-200 shadow-xl' : 'bg-gray-50 border-gray-100 opacity-60'}`}>
                     <div className={`w-full p-8 flex items-center justify-between border-b border-gray-100`}>
                         <div className="flex items-center space-x-6">
                             <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all ${nomineeData?.round3Unlocked ? 'bg-gkk-gold text-gkk-navy shadow-lg' : 'bg-gray-200 text-gray-400'}`}>{nomineeData?.round3Unlocked ? <Unlock size={24} /> : <Lock size={24} />}</div>
