@@ -60,9 +60,6 @@ const MicroPortalView: React.FC<MicroPortalViewProps> = ({
                                 <div className="space-y-2"><span className="text-[10px] font-bold text-gray-400 uppercase block">Safety Contact</span><div className="flex items-center gap-2 text-sm font-bold text-gkk-navy"><HardHat size={16} className="text-gkk-gold" /> {nomineeData?.details?.focalName || nomineeData?.details?.safetyOfficer || 'Owner/Proprietor'}</div></div>
                             </div>
 
-                            {!!nomineeData?.round3Unlocked && (
-                                <FailedDocumentsAlert failedDocs={failedDocs} />
-                            )}
                         </div>
                         <StageProgress
                             stage1Progress={stage1Progress}
@@ -139,6 +136,9 @@ const MicroPortalView: React.FC<MicroPortalViewProps> = ({
                         <div className="p-8 bg-white">
                             <div className="flex justify-end mb-6">
                                 <button onClick={() => handleStageSubmit(3)} disabled={stage3Progress === 0} className="px-8 py-3 bg-gradient-to-r from-gkk-gold to-yellow-500 text-gkk-navy font-bold rounded-2xl shadow-xl hover:-translate-y-1 transition-all disabled:opacity-30 text-xs uppercase tracking-widest flex items-center gap-2"><Send size={16} /> Submit Deficiencies</button>
+                            </div>
+                            <div className="mb-8">
+                                <FailedDocumentsAlert failedDocs={failedDocs} />
                             </div>
                             <DocumentGrid round={3} documents={documents} nomineeData={nomineeData} handleOpenUpload={handleOpenUpload} handlePreview={handlePreview} />
                         </div>
