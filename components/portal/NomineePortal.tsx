@@ -208,6 +208,16 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
   // Toast State
   const [toast, setToast] = useState<{ message: string, type: ToastType } | null>(null);
 
+  // Stage Folding State
+  const [stage1Open, setStage1Open] = useState(true);
+
+  useEffect(() => {
+    // Stage 1 is folded by default if Stage 2 or 3 is unlocked
+    if (nomineeData?.round2Unlocked || nomineeData?.round3Unlocked) {
+      setStage1Open(false);
+    }
+  }, [nomineeData?.id, nomineeData?.round2Unlocked, nomineeData?.round3Unlocked]);
+
   // Close dropdown on click outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -560,7 +570,9 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
                     handleStageSubmit,
                     handleOpenUpload,
                     handlePreview,
-                    failedDocs // Pass failedDocs here
+                    failedDocs, // Pass failedDocs here
+                    stage1Open,
+                    setStage1Open
                   };
 
                   switch (category) {

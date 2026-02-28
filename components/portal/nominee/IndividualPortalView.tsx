@@ -19,6 +19,8 @@ interface IndividualPortalViewProps {
     round3Open: boolean;
     setRound3Open: (open: boolean) => void;
     failedDocs: any[];
+    stage1Open: boolean;
+    setStage1Open: (open: boolean) => void;
 }
 
 const IndividualPortalView: React.FC<IndividualPortalViewProps> = ({
@@ -34,7 +36,9 @@ const IndividualPortalView: React.FC<IndividualPortalViewProps> = ({
     setRound2Open,
     round3Open,
     setRound3Open,
-    failedDocs
+    failedDocs,
+    stage1Open,
+    setStage1Open
 }) => {
     return (
         <div className="animate-in fade-in duration-500 space-y-8">
@@ -81,15 +85,24 @@ const IndividualPortalView: React.FC<IndividualPortalViewProps> = ({
 
             <div id="documents-section" className="space-y-8 pb-20">
                 {/* Stage 1 */}
-                <div className="bg-white rounded-3xl border border-gray-200 p-8 shadow-sm">
-                    <div className="flex flex-col md:flex-row justify-between items-start mb-6 gap-4">
-                        <div>
-                            <h3 className="text-2xl font-serif font-bold text-gkk-navy uppercase tracking-widest">Individual Requirements - Stage 1 (Submission)</h3>
+                <div className="bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm">
+                    <div
+                        className="p-8 flex flex-col md:flex-row justify-between items-start gap-4 cursor-pointer hover:bg-gray-50/50 transition-colors"
+                        onClick={() => setStage1Open(!stage1Open)}
+                    >
+                        <div className="flex-1">
+                            <div className="flex items-center gap-4">
+                                <h3 className="text-2xl font-serif font-bold text-gkk-navy uppercase tracking-widest">Individual Requirements - Stage 1 (Submission)</h3>
+                                {stage1Open ? <ChevronUp size={24} className="text-gray-400" /> : <ChevronDown size={24} className="text-gray-400" />}
+                            </div>
                             <p className="text-sm border-l-4 border-gkk-gold pl-3 py-1 font-bold italic text-gkk-navy/80 bg-gold-50/50 mt-4">Personal credentials, OSH contributions, and safety leadership evidence.</p>
                         </div>
                         {nomineeData?.status !== 'completed' && (
                             <button
-                                onClick={() => handleStageSubmit(1)}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleStageSubmit(1);
+                                }}
                                 disabled={stage1Progress === 0 || !!nomineeData?.round2Unlocked}
                                 className="px-8 py-3 bg-gkk-navy text-white font-bold rounded-2xl shadow-xl hover:shadow-gkk-navy/40 hover:-translate-y-1 transition-all disabled:opacity-30 flex items-center gap-2 text-xs uppercase tracking-widest truncate"
                             >
@@ -97,7 +110,11 @@ const IndividualPortalView: React.FC<IndividualPortalViewProps> = ({
                             </button>
                         )}
                     </div>
-                    <DocumentGrid round={1} documents={documents} nomineeData={nomineeData} handleOpenUpload={handleOpenUpload} handlePreview={handlePreview} />
+                    {stage1Open && (
+                        <div className="px-8 pb-8 animate-in slide-in-from-top-2 duration-300">
+                            <DocumentGrid round={1} documents={documents} nomineeData={nomineeData} handleOpenUpload={handleOpenUpload} handlePreview={handlePreview} />
+                        </div>
+                    )}
                 </div>
 
                 {/* Stage 2 */}
