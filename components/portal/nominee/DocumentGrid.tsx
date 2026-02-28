@@ -73,7 +73,7 @@ const DocumentGrid: React.FC<DocumentGridProps> = ({
                     (nomineeData?.status === 'completed') ||
                     (round === 1 && nomineeData?.round2Unlocked) ||
                     (round === 2) ||
-                    (round === 3 && !nomineeData?.round3Unlocked);
+                    (round === 3 && (!nomineeData?.round3Unlocked || (doc.status === 'uploaded' && doc.verdict !== 'fail')));
 
                 // Hide verdicts and remarks in Stage 1
                 const showVerdicts = round !== 1;
