@@ -70,6 +70,7 @@ const DocumentGrid: React.FC<DocumentGridProps> = ({
                 // Stage 2 is ALWAYS read-only/locked
                 // Stage 3 is locked if Stage 3 hasn't been triggered
                 const isLockedInThisRound =
+                    (nomineeData?.status === 'completed') ||
                     (round === 1 && nomineeData?.round2Unlocked) ||
                     (round === 2) ||
                     (round === 3 && !nomineeData?.round3Unlocked);
@@ -116,7 +117,7 @@ const DocumentGrid: React.FC<DocumentGridProps> = ({
                         <div className="flex gap-2 pt-3 border-t border-gray-100">
                             {isLockedInThisRound ? (
                                 <div className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-gray-50 text-gray-400 rounded-xl text-[10px] font-bold border border-gray-200">
-                                    <Lock size={12} /> <span>{round === 2 ? 'BANKED (READ-ONLY)' : 'LOCKED'}</span>
+                                    <Lock size={12} /> <span>{nomineeData?.status === 'completed' ? 'FINALIZED (READ-ONLY)' : round === 2 ? 'BANKED (READ-ONLY)' : 'LOCKED'}</span>
                                 </div>
                             ) : (
                                 <button

@@ -79,7 +79,13 @@ const IndividualPortalView: React.FC<IndividualPortalViewProps> = ({
                             <h3 className="text-2xl font-serif font-bold text-gkk-navy uppercase tracking-widest">Individual Requirements - Stage 1 (Submission)</h3>
                             <p className="text-sm border-l-4 border-gkk-gold pl-3 py-1 font-bold italic text-gkk-navy/80 bg-gold-50/50 mt-4">Personal credentials, OSH contributions, and safety leadership evidence.</p>
                         </div>
-                        <button onClick={() => handleStageSubmit(1)} disabled={stage1Progress === 0 || !!nomineeData?.round2Unlocked} className="px-8 py-3 bg-gkk-navy text-white font-bold rounded-2xl shadow-xl hover:shadow-gkk-navy/40 hover:-translate-y-1 transition-all disabled:opacity-30 flex items-center gap-2 text-xs uppercase tracking-widest truncate">Submit Stage 1</button>
+                        <button
+                            onClick={() => handleStageSubmit(1)}
+                            disabled={stage1Progress === 0 || !!nomineeData?.round2Unlocked || nomineeData?.status === 'completed'}
+                            className="px-8 py-3 bg-gkk-navy text-white font-bold rounded-2xl shadow-xl hover:shadow-gkk-navy/40 hover:-translate-y-1 transition-all disabled:opacity-30 flex items-center gap-2 text-xs uppercase tracking-widest truncate"
+                        >
+                            {nomineeData?.status === 'completed' ? 'Application Finalized' : 'Submit Stage 1'}
+                        </button>
                     </div>
                     <DocumentGrid round={1} documents={documents} nomineeData={nomineeData} handleOpenUpload={handleOpenUpload} handlePreview={handlePreview} />
                 </div>
@@ -135,7 +141,13 @@ const IndividualPortalView: React.FC<IndividualPortalViewProps> = ({
                     {!!nomineeData?.round3Unlocked && (
                         <div className="p-8 bg-white">
                             <div className="flex justify-end mb-6">
-                                <button onClick={() => handleStageSubmit(3)} disabled={stage3Progress === 0} className="px-8 py-3 bg-gradient-to-r from-gkk-gold to-yellow-500 text-gkk-navy font-bold rounded-2xl shadow-xl hover:-translate-y-1 transition-all disabled:opacity-30 text-xs uppercase tracking-widest flex items-center gap-2"><Send size={16} /> Submit Deficiencies</button>
+                                <button
+                                    onClick={() => handleStageSubmit(3)}
+                                    disabled={stage3Progress === 0 || nomineeData?.status === 'completed'}
+                                    className="px-8 py-3 bg-gradient-to-r from-gkk-gold to-yellow-500 text-gkk-navy font-bold rounded-2xl shadow-xl hover:-translate-y-1 transition-all disabled:opacity-30 text-xs uppercase tracking-widest flex items-center gap-2"
+                                >
+                                    <Send size={16} /> {nomineeData?.status === 'completed' ? 'Application Finalized' : 'Submit Deficiencies'}
+                                </button>
                             </div>
                             <div className="mb-8">
                                 <FailedDocumentsAlert failedDocs={failedDocs} />
