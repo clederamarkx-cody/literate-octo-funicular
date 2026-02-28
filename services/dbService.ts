@@ -238,7 +238,8 @@ export const getNominee = async (uid: string): Promise<Nominee | null> => {
             date: d.date,
             slotId: d.slot_id,
             remarks: d.remarks,
-            verdict: d.verdict?.toLowerCase()
+            verdict: d.verdict?.toLowerCase(),
+            isCorrection: d.is_correction
         })) || []
     } as unknown as Nominee;
 };
@@ -328,7 +329,8 @@ export const addNomineeDocument = async (uid: string, document: NomineeDocument)
         url: document.url,
         date: document.date || new Date().toISOString(),
         remarks: document.remarks,
-        verdict: document.verdict
+        verdict: document.verdict,
+        is_correction: document.isCorrection
     }, { onConflict: 'application_id,slot_id' }); // Requires a unique constraint in Supabase for this to work as upsert
 
     if (error) console.error("Add nominee document failed:", error);
@@ -423,7 +425,8 @@ export const getAllNominees = async (): Promise<Nominee[]> => {
             date: d.date,
             slotId: d.slot_id,
             remarks: d.remarks,
-            verdict: d.verdict?.toLowerCase()
+            verdict: d.verdict?.toLowerCase(),
+            isCorrection: d.is_correction
         })) || []
     })) as unknown as Nominee[];
 };

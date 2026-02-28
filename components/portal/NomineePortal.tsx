@@ -352,7 +352,7 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
       const stage3Uploaded = stage3ReqDocs.filter(d => d.status === 'uploaded').length;
 
       const deficiencies = documents.filter(d => d.round < 3 && d.verdict === 'fail');
-      const correctedDeficiencies = deficiencies.filter(d => d.status === 'uploaded' && (d as any).isCorrected).length;
+      const correctedDeficiencies = deficiencies.filter(d => d.status === 'uploaded' && d.isCorrection).length;
 
       const totalItems = stage3ReqDocs.length + deficiencies.length;
       if (totalItems === 0) return 100; // If no deficiencies and no stage 3 reqs, it's 100%
@@ -485,7 +485,8 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
         date: today,
         slotId: selectedDocId || undefined,
         remarks: isCorrection ? undefined : uploadRemarks, // Clear remarks on correction
-        verdict: isCorrection ? undefined : currentDoc?.verdict // Clear failure on correction
+        verdict: isCorrection ? undefined : currentDoc?.verdict, // Clear failure on correction
+        isCorrection: isCorrection // Persist correction flag
       };
 
       setDocuments(prev => prev.map(doc => doc.id === selectedDocId ? {
@@ -497,7 +498,7 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
         type: selectedFile.type,
         remarks: isCorrection ? undefined : uploadRemarks,
         verdict: isCorrection ? undefined : doc.verdict,
-        isCorrected: isCorrection // Flag for Stage 3 progress logic
+        isCorrection: isCorrection // Flag for Stage 3 progress logic and persistent view
       } as any : doc));
 
       await addNomineeDocument(nomineeData.id, updatedDoc);

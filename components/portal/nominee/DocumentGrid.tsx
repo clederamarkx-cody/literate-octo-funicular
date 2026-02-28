@@ -45,8 +45,8 @@ const DocumentGrid: React.FC<DocumentGridProps> = ({
             return doc.round === 1;
         }
         if (round === 3) {
-            // Stage 3 is for Stage 3 requirements + any previous failures
-            return doc.round === 3 || (doc.round < 3 && doc.verdict === 'fail');
+            // Stage 3 is for Stage 3 requirements + any previous failures (even if already corrected)
+            return doc.round === 3 || (doc.round < 3 && (doc.verdict === 'fail' || (doc as any).isCorrection));
         }
         return false;
     });

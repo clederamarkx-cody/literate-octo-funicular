@@ -28,6 +28,7 @@ export interface NomineeDocument {
   slotId?: string;
   remarks?: string;
   verdict?: 'pass' | 'fail'; // Added for persistent evaluation feedback
+  isCorrection?: boolean; // Flag to indicate a deficiency has been corrected
 }
 
 // 1. Users (Consolidated Staff & Nominees)
