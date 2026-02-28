@@ -527,44 +527,11 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
           <div className="max-w-7xl mx-auto space-y-8 pb-20">
             {activeTab === 'dashboard' ? (
               <div className="animate-in fade-in duration-500 space-y-8">
-                {/* Aggregated Action Required — Failed Documents Alert */}
                 {(() => {
                   const failedDocs = documents.filter(d => {
                     const persisted = nomineeData?.documents?.find((nd: any) => nd.slotId === d.id);
                     return persisted?.verdict === 'fail';
                   });
-                  if (failedDocs.length === 0) return null;
-                  return (
-                    <div className="bg-red-50 border-2 border-red-100 rounded-3xl p-6 shadow-lg animate-pulse hover:animate-none transition-all">
-                      <div className="flex items-start gap-4">
-                        <div className="p-3 bg-red-500 text-white rounded-2xl shadow-lg">
-                          <ShieldAlert size={28} />
-                        </div>
-                        <div className="flex-1">
-                          <h3 className="text-xl font-black text-red-500 uppercase tracking-tighter italic">Action Required: Your attention is needed</h3>
-                          <p className="text-sm font-bold text-red-800 mt-1 leading-relaxed">
-                            Evaluators have flagged <span className="underline decoration-2">{failedDocs.length} document{failedDocs.length > 1 ? 's' : ''}</span> as <span className="font-black">INCOMPLETE</span>. You must upload replacements for the required items before your application can proceed further.
-                          </p>
-                          <div className="mt-4 flex flex-wrap gap-2">
-                            {failedDocs.slice(0, 3).map(doc => (
-                              <div key={doc.id} className="bg-white/80 backdrop-blur px-3 py-1.5 rounded-xl border border-red-100 text-[10px] font-black text-red-500 flex items-center gap-2">
-                                <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping"></span>
-                                {doc.label}
-                              </div>
-                            ))}
-                            {failedDocs.length > 3 && (
-                              <div className="bg-white/80 backdrop-blur px-3 py-1.5 rounded-xl border border-red-100 text-[10px] font-black text-red-500">
-                                + {failedDocs.length - 3} more
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })()}
-
-                {(() => {
                   const category = nomineeData?.details?.nomineeCategory || 'Private Sector';
                   const props = {
                     nomineeData,
@@ -574,7 +541,8 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
                     stage3Progress,
                     handleStageSubmit,
                     handleOpenUpload,
-                    handlePreview
+                    handlePreview,
+                    failedDocs // Pass failedDocs here
                   };
 
                   switch (category) {

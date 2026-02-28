@@ -3,6 +3,7 @@ import { User, MapPin, Briefcase, Award, Hash, HardHat, Unlock, Lock, ChevronUp,
 import { Nominee, NomineeDocument } from '../../../types';
 import StageProgress from './StageProgress';
 import DocumentGrid from './DocumentGrid';
+import FailedDocumentsAlert from './FailedDocumentsAlert';
 
 interface IndividualPortalViewProps {
     nomineeData: Nominee | null;
@@ -17,6 +18,7 @@ interface IndividualPortalViewProps {
     setRound2Open: (open: boolean) => void;
     round3Open: boolean;
     setRound3Open: (open: boolean) => void;
+    failedDocs: any[];
 }
 
 const IndividualPortalView: React.FC<IndividualPortalViewProps> = ({
@@ -31,7 +33,8 @@ const IndividualPortalView: React.FC<IndividualPortalViewProps> = ({
     round2Open,
     setRound2Open,
     round3Open,
-    setRound3Open
+    setRound3Open,
+    failedDocs
 }) => {
     return (
         <div className="animate-in fade-in duration-500 space-y-8">
@@ -56,6 +59,8 @@ const IndividualPortalView: React.FC<IndividualPortalViewProps> = ({
                                 <div className="space-y-2"><span className="text-[10px] font-bold text-gray-400 uppercase block">Nominee ID</span><div className="flex items-center gap-2 text-sm font-bold text-gkk-navy font-mono"><Hash size={16} className="text-gkk-gold" /> {nomineeData?.regId}</div></div>
                                 <div className="space-y-2"><span className="text-[10px] font-bold text-gray-400 uppercase block">Specialization</span><div className="flex items-center gap-2 text-sm font-bold text-gkk-navy"><HardHat size={16} className="text-gkk-gold" /> {nomineeData?.details?.industry || 'OSH Practitioner'}</div></div>
                             </div>
+
+                            <FailedDocumentsAlert failedDocs={failedDocs} />
                         </div>
                         <StageProgress
                             stage1Progress={stage1Progress}
