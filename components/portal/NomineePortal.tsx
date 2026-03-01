@@ -597,6 +597,37 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
 
 
 
+  const hasActionRequired = useMemo(() => documents.some(d => {
+    const persisted = nomineeData?.documents?.find((nd: any) => nd.slotId === d.id);
+    return persisted?.verdict === 'fail';
+  }), [documents, nomineeData?.documents]);
+
+  const failedDocs = useMemo(() => documents.filter(d => {
+    const persisted = nomineeData?.documents?.find((nd: any) => nd.slotId === d.id);
+    return persisted?.verdict === 'fail';
+  }), [documents, nomineeData?.documents]);
+
+  const portalProps = useMemo(() => ({
+    nomineeData: (nomineeData?.status === 'under_review' || nomineeData?.status === 'completed') ? { ...nomineeData, status: 'completed' } as any : nomineeData,
+    documents,
+    stage1Progress,
+    stage2Progress,
+    stage3Progress,
+    handleStageSubmit,
+    handleOpenUpload,
+    handlePreview,
+    failedDocs,
+    stage1Open,
+    setStage1Open,
+    stage2Open,
+    setStage2Open
+  }), [
+    nomineeData, documents, stage1Progress, stage2Progress, stage3Progress,
+    failedDocs, stage1Open, stage2Open
+  ]);
+
+  const isSplashStatus = nomineeData?.status === 'under_review' || nomineeData?.status === 'completed';
+
   return (
     <div className="flex h-screen bg-gray-50 font-sans overflow-hidden page-transition">
       <NomineeSidebar activeTab={activeTab} setActiveTab={setActiveTab} onUnderDev={onUnderDev} />
@@ -615,14 +646,15 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
           <div className="max-w-7xl mx-auto space-y-8 pb-20">
             {activeTab === 'dashboard' ? (
               <div className="animate-in fade-in duration-500 space-y-8">
-                {nomineeData?.status === 'under_review' && showSplash ? (
+                {isSplashStatus && showSplash ? (
                   <SubmissionSuccessView
                     onViewRecords={() => setShowSplash(false)}
                     companyName={nomineeData?.name || nomineeData?.organizationName}
+                    status={nomineeData?.status as any}
                   />
                 ) : (
                   <>
-                    {nomineeData?.status === 'under_review' && (
+                    {isSplashStatus && (
                       <button
                         onClick={() => setShowSplash(true)}
                         className="mb-4 flex items-center gap-2 text-xs font-bold text-gkk-gold hover:text-gkk-navy transition-all uppercase tracking-widest bg-white px-4 py-2 rounded-xl border border-gray-100 shadow-sm"
@@ -631,44 +663,20 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
                       </button>
                     )}
                     {(() => {
-                      const failedDocs = useMemo(() => documents.filter(d => {
-                        const persisted = nomineeData?.documents?.find((nd: any) => nd.slotId === d.id);
-                        return persisted?.verdict === 'fail';
-                      }), [documents, nomineeData?.documents]);
-
                       const category = nomineeData?.details?.nomineeCategory || 'Private Sector';
-
-                      const props = useMemo(() => ({
-                        nomineeData: nomineeData?.status === 'under_review' ? { ...nomineeData, status: 'completed' } as any : nomineeData, // Force read-only feel if under_review
-                        documents,
-                        stage1Progress,
-                        stage2Progress,
-                        stage3Progress,
-                        handleStageSubmit,
-                        handleOpenUpload,
-                        handlePreview,
-                        failedDocs,
-                        stage1Open,
-                        setStage1Open,
-                        stage2Open,
-                        setStage2Open
-                      }), [
-                        nomineeData, documents, stage1Progress, stage2Progress, stage3Progress,
-                        failedDocs, stage1Open, stage2Open
-                      ]);
 
                       switch (category) {
                         case 'Government':
                         case 'Government Agency':
-                          return <GovernmentPortalView {...props} />;
+                          return <GovernmentPortalView {...portalProps} />;
                         case 'Micro Enterprise':
-                          return <MicroPortalView {...props} />;
+                          return <MicroPortalView {...portalProps} />;
                         case 'Individual':
-                          return <IndividualPortalView {...props} />;
+                          return <IndividualPortalView {...portalProps} />;
                         case 'Industry':
                         case 'Private Sector':
                         default:
-                          return <PrivateSectorPortalView {...props} />;
+                          return <PrivateSectorPortalView {...portalProps} />;
                       }
                     })()}
                   </>
