@@ -140,11 +140,15 @@ function App() {
 
   const handleToggleRound3 = useCallback(async (nomineeId: string, unlocked: boolean) => {
     try {
-      await updateNominee(nomineeId, { round3Unlocked: unlocked, stage3TriggeredByScd: unlocked });
+      const updates: any = { round3Unlocked: unlocked, stage3TriggeredByScd: unlocked };
+      if (unlocked) {
+        updates.status = 'in_progress';
+      }
+      await updateNominee(nomineeId, updates);
+      setNominees(prev => prev.map(app => app.id === nomineeId ? { ...app, ...updates } : app));
     } catch (err) {
       console.error("Failed to toggle round 3 details to local database", err);
     }
-    setNominees(prev => prev.map(app => app.id === nomineeId ? { ...app, round3Unlocked: unlocked, stage3TriggeredByScd: unlocked } : app));
   }, []);
 
   const isPortalView = useMemo(() => view === 'nominee-portal' || view === 'evaluator-portal', [view]);

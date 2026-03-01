@@ -608,7 +608,7 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
   }), [documents, nomineeData?.documents]);
 
   const portalProps = useMemo(() => ({
-    nomineeData: (nomineeData?.status === 'under_review' || nomineeData?.status === 'completed') ? { ...nomineeData, status: 'completed' } as any : nomineeData,
+    nomineeData,
     documents,
     stage1Progress,
     stage2Progress,
@@ -626,7 +626,7 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
     failedDocs, stage1Open, stage2Open
   ]);
 
-  const isSplashStatus = nomineeData?.status === 'under_review' || nomineeData?.status === 'completed';
+  const isSplashStatus = nomineeData?.status === 'completed';
 
   return (
     <div className="flex h-screen bg-gray-50 font-sans overflow-hidden page-transition">
