@@ -392,6 +392,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                   <div className="flex gap-1.5">
                     {docStatus === 'pass' && <span className="text-[9px] font-black text-green-600 bg-green-100 px-2 py-0.5 rounded-md">PASSED</span>}
                     {docStatus === 'fail' && <span className="text-[9px] font-black text-red-600 bg-red-100 px-2 py-0.5 rounded-md">INCOMPLETE</span>}
+                    {doc?.isCorrection && <span className="text-[9px] font-black text-amber-600 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-100 animate-pulse">CORRECTION</span>}
                     {doc ? <span className="text-[9px] font-black text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md">SUBMITTED</span> : <span className="text-[9px] font-black text-gray-400 bg-gray-100 px-2 py-0.5 rounded-md">EMPTY</span>}
                   </div>
                 </div>
