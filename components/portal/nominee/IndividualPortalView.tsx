@@ -101,7 +101,10 @@ const IndividualPortalView: React.FC<IndividualPortalViewProps> = ({
                                     <ChevronDown size={24} className="text-gray-400" />
                                 </div>
                             </div>
-                            <p className="text-sm border-l-4 border-gkk-gold pl-3 py-1 font-bold italic text-gkk-navy/80 bg-gold-50/50 mt-4">Personal credentials, OSH contributions, and safety leadership evidence.</p>
+                            <div className="text-sm border-l-4 border-gkk-gold pl-3 py-1 font-bold italic text-gkk-navy/80 bg-gold-50/50 mt-4 space-y-1">
+                                <p>- Each specific requirement must be uploaded as a single PDF file.</p>
+                                <p>- This stage focuses on completeness of the submissions.</p>
+                            </div>
                         </div>
                         {nomineeData?.status !== 'completed' && (
                             <button
@@ -139,11 +142,11 @@ const IndividualPortalView: React.FC<IndividualPortalViewProps> = ({
                                         </div>
                                     )}
                                 </div>
-                                <p className="text-xs text-gray-500 mt-2 font-bold uppercase tracking-widest leading-relaxed">
+                                <div className="text-xs text-gray-500 mt-2 font-bold uppercase tracking-widest leading-relaxed">
                                     {nomineeData?.round2Unlocked
-                                        ? 'Review Area: Current Evaluation Findings from the Regional Board'
+                                        ? '- This stage focuses on the correctness and consistency of data and validity.'
                                         : 'Locked - Monitoring current submission status'}
-                                </p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -170,7 +173,9 @@ const IndividualPortalView: React.FC<IndividualPortalViewProps> = ({
                                     <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${nomineeData?.round3Unlocked ? 'bg-gkk-navy text-white' : 'bg-gray-300 text-white'}`}>3</div>
                                     <h4 className="font-bold text-gkk-navy text-xl leading-none">Stage 3 (Submission of Deficiencies)</h4>
                                 </div>
-                                <p className="text-xs text-gray-500 mt-2 font-bold uppercase tracking-widest">{nomineeData?.round3Unlocked ? 'Correction Window: Resolve flagged incomplete items' : 'Locked'}</p>
+                                <div className="text-xs text-gray-500 mt-2 font-bold uppercase tracking-widest">
+                                    {nomineeData?.round3Unlocked ? '- Only upload requirements that are for re-submission.' : 'Locked'}
+                                </div>
                             </div>
                         </div>
                     </div>
