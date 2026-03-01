@@ -18,14 +18,14 @@ const StageProgress: React.FC<StageProgressProps> = ({ stage1Progress, stage2Pro
 
     const renderProgressBar = (round: number) => {
         const progress = getProgress(round);
-        const label = round === 1 ? 'Submission' : round === 2 ? 'Document Evaluation' : 'Submission of Deficiencies';
+        const label = round === 1 ? 'SUBMISSION' : round === 2 ? 'DOCUMENT EVALUATION' : 'SUBMISSION OF DEFICIENCIES';
         const colorClass = round === 1 ? 'bg-gkk-gold' : round === 2 ? 'bg-blue-600' : 'bg-gkk-navy';
         const locked = round === 2 ? !nomineeData?.round2Unlocked : round === 3 ? !nomineeData?.round3Unlocked : false;
 
         return (
             <div className={`w-full ${locked ? 'opacity-40' : ''}`}>
                 <div className="flex justify-between items-center mb-1.5">
-                    <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Stage {round}: {label}</span>
+                    <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">STAGE {round} ({label})</span>
                     <span className="text-[9px] font-bold text-gkk-navy">{progress}%</span>
                 </div>
                 <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">

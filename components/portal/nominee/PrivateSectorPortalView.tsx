@@ -96,7 +96,7 @@ const PrivateSectorPortalView: React.FC<PrivateSectorPortalViewProps> = ({
                     >
                         <div className="flex-1">
                             <div className="flex items-center gap-4">
-                                <h3 className="text-2xl font-serif font-bold text-gkk-navy uppercase tracking-widest">Private Sector Requirements - Stage 1 (Submission)</h3>
+                                <h3 className="text-2xl font-serif font-bold text-gkk-navy uppercase tracking-widest">Private Sector Requirements - STAGE 1 (SUBMISSION)</h3>
                                 <div className={`transition-transform duration-300 ${stage1Open ? 'rotate-180' : 'rotate-0'}`}>
                                     <ChevronDown size={24} className="text-gray-400" />
                                 </div>
@@ -135,7 +135,7 @@ const PrivateSectorPortalView: React.FC<PrivateSectorPortalViewProps> = ({
                             <div className="text-left">
                                 <div className="flex items-center gap-3">
                                     <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${nomineeData?.round2Unlocked ? 'bg-gkk-gold text-gkk-navy' : 'bg-gray-300 text-white'}`}>2</div>
-                                    <h4 className="font-bold text-gkk-navy text-xl leading-none">Stage 2 (Document Evaluation)</h4>
+                                    <h4 className="font-bold text-gkk-navy text-xl leading-none">STAGE 2 (DOCUMENT EVALUATION)</h4>
                                     {!!nomineeData?.round2Unlocked && (
                                         <div className={`transition-transform duration-300 ${stage2Open ? 'rotate-180' : 'rotate-0'}`}>
                                             <ChevronDown size={20} className="text-gray-400" />
@@ -171,7 +171,7 @@ const PrivateSectorPortalView: React.FC<PrivateSectorPortalViewProps> = ({
                             <div className="text-left">
                                 <div className="flex items-center gap-3">
                                     <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${nomineeData?.round3Unlocked ? 'bg-gkk-navy text-white' : 'bg-gray-300 text-white'}`}>3</div>
-                                    <h4 className="font-bold text-gkk-navy text-xl leading-none">Stage 3 (Submission of Deficiencies)</h4>
+                                    <h4 className="font-bold text-gkk-navy text-xl leading-none">STAGE 3 (SUBMISSION OF DEFICIENCIES)</h4>
                                 </div>
                                 <div className="text-xs text-gray-500 mt-2 font-bold uppercase tracking-widest">
                                     {nomineeData?.round3Unlocked ? '- Only upload requirements that are for re-submission.' : 'Locked'}

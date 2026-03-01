@@ -430,13 +430,15 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleDocVerdict('pass')}
-                          className={`flex-1 py-1.5 rounded-xl text-xs font-black border transition-all ${docStatus === 'pass' ? 'bg-green-600 text-white border-green-600 shadow-md' : 'bg-white text-gray-400 border-gray-200 hover:text-green-600'}`}
+                          disabled={userRole === 'reu' && round > 1}
+                          className={`flex-1 py-1.5 rounded-xl text-xs font-black border transition-all ${(userRole === 'reu' && round > 1) ? 'opacity-50 cursor-not-allowed' : ''} ${docStatus === 'pass' ? 'bg-green-600 text-white border-green-600 shadow-md' : 'bg-white text-gray-400 border-gray-200 hover:text-green-600'}`}
                         >
                           PASS
                         </button>
                         <button
                           onClick={() => handleDocVerdict('fail')}
-                          className={`flex-1 py-1.5 rounded-xl text-xs font-black border transition-all ${docStatus === 'fail' ? 'bg-red-600 text-white border-red-600 shadow-md' : 'bg-white text-gray-400 border-gray-200 hover:text-red-600'}`}
+                          disabled={userRole === 'reu' && round > 1}
+                          className={`flex-1 py-1.5 rounded-xl text-xs font-black border transition-all ${(userRole === 'reu' && round > 1) ? 'opacity-50 cursor-not-allowed' : ''} ${docStatus === 'fail' ? 'bg-red-600 text-white border-red-600 shadow-md' : 'bg-white text-gray-400 border-gray-200 hover:text-red-600'}`}
                         >
                           INCOMPLETE
                         </button>
@@ -444,9 +446,11 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                       <div className="mt-2">
                         <textarea
                           placeholder="Add remarks for the nominee..."
+                          disabled={userRole === 'reu' && round > 1}
                           value={docRemarks[slotId] ?? doc.remarks ?? ''}
                           onChange={(e) => setDocRemarks(prev => ({ ...prev, [slotId]: e.target.value }))}
                           onBlur={async () => {
+                            if (userRole === 'reu' && round > 1) return;
                             const remark = docRemarks[slotId];
                             if (remark !== undefined && remark !== (doc.remarks ?? '')) {
                               await updateDocumentRemarks(selectedNominee.id, slotId, remark);
@@ -843,12 +847,12 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
               <div className="w-36 bg-white rounded-[20px] p-4 text-center border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
                 {renderProgressBar(selectedNominee, 1)}
               </div>
-              {userRole !== 'reu' && (selectedNominee.round2Unlocked || userRole === 'admin' || userRole === 'scd_team_leader') && (
+              {(selectedNominee.round2Unlocked || userRole === 'admin' || userRole === 'scd_team_leader' || userRole === 'reu') && (
                 <div className="w-36 bg-white rounded-[20px] p-4 text-center border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
                   {renderProgressBar(selectedNominee, 2)}
                 </div>
               )}
-              {userRole !== 'reu' && (selectedNominee.round3Unlocked || userRole === 'admin' || userRole === 'scd_team_leader') && (
+              {(selectedNominee.round3Unlocked || userRole === 'admin' || userRole === 'scd_team_leader' || userRole === 'reu') && (
                 <div className="w-36 bg-white rounded-[20px] p-4 text-center border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
                   {renderProgressBar(selectedNominee, 3)}
                 </div>
@@ -867,18 +871,59 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                 {isStage1Folded ? <ChevronDown size={24} /> : <ChevronUp size={24} />}
               </button>
               <div>
-                <h3 className="text-2xl font-serif font-bold text-gkk-navy uppercase tracking-widest leading-none">Stage 1 (Submission)</h3>
+                <div className="flex items-center gap-3">
+                  <h3 className="text-2xl font-serif font-bold text-gkk-navy uppercase tracking-widest leading-none">STAGE 1 (SUBMISSION)</h3>
+                  {selectedNominee.stage1PassedByReu && (
+                    <span className="bg-emerald-100 text-emerald-700 text-[9px] font-black px-3 py-1 rounded-full border border-emerald-200 uppercase tracking-widest flex items-center gap-1.5 shadow-sm">
+                      <ShieldCheck size={12} /> REU VERIFIED
+                    </span>
+                  )}
+                </div>
                 {!isStage1Folded && <p className="text-xs text-gray-500 mt-2 font-bold uppercase tracking-widest italic opacity-60">Evaluate the initial compliance records.</p>}
               </div>
             </div>
             {!isStage1Folded && (
-              <button
-                onClick={() => handleExportStage(1)}
-                disabled={isExporting === 1}
-                className="px-6 py-3 bg-white border border-gray-200 text-gray-600 font-bold rounded-2xl hover:bg-gray-50 transition-all text-[10px] uppercase tracking-widest flex items-center gap-2 shadow-sm"
-              >
-                <Download size={14} /> {isExporting === 1 ? "Exporting..." : "Export PDFs"}
-              </button>
+              <div className="flex items-center gap-3">
+                {userRole === 'reu' && (
+                  <button
+                    onClick={async () => {
+                      const newPassed = !selectedNominee.stage1PassedByReu;
+                      const msg = newPassed
+                        ? "Mark Stage 1 as VERIFIED and UNLOCK Stage 2 for this nominee?"
+                        : "Revert Stage 1 verification and RELOCK Stage 2?";
+
+                      setConfirmModal({
+                        isOpen: true,
+                        title: newPassed ? 'Verify Stage 1' : 'Revert Verification',
+                        message: msg,
+                        type: 'info',
+                        onConfirm: async () => {
+                          const updates = {
+                            stage1PassedByReu: newPassed,
+                            round2Unlocked: newPassed // Unlock round 2 if stage 1 passed
+                          };
+                          await updateNominee(selectedNominee.id, updates);
+                          const updated = { ...selectedNominee, ...updates };
+                          setSelectedNominee(updated);
+                          setLocalNominees(prev => prev.map(a => a.id === updated.id ? updated : a));
+                          setConfirmModal(prev => ({ ...prev, isOpen: false }));
+                        }
+                      });
+                    }}
+                    className={`px-6 py-3 rounded-2xl font-bold transition-all text-[10px] uppercase tracking-widest flex items-center gap-2 shadow-sm ${selectedNominee.stage1PassedByReu ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-gkk-gold text-gkk-navy hover:bg-gkk-navy hover:text-white border border-gkk-gold/20'}`}
+                  >
+                    {selectedNominee.stage1PassedByReu ? <ShieldCheck size={14} /> : <Zap size={14} />}
+                    {selectedNominee.stage1PassedByReu ? 'Passed & Unlocked' : 'Pass Stage 1 & Unlock Stage 2'}
+                  </button>
+                )}
+                <button
+                  onClick={() => handleExportStage(1)}
+                  disabled={isExporting === 1}
+                  className="px-6 py-3 bg-white border border-gray-200 text-gray-600 font-bold rounded-2xl hover:bg-gray-50 transition-all text-[10px] uppercase tracking-widest flex items-center gap-2 shadow-sm"
+                >
+                  <Download size={14} /> {isExporting === 1 ? "Exporting..." : "Export PDFs"}
+                </button>
+              </div>
             )}
           </div>
           {!isStage1Folded && (
@@ -889,17 +934,17 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
 
 
 
-          {userRole !== 'reu' && (
+          {(userRole !== 'reu' || selectedNominee.stage1PassedByReu) && (
             <>
               <div className="space-y-4">
-                <div className={`rounded-[40px] border transition-all duration-300 overflow-hidden ${(selectedNominee.round2Unlocked || ['admin', 'scd_team_leader'].includes(userRole || '')) ? 'bg-white border-gray-200 shadow-xl' : 'bg-gray-50 border-gray-100 opacity-60'}`}>
+                <div className={`rounded-[40px] border transition-all duration-300 overflow-hidden ${(selectedNominee.round2Unlocked || ['admin', 'scd_team_leader', 'reu'].includes(userRole || '')) ? 'bg-white border-gray-200 shadow-xl' : 'bg-gray-50 border-gray-100 opacity-60'}`}>
                   <div className="p-10 flex flex-col md:flex-row items-center justify-between gap-8">
                     <div className="flex items-center space-x-8">
-                      <div className={`w-16 h-16 rounded-3xl flex items-center justify-center transition-all ${(selectedNominee.round2Unlocked || ['admin', 'scd_team_leader'].includes(userRole || '')) ? 'bg-blue-600 text-white shadow-xl' : 'bg-gray-200 text-gray-400'}`}>{(selectedNominee.round2Unlocked || ['admin', 'scd_team_leader'].includes(userRole || '')) ? <Unlock size={28} /> : <Lock size={28} />}</div>
-                      <div className="text-left"><h4 className="font-bold text-gkk-navy text-xl uppercase tracking-tighter leading-none">Stage 2 (Evaluation)</h4><p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-3">{selectedNominee.round2Unlocked ? 'Reviewing national shortlist' : (['admin', 'scd_team_leader'].includes(userRole || '')) ? 'Action Required: Trigger Stage 2' : 'Locked'}</p></div>
+                      <div className={`w-16 h-16 rounded-3xl flex items-center justify-center transition-all ${(selectedNominee.round2Unlocked || ['admin', 'scd_team_leader', 'reu'].includes(userRole || '')) ? 'bg-blue-600 text-white shadow-xl' : 'bg-gray-200 text-gray-400'}`}>{(selectedNominee.round2Unlocked || ['admin', 'scd_team_leader', 'reu'].includes(userRole || '')) ? <Unlock size={28} /> : <Lock size={28} />}</div>
+                      <div className="text-left"><h4 className="font-bold text-gkk-navy text-xl uppercase tracking-tighter leading-none">STAGE 2 (DOCUMENT EVALUATION)</h4><p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-3">{selectedNominee.round2Unlocked ? 'Reviewing national shortlist' : (['admin', 'scd_team_leader', 'reu'].includes(userRole || '')) ? 'Action Required: Trigger Stage 2' : 'Locked'}</p></div>
                     </div>
                     <div className="flex items-center gap-4">
-                      {(selectedNominee.round2Unlocked || ['admin', 'scd_team_leader'].includes(userRole || '')) && (
+                      {(selectedNominee.round2Unlocked || ['admin', 'scd_team_leader', 'reu'].includes(userRole || '')) && (
                         <button
                           onClick={() => handleExportStage(2)}
                           disabled={isExporting === 2}
@@ -917,11 +962,12 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                           setLocalNominees(prev => prev.map(a => a.id === updated.id ? updated : a));
                         }} className={`px-10 py-4 rounded-[20px] font-bold transition-all shadow-xl text-[10px] tracking-widest uppercase ${selectedNominee.round2Unlocked ? 'bg-red-50 text-red-600 border border-red-100 hover:bg-red-100' : 'bg-gkk-gold text-gkk-navy hover:bg-gkk-navy hover:text-white'}`}>{selectedNominee.round2Unlocked ? 'Deactivate Stage 2' : 'Activate Stage 2'}</button>
                       )}
-
-
+                      {userRole === 'reu' && !selectedNominee.round2Unlocked && (
+                        <span className="text-[10px] font-bold text-amber-500 uppercase tracking-widest bg-amber-50 px-5 py-3 rounded-2xl border border-amber-100">Regional verification pending</span>
+                      )}
                     </div>
                   </div>
-                  {(selectedNominee.round2Unlocked || ['admin', 'scd_team_leader'].includes(userRole || '')) && (
+                  {(selectedNominee.round2Unlocked || ['admin', 'scd_team_leader', 'reu'].includes(userRole || '')) && (
                     <div className="border-t border-gray-100 bg-white">
                       <div className="p-10">{renderDocumentGrid(2)}</div>
                     </div>
@@ -930,14 +976,14 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
               </div>
 
               <div className="space-y-4">
-                <div className={`rounded-[40px] border transition-all duration-300 overflow-hidden ${(selectedNominee.round3Unlocked || ['admin', 'scd_team_leader'].includes(userRole || '')) ? 'bg-white border-gray-200 shadow-xl' : 'bg-gray-50 border-gray-100 opacity-60'}`}>
+                <div className={`rounded-[40px] border transition-all duration-300 overflow-hidden ${(selectedNominee.round3Unlocked || ['admin', 'scd_team_leader', 'reu'].includes(userRole || '')) ? 'bg-white border-gray-200 shadow-xl' : 'bg-gray-50 border-gray-100 opacity-60'}`}>
                   <div className="p-10 flex flex-col md:flex-row items-center justify-between gap-8">
                     <div className="flex items-center space-x-8">
-                      <div className={`w-16 h-16 rounded-3xl flex items-center justify-center transition-all ${(selectedNominee.round3Unlocked || ['admin', 'scd_team_leader'].includes(userRole || '')) ? 'bg-gkk-gold text-gkk-navy shadow-xl' : 'bg-gray-200 text-gray-400'}`}>{(selectedNominee.round3Unlocked || ['admin', 'scd_team_leader'].includes(userRole || '')) ? <Unlock size={28} /> : <Lock size={28} />}</div>
-                      <div className="text-left"><h4 className="font-bold text-gkk-navy text-xl uppercase tracking-tighter leading-none">Stage 3 (Deficiencies)</h4><p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-3">{selectedNominee.round3Unlocked ? 'National Board Final Evaluation' : (['admin', 'scd_team_leader'].includes(userRole || '')) ? 'SCD Trigger Required' : 'Locked'}</p></div>
+                      <div className={`w-16 h-16 rounded-3xl flex items-center justify-center transition-all ${(selectedNominee.round3Unlocked || ['admin', 'scd_team_leader', 'reu'].includes(userRole || '')) ? 'bg-gkk-gold text-gkk-navy shadow-xl' : 'bg-gray-200 text-gray-400'}`}>{(selectedNominee.round3Unlocked || ['admin', 'scd_team_leader', 'reu'].includes(userRole || '')) ? <Unlock size={28} /> : <Lock size={28} />}</div>
+                      <div className="text-left"><h4 className="font-bold text-gkk-navy text-xl uppercase tracking-tighter leading-none">STAGE 3 (SUBMISSION OF DEFICIENCIES)</h4><p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-3">{selectedNominee.round3Unlocked ? 'National Board Final Evaluation' : (['admin', 'scd_team_leader', 'reu'].includes(userRole || '')) ? 'SCD Trigger Required' : 'Locked'}</p></div>
                     </div>
                     <div className="flex items-center gap-4">
-                      {(selectedNominee.round3Unlocked || ['admin', 'scd_team_leader'].includes(userRole || '')) && (
+                      {(selectedNominee.round3Unlocked || ['admin', 'scd_team_leader', 'reu'].includes(userRole || '')) && (
                         <button
                           onClick={() => handleExportStage(3)}
                           disabled={isExporting === 3}
@@ -992,18 +1038,15 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                           className="px-10 py-4 rounded-[20px] font-semibold transition-all shadow-sm text-[14.5px] uppercase bg-white border border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gkk-navy"
                         >Close</button>
                       )}
-
-
                     </div>
                   </div>
-                  {(selectedNominee.round3Unlocked || ['admin', 'scd_team_leader'].includes(userRole || '')) && (
+                  {(selectedNominee.round3Unlocked || ['admin', 'scd_team_leader', 'reu'].includes(userRole || '')) && (
                     <div className="border-t border-gray-100">
                       <div className="p-10 bg-white">{renderDocumentGrid(3)}</div>
                     </div>
                   )}
                 </div>
               </div>
-
             </>
           )}
         </div>
