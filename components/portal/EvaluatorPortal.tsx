@@ -39,8 +39,10 @@ import {
   FileIcon,
   KeyRound,
   Zap,
-  Upload
+  Upload,
+  AlertTriangle
 } from 'lucide-react';
+import ConfirmationModal from '../ui/ConfirmationModal';
 import { Nominee, NomineeDocument, UserRole, AccessKey, User as UserType } from '../../types';
 import { STAGE_1_REQUIREMENTS } from './NomineePortal';
 import { getAllNominees, resolveFileUrl, updateDocumentEvaluation, updateDocumentRemarks, getRequirementsByCategory, issueAccessKey, getAllAccessKeys, getUserProfile, updateUserProfile, updateNominee } from '../../services/dbService';
@@ -68,6 +70,19 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
   const [isLoading, setIsLoading] = useState(true);
   const [staffProfile, setStaffProfile] = useState<UserType | null>(null);
   const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+    type: 'warning' | 'success' | 'info';
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => { },
+    type: 'warning'
+  });
 
   useEffect(() => {
     const fetchNominees = async () => {
@@ -948,17 +963,24 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                               ? "Are you sure you want to CLOSE this application? This will make it read-only for the nominee."
                               : "Are you sure you want to OPEN this application? This will allow the nominee to make further changes.";
 
-                            if (window.confirm(confirmMsg)) {
-                              const newStatus = isClosing ? 'completed' : 'under_review';
-                              await updateNominee(selectedNominee.id, { status: newStatus as any });
-                              const updated = { ...selectedNominee, status: newStatus as any };
-                              setSelectedNominee(updated);
-                              setLocalNominees(prev => prev.map(a => a.id === updated.id ? updated : a));
-                              if (isClosing) {
-                                setView('list');
-                                setSelectedNominee(null);
+                            setConfirmModal({
+                              isOpen: true,
+                              title: isClosing ? 'Close Application' : 'Reopen Application',
+                              message: confirmMsg,
+                              type: isClosing ? 'warning' : 'info',
+                              onConfirm: async () => {
+                                const newStatus = isClosing ? 'completed' : 'under_review';
+                                await updateNominee(selectedNominee.id, { status: newStatus as any });
+                                const updated = { ...selectedNominee, status: newStatus as any };
+                                setSelectedNominee(updated);
+                                setLocalNominees(prev => prev.map(a => a.id === updated.id ? updated : a));
+                                if (isClosing) {
+                                  setView('list');
+                                  setSelectedNominee(null);
+                                }
+                                setConfirmModal(prev => ({ ...prev, isOpen: false }));
                               }
-                            }
+                            });
                           }}
                           className={`px-10 py-4 rounded-[20px] font-bold transition-all shadow-xl text-[10px] tracking-widest uppercase ${selectedNominee.status === 'completed' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100 hover:bg-emerald-100' : 'bg-gkk-navy text-white hover:bg-gkk-royalBlue'}`}
                         >
@@ -1164,6 +1186,14 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
           </div>
         </div>
       )}
+      <ConfirmationModal
+        isOpen={confirmModal.isOpen}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        type={confirmModal.type}
+        onConfirm={confirmModal.onConfirm}
+        onClose={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+      />
     </div>
   );
 };
