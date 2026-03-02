@@ -430,13 +430,15 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleDocVerdict('pass')}
-                          className={`flex-1 py-1.5 rounded-xl text-xs font-black border transition-all ${docStatus === 'pass' ? 'bg-green-600 text-white border-green-600 shadow-md' : 'bg-white text-gray-400 border-gray-200 hover:text-green-600'}`}
+                          disabled={userRole === 'reu' && selectedNominee.stage1PassedByReu}
+                          className={`flex-1 py-1.5 rounded-xl text-xs font-black border transition-all ${userRole === 'reu' && selectedNominee.stage1PassedByReu ? 'opacity-50 cursor-not-allowed' : ''} ${docStatus === 'pass' ? 'bg-green-600 text-white border-green-600 shadow-md' : 'bg-white text-gray-400 border-gray-200 hover:text-green-600'}`}
                         >
                           PASS
                         </button>
                         <button
                           onClick={() => handleDocVerdict('fail')}
-                          className={`flex-1 py-1.5 rounded-xl text-xs font-black border transition-all ${docStatus === 'fail' ? 'bg-red-600 text-white border-red-600 shadow-md' : 'bg-white text-gray-400 border-gray-200 hover:text-red-600'}`}
+                          disabled={userRole === 'reu' && selectedNominee.stage1PassedByReu}
+                          className={`flex-1 py-1.5 rounded-xl text-xs font-black border transition-all ${userRole === 'reu' && selectedNominee.stage1PassedByReu ? 'opacity-50 cursor-not-allowed' : ''} ${docStatus === 'fail' ? 'bg-red-600 text-white border-red-600 shadow-md' : 'bg-white text-gray-400 border-gray-200 hover:text-red-600'}`}
                         >
                           INCOMPLETE
                         </button>
@@ -444,6 +446,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                       <div className="mt-2">
                         <textarea
                           placeholder="Add remarks for the nominee..."
+                          disabled={userRole === 'reu' && selectedNominee.stage1PassedByReu}
                           value={docRemarks[slotId] ?? doc.remarks ?? ''}
                           onChange={(e) => setDocRemarks(prev => ({ ...prev, [slotId]: e.target.value }))}
                           onBlur={async () => {
@@ -458,7 +461,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                               setLocalNominees(prev => prev.map(a => a.id === selectedNominee.id ? updatedNominee : a));
                             }
                           }}
-                          className="w-full text-[11px] font-semibold text-gray-600 border border-gray-200 rounded-xl px-3 py-2 resize-none focus:outline-none focus:border-gkk-gold/50 focus:ring-1 focus:ring-gkk-gold/20 placeholder:text-gray-300 transition-all"
+                          className={`w-full text-[11px] font-semibold text-gray-600 border border-gray-200 rounded-xl px-3 py-2 resize-none focus:outline-none focus:border-gkk-gold/50 focus:ring-1 focus:ring-gkk-gold/20 placeholder:text-gray-300 transition-all ${userRole === 'reu' && selectedNominee.stage1PassedByReu ? 'opacity-50 cursor-not-allowed' : ''}`}
                           rows={2}
                         />
                       </div>
