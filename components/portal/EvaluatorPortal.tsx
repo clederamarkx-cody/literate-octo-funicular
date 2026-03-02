@@ -615,7 +615,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
           <form onSubmit={handleIssueKey} className="p-8 space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
-                <label className="block text-[14.5px] font-semibold text-gray-400 uppercase tracking-wide mb-2 ml-1">Establishment Name</label>
+                <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Establishment Name</label>
                 <input
                   type="text"
                   required
