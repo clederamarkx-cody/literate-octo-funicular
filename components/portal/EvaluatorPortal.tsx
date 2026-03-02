@@ -923,12 +923,12 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
               <div className="w-36 bg-white rounded-[20px] p-4 text-center border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
                 {renderProgressBar(selectedNominee, 1)}
               </div>
-              {(selectedNominee.round2Unlocked || ['admin', 'scd_team_leader', 'reu', 'evaluator'].includes(userRole || '')) && (
+              {userRole !== 'reu' && (selectedNominee.round2Unlocked || ['admin', 'scd_team_leader', 'evaluator'].includes(userRole || '')) && (
                 <div className="w-36 bg-white rounded-[20px] p-4 text-center border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
                   {renderProgressBar(selectedNominee, 2)}
                 </div>
               )}
-              {(selectedNominee.round3Unlocked || ['admin', 'scd_team_leader', 'reu', 'evaluator'].includes(userRole || '')) && (
+              {userRole !== 'reu' && (selectedNominee.round3Unlocked || ['admin', 'scd_team_leader', 'evaluator'].includes(userRole || '')) && (
                 <div className="w-36 bg-white rounded-[20px] p-4 text-center border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
                   {renderProgressBar(selectedNominee, 3)}
                 </div>
