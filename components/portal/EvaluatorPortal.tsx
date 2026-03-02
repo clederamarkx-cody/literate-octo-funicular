@@ -188,7 +188,17 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
     }
   }, [activeTab]);
 
-  // Removed auto-folding logic to keep Stage 1 unfolded by default
+  useEffect(() => {
+    if (selectedNominee && view === 'review') {
+      // Auto-fold Stage 1 for national roles (SCD/Evaluator/Admin) if Stage 2 is unlocked
+      if (userRole !== 'reu' && selectedNominee.round2Unlocked) {
+        setIsStage1Folded(true);
+      } else {
+        // Default to unfolded for REU or if Stage 2 is locked
+        setIsStage1Folded(false);
+      }
+    }
+  }, [selectedNominee?.id, view, userRole]);
 
   const docCategories = [
     { id: 'Compliance', name: 'Compliance Reports', icon: FileText },
