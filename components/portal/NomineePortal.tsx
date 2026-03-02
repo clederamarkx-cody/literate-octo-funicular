@@ -686,8 +686,7 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
                       </button>
                     )}
                     {(() => {
-                      const category = nomineeData?.details?.nomineeCategory || 'Private Sector';
-
+                      const category = nomineeData?.details?.nomineeCategory || 'Private';
                       switch (category) {
                         case 'Government':
                         case 'Government Agency':
@@ -697,7 +696,9 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
                         case 'Individual':
                           return <IndividualPortalView {...portalProps} />;
                         case 'Industry':
+                        case 'Private':
                         case 'Private Sector':
+                        case 'Private Construction':
                         case 'Construction':
                         default:
                           return <PrivateSectorPortalView {...portalProps} />;

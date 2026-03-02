@@ -96,7 +96,7 @@ const GovernmentPortalView: React.FC<GovernmentPortalViewProps> = ({
                     >
                         <div className="flex-1">
                             <div className="flex items-center gap-4">
-                                <h3 className="text-2xl font-serif font-bold text-gkk-navy uppercase tracking-widest">Government Agency Requirements - STAGE 1 (SUBMISSION)</h3>
+                                <h3 className="text-2xl font-serif font-bold text-gkk-navy uppercase tracking-widest">Government Requirements - STAGE 1 (SUBMISSION)</h3>
                                 <div className={`transition-transform duration-300 ${stage1Open ? 'rotate-180' : 'rotate-0'}`}>
                                     <ChevronDown size={24} className="text-gray-400" />
                                 </div>

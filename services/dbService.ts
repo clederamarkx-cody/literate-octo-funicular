@@ -52,9 +52,10 @@ export const getRequirementsByCategory = async (category: string) => {
     let catId = `cat_${category.toLowerCase().replace(/\s+/g, '_')}`;
 
     // Explicit mapping for common variations
-    if (category.toLowerCase() === 'private sector') catId = 'cat_industry';
-    if (category.toLowerCase() === 'government agency') catId = 'cat_government';
+    if (category.toLowerCase() === 'private sector' || category.toLowerCase() === 'private') catId = 'cat_industry';
+    if (category.toLowerCase() === 'government agency' || category.toLowerCase() === 'government') catId = 'cat_government';
     if (category.toLowerCase() === 'industry') catId = 'cat_industry';
+    if (category.toLowerCase() === 'construction') catId = 'cat_construction';
 
     const { data, error } = await supabase
         .from(REQUIREMENTS_COLLECTION)

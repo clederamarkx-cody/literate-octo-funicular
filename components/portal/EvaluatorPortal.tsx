@@ -163,7 +163,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
   const [keyStatusFilter, setKeyStatusFilter] = useState<string>('all');
   const [keyRoleFilter, setKeyRoleFilter] = useState<string>('all');
   const [isIssuingKey, setIsIssuingKey] = useState(false);
-  const [newKeyData, setNewKeyData] = useState({ companyName: '', focalName: '', email: '', region: 'NCR', role: 'nominee', category: 'Private Sector' as 'Private Sector' | 'Individual' | 'Micro Enterprise' | 'Government Agency' | 'Construction', industry: '' });
+  const [newKeyData, setNewKeyData] = useState({ companyName: '', focalName: '', email: '', region: 'NCR', role: 'nominee', category: 'Private' as 'Private' | 'Individual' | 'Micro Enterprise' | 'Government' | 'Construction', industry: '' });
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [issuedKeyId, setIssuedKeyId] = useState('');
   const [industrySectors, setIndustrySectors] = useState<any[]>([]);
@@ -621,7 +621,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                   required
                   value={newKeyData.companyName}
                   onChange={(e) => setNewKeyData({ ...newKeyData, companyName: e.target.value })}
-                  className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-gkk-gold/5 focus:border-gkk-gold outline-none transition-all font-semibold text-[14.5px]"
+                  className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-gkk-gold/5 focus:border-gkk-gold outline-none transition-all font-bold text-sm tracking-tight"
                   placeholder="e.g. Acme Corp Philippines"
                 />
               </div>
@@ -653,7 +653,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                 <select
                   value={newKeyData.role}
                   onChange={(e) => setNewKeyData({ ...newKeyData, role: e.target.value })}
-                  className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-gkk-gold/5 focus:border-gkk-gold outline-none transition-all font-semibold text-[14.5px] appearance-none"
+                  className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-gkk-gold/5 focus:border-gkk-gold outline-none transition-all font-bold text-sm tracking-tight appearance-none"
                 >
                   <option value="nominee">Nominee</option>
                   <option value="reu">REU (Regional Extension Unit)</option>
@@ -683,11 +683,11 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                     onChange={(e) => setNewKeyData({ ...newKeyData, category: e.target.value })}
                     className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-gkk-gold/5 focus:border-gkk-gold outline-none transition-all font-bold text-sm tracking-tight appearance-none"
                   >
-                    <option value="Private Sector">Private Sector</option>
+                    <option value="Private">Private</option>
                     <option value="Construction">Construction</option>
                     <option value="Individual">Individual</option>
                     <option value="Micro Enterprise">Micro Enterprise</option>
-                    <option value="Government Agency">Government Agency</option>
+                    <option value="Government">Government</option>
                   </select>
                 </div>
               ) : (
