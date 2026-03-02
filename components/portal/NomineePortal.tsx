@@ -388,7 +388,7 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
       const correctedDeficiencies = deficiencies.filter(d => (d as any).isCorrection).length;
 
       const totalItems = stage3ReqDocs.length + deficiencies.length;
-      if (totalItems === 0) return 100; // If no deficiencies and no stage 3 reqs, it's 100%
+      if (totalItems === 0) return nomineeData?.round3Unlocked ? 100 : 0;
 
       return Math.round(((stage3Uploaded + correctedDeficiencies) / totalItems) * 100);
     }

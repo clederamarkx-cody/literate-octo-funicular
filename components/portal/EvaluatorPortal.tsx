@@ -700,7 +700,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
 
               {newKeyData.role === 'nominee' ? (
                 <div>
-                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Establishment Industry</label>
+                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Industry Category</label>
                   <select
                     value={newKeyData.industry}
                     onChange={(e) => setNewKeyData({ ...newKeyData, industry: e.target.value })}
@@ -715,7 +715,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
               ) : (
                 <div className="flex items-end pb-1">
                   <div className="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 flex items-center justify-center">
-                    <p className="text-[14.5px] text-gray-400 font-semibold">Industry selection only for Nominees</p>
+                    <p className="text-[14.5px] text-gray-400 font-semibold">Industry category selection only for Nominees</p>
                   </div>
                 </div>
               )}
