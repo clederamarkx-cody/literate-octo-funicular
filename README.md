@@ -6,6 +6,11 @@ Welcome to the official repository for the **14th Gawad Kaligtasan at Kalusugan 
 
 ## Recent Updates
 
+### GKK Requirement Update (2026)
+- **Expanded Checklist**: Updated the Stage 1 requirements to the latest 55-item list (48 General + 7 Construction-specific).
+- **Construction Sector**: Introduced a dedicated "Construction" sector with customized requirements to comply with IRR of R.A. No. 11058.
+- **Dynamic Mapping**: Re-engineered the database mapping to ensure "Private Sector", "Industry", and "Construction" are uniquely handled via `cat_id` normalization.
+
 ### Access Key Activation Fix
 - **Improved Reliability**: Resolved a database constraint issue where the `applications` table failed to receive a mandatory `email` field during the activation process.
 - **Auto-Provisioning**: The system now correctly links the pre-allocated user account with the newly created application record during single-key activation.

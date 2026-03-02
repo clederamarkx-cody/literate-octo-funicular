@@ -52,61 +52,54 @@ import SubmissionSuccessView from './nominee/SubmissionSuccessView';
 
 
 export const STAGE_1_REQUIREMENTS = [
-  { category: 'Requirement', label: '1. Endorsement by the DOLE Regional Office' },
-  { category: 'Requirement', label: '2. Accomplished GKK Application Form' },
-  { category: 'Requirement', label: '3. Company Safety and Health Policy duly signed by the Authorized Personnel or Owner' },
-  { category: 'Requirement', label: '4. Full copy of the OSH Program submitted to the DOLE with proof of receipt' },
-  { category: 'Requirement', label: '5. Proof of conduct of mandatory eight-hour OSH Orientation for all employees, contractors, and concessionaires' },
-  { category: 'Requirement', label: '6. Designation of Safety Officer (SO1, SO2, SO3 or SO4), signed by the HR Manager or Head of the Company' },
-  { category: 'Requirement', label: '7. Safety Officer: Certificate of Completion of applicable mandatory OSH training course' },
-  { category: 'Requirement', label: '8. Safety Officer: Certificate of Completion of advanced/specialized OSH training courses, as applicable' },
-  { category: 'Requirement', label: '9. Designation or certification of Occupational Health Personnel, signed by the HR Manager or Head of the Company' },
-  { category: 'Requirement', label: '10. Occupational Health Personnel: Certificate of Completion of applicable mandatory OSH training course or First Aid Training certificate for First Aiders' },
-  { category: 'Requirement', label: '11. Annual Work Accident and Illness Exposure Data Report (AEDR) submitted to DOLE, with proof of receipt (2024-2025)' },
-  { category: 'Requirement', label: '12. Annual Medical Report (AMR) submitted to DOLE, with proof of receipt (2024-2025)' },
-  { category: 'Requirement', label: '13. Work Accident / Illness Report (WAIR) submitted to DOLE, with proof of receipt (2024-up to present)' },
-  { category: 'Requirement', label: '14. Report of Safety Organization (RSO) submitted to DOLE, with proof of receipt (2024-2025)' },
-  { category: 'Requirement', label: '15. Safety and Health Committee Minutes of Meetings submitted to DOLE, with proof of receipt (2024-2025)' },
-  { category: 'Requirement', label: '16. Signed undertaking that the principal, contractor and subcontractors have no record of any disabling and/or fatality case (2024-2025)' },
-  { category: 'Requirement', label: '17. Work Environment Measurement (2024-2025)' },
-  { category: 'Requirement', label: '18. Written Policy on DOLE D.O. No. 136-14 (GHS in Chemical Safety Program in the Workplace)' },
-  { category: 'Requirement', label: '19. Written Policy on DOLE D.O. No. 53-03 (Drug-Free Workplace)' },
-  { category: 'Requirement', label: '20. Written Policy on DOLE D.O. No. 102-10 and Labor Advisory No. 22-23 (HIV and AIDS Prevention and Control)' },
-  { category: 'Requirement', label: '21. Written Policy on DOLE D.O. No. 73-05 and Labor Advisory No. 21-23 (Tuberculosis Prevention Workplace Policy and Program)' },
-  { category: 'Requirement', label: '22. Written Policy on Labor Advisory No. 05-10 (Hepatitis B Prevention and Control)' },
-  { category: 'Requirement', label: '23. Written Policy on DOLE D.O. No. 208-20 and Labor Advisory No. 19-23 (Mental Health Workplace Policies and Programs)' },
-  { category: 'Requirement', label: '24. Written Policy on R.A. No. 11215 and Labor Advisory No. 20-23 (Cancer Prevention)' },
-  { category: 'Requirement', label: '25. Written Policy on R.A. No. 9211 (Smoke-Free Workplace Policy and Program)' },
-  { category: 'Requirement', label: '26. Written Policy on DOLE D.O. No. 252-25 - Annex B.2.7 (Alcohol-Free Workplace Policy and Program)' },
-  { category: 'Requirement', label: '27. Written Policy on R.A. No. 7877 and Republic Act No. 11313 (Sexual Harassment Policy and Procedure)' },
-  { category: 'Requirement', label: '28. Written Policy on DOLE D.O. No. 252, series of 2025 - Annex B.2.10 (Policy Procedure for Establishing the Committee on Decorum and Investigation)' },
-  { category: 'Requirement', label: '29. Written Policy on Labor Advisory No. 01-23 (Food and Waterborne Disease Prevention and Control in the Workplace)' },
-  { category: 'Requirement', label: '30. Written Policy on DOLE D.O. No. 56-03 (Rationalizing the Implementation of Family Welfare Program in DOLE, for 200 or more workers)' },
-  { category: 'Requirement', label: '31. Risk-based Policy and Program (such as, but not limited to programs on hearing conservation, heat stress, etc.)' },
-  { category: 'Requirement', label: '32. DOLE-approved Registration of Establishment (per OSHS Rule 1020)' },
-  { category: 'Requirement', label: '33. List of Medical Facilities and Emergency Medicines' },
-  { category: 'Requirement', label: '34. Copy of signed HIRAC / Risk Assessment conducted (2024-2025)' },
-  { category: 'Requirement', label: '35. OSH Information (such as, but not limited to, communication plan, bulletin boards, information system, etc.) (2024-2025)' },
-  { category: 'Requirement', label: '36. Valid Permits to Operate (boiler, pressure vessel, internal combustion engine, elevators, etc.)' },
-  { category: 'Requirement', label: '37. Electrical Wiring Installation Inspection (Rule 1210) (For construction: certificate of electrical inspection issued by LGU)' },
-  { category: 'Requirement', label: '38. Employees’ Compensation Logbook' },
-  { category: 'Requirement', label: '39. Valid Fire Safety Inspection Certificate (FSIC) from Bureau of Fire Protection (BFP) (For construction: fire safety evaluation from BFP)' },
-  { category: 'Requirement', label: '40. Fire Evacuation Drill Certificate from BFP (2024-2025)' },
-  { category: 'Requirement', label: '41. Corporate Social Responsibility or any Community Relations / Assistance Programs (2024-2025)' },
-  { category: 'Requirement', label: '42. OSH Budget (2024-2025)' },
-  { category: 'Requirement', label: '43. SSS, Proof of Compliance (not more than 6-month coverage)' },
-  { category: 'Requirement', label: '44. PhilHealth, Proof of Compliance (not more than 6-month coverage)' },
-  { category: 'Requirement', label: '45. Pag-IBIG, Proof of Compliance (not more than 6-month coverage)' },
-  { category: 'Requirement', label: '46. Compliance to applicable environmental laws and programs (ECC, Certificate of No Pending Case/Violation issued by DENR-EMB, PCO Certificate, CMR, SMR, CCO Certificate, Permit to Operate, PDEA and PNP Licenses, etc. – whichever is applicable)' },
-  { category: 'Requirement', label: '47. Valid Philippine Contractors Accreditation Board (PCAB) Registration' },
-  { category: 'Requirement', label: '48. Full copy of the Construction Safety and Health Program (CSHP) submitted to DOLE, with proof of receipt by DOLE (For publicly funded projects, DPWH-approved CSHP)' },
-  { category: 'Requirement', label: '49. Proof of Project Duration (start to end of project)' },
-  { category: 'Requirement', label: '50. Valid Construction Heavy Equipment (CHE) Testing' },
-  { category: 'Requirement', label: '51. For CHE operators, valid Technical Education and Skills Development Authority (TESDA) Certification' },
-  { category: 'Requirement', label: '52. Valid Worker’s Skills Certification for Critical Occupations (welding, scaffolding, rigging, heavy equipment operation, etc.), if applicable (If TESDA certification is not applicable, skills training and valid authorization issued by the company)' },
-  { category: 'Requirement', label: '53. Temporary Accommodation and Welfare Facilities' },
-  { category: 'Requirement', label: '54. Valid OSH-related Certifications / Accreditations / Awards (e.g. ISO 45001, 14001)' },
-  { category: 'Requirement', label: '55. Industry-specific compliances with guidelines set by authorities having jurisdiction as specified in the IRR of R.A. No. 11058' }
+  { "category": "Requirement", "label": "1. Endorsement by the DOLE Regional Office" },
+  { "category": "Requirement", "label": "2. Accomplished GKK Application Form" },
+  { "category": "Requirement", "label": "3. Company Safety and Health Policy duly signed by the Authorized Personnel or Owner" },
+  { "category": "Requirement", "label": "4. Full copy of the OSH Program submitted to DOLE with proof of receipt (per IRR of R.A. No. 11058)" },
+  { "category": "Requirement", "label": "5. Proof of conduct of mandatory eight-hour OSH Orientation for all employees, contractors, and concessionaires, if applicable" },
+  { "category": "Requirement", "label": "6. Designation of Safety Officer (SO1, SO2, SO3, or SO4) signed by HR Manager or Head of Company" },
+  { "category": "Requirement", "label": "7. Safety Officer: Certificate of Completion of mandatory OSH training course" },
+  { "category": "Requirement", "label": "8. Safety Officer: Certificate of Completion of advanced/specialized OSH training courses, as applicable" },
+  { "category": "Requirement", "label": "9. Designation or certification of Occupational Health Personnel signed by HR Manager or Head of Company" },
+  { "category": "Requirement", "label": "10. Occupational Health Personnel: Certificate of Completion of mandatory OSH training or First Aid Training certificate for First Aiders" },
+  { "category": "Requirement", "label": "11. Annual Work Accident and Illness Exposure Data Report (AEDR) submitted to DOLE with proof of receipt (2024–2025)" },
+  { "category": "Requirement", "label": "12. Annual Medical Report (AMR) submitted to DOLE with proof of receipt (2024–2025)" },
+  { "category": "Requirement", "label": "13. Work Accident / Illness Report (WAIR) submitted to DOLE with proof of receipt (2024–present)" },
+  { "category": "Requirement", "label": "14. Report of Safety Organization (RSO) submitted to DOLE with proof of receipt (2024–2025)" },
+  { "category": "Requirement", "label": "15. Safety and Health Committee Minutes of Meetings submitted to DOLE with proof of receipt (2024–2025)" },
+  { "category": "Requirement", "label": "16. Signed undertaking that principal, contractor, and subcontractors have no record of disabling/fatality cases (2024–2025)" },
+  { "category": "Requirement", "label": "17. Work Environment Measurement (2024–2025)" },
+  { "category": "Requirement", "label": "18. Written Policy on DOLE D.O. No. 136-14 (GHS in Chemical Safety Program)" },
+  { "category": "Requirement", "label": "19. Written Policy on DOLE D.O. No. 53-03 (Drug-Free Workplace)" },
+  { "category": "Requirement", "label": "20. Written Policy on DOLE D.O. No. 102-10 and Labor Advisory No. 22-23 (HIV and AIDS Prevention and Control)" },
+  { "category": "Requirement", "label": "21. Written Policy on DOLE D.O. No. 73-05 and Labor Advisory No. 21-23 (Tuberculosis Prevention)" },
+  { "category": "Requirement", "label": "22. Written Policy on Labor Advisory No. 05-10 (Hepatitis B Prevention and Control)" },
+  { "category": "Requirement", "label": "23. Written Policy on DOLE D.O. No. 208-20 and Labor Advisory No. 19-23 (Mental Health Workplace Policies and Programs)" },
+  { "category": "Requirement", "label": "24. Written Policy on R.A. No. 11215 and Labor Advisory No. 20-23 (Cancer Prevention)" },
+  { "category": "Requirement", "label": "25. Written Policy on R.A. No. 9211 (Smoke-Free Workplace Policy and Program)" },
+  { "category": "Requirement", "label": "26. Written Policy on DOLE D.O. No. 252-25 Annex B.2.7 (Alcohol-Free Workplace Policy and Program)" },
+  { "category": "Requirement", "label": "27. Written Policy on R.A. No. 7877 and R.A. No. 11313 (Sexual Harassment Policy and Procedure)" },
+  { "category": "Requirement", "label": "28. Written Policy on DOLE D.O. No. 252, series of 2025 Annex B.2.10 (Committee on Decorum and Investigation)" },
+  { "category": "Requirement", "label": "29. Written Policy on Labor Advisory No. 01-23 (Food and Waterborne Disease Prevention and Control)" },
+  { "category": "Requirement", "label": "30. Written Policy on DOLE D.O. No. 56-03 (Family Welfare Program for 200+ workers)" },
+  { "category": "Requirement", "label": "31. Risk-based Policy and Program (e.g., hearing conservation, heat stress)" },
+  { "category": "Requirement", "label": "32. DOLE-approved Registration of Establishment (per OSHS Rule 1020)" },
+  { "category": "Requirement", "label": "33. List of Medical Facilities and Emergency Medicines" },
+  { "category": "Requirement", "label": "34. Copy of signed HIRAC / Risk Assessment conducted (2024–2025)" },
+  { "category": "Requirement", "label": "35. OSH Information (communication plan, bulletin boards, information system, etc.) (2024–2025)" },
+  { "category": "Requirement", "label": "36. Valid Permits to Operate (boiler, pressure vessel, internal combustion engine, elevators, etc.)" },
+  { "category": "Requirement", "label": "37. Electrical Wiring Installation Inspection (Rule 1210) (For construction: certificate of electrical inspection issued by LGU)" },
+  { "category": "Requirement", "label": "38. Employees’ Compensation Logbook" },
+  { "category": "Requirement", "label": "39. Valid Fire Safety Inspection Certificate (FSIC) from Bureau of Fire Protection (BFP) (For construction: fire safety evaluation from BFP)" },
+  { "category": "Requirement", "label": "40. Fire Evacuation Drill Certificate from BFP (2024–2025)" },
+  { "category": "Requirement", "label": "41. Corporate Social Responsibility or Community Relations / Assistance Programs (2024–2025)" },
+  { "category": "Requirement", "label": "42. OSH Budget (2024–2025)" },
+  { "category": "Requirement", "label": "43. Social Security System (SSS) Proof of Compliance (≤6 months coverage)" },
+  { "category": "Requirement", "label": "44. PhilHealth Proof of Compliance (≤6 months coverage)" },
+  { "category": "Requirement", "label": "45. Pag-IBIG Proof of Compliance (≤6 months coverage)" },
+  { "category": "Requirement", "label": "46. Compliance to applicable environmental laws and programs (ECC, DENR-EMB certificates, permits, licenses, etc.)" },
+  { "category": "Requirement", "label": "47. Valid OSH-related Certifications / Accreditations / Awards (e.g. ISO 45001, 14001)" },
+  { "category": "Requirement", "label": "48. Industry-specific compliances per IRR of R.A. No. 11058" }
 ];
 interface NomineePortalProps {
   onLogout: () => void;
@@ -118,7 +111,7 @@ interface NomineePortalProps {
 
 interface DocumentSlot {
   id: string;
-  category: 'Reportorial Compliance' | 'Legal & Administrative' | 'OSH Systems';
+  category: 'Reportorial Compliance' | 'Legal & Administrative' | 'OSH Systems' | 'Deficiency Correction';
   label: string;
   fileName: string | null;
   status: 'pending' | 'uploaded';
@@ -128,6 +121,7 @@ interface DocumentSlot {
   round: number;
   remarks?: string;
   verdict?: 'pass' | 'fail';
+  isCorrection?: boolean;
 }
 
 const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nomineeData: nomineeData, onDocumentUpload, onUpdateNominee: onUpdateNominee }) => {
@@ -704,6 +698,7 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
                           return <IndividualPortalView {...portalProps} />;
                         case 'Industry':
                         case 'Private Sector':
+                        case 'Construction':
                         default:
                           return <PrivateSectorPortalView {...portalProps} />;
                       }

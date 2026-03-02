@@ -49,10 +49,17 @@ export const logAction = async (action: string, details: string, appId?: string)
 };
 
 export const getRequirementsByCategory = async (category: string) => {
+    let catId = `cat_${category.toLowerCase().replace(/\s+/g, '_')}`;
+
+    // Explicit mapping for common variations
+    if (category.toLowerCase() === 'private sector') catId = 'cat_industry';
+    if (category.toLowerCase() === 'government agency') catId = 'cat_government';
+    if (category.toLowerCase() === 'industry') catId = 'cat_industry';
+
     const { data, error } = await supabase
         .from(REQUIREMENTS_COLLECTION)
         .select('*')
-        .eq('category_id', `cat_${category.toLowerCase()}`)
+        .eq('category_id', catId)
         .single();
 
     if (error || !data) {
