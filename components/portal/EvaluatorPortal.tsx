@@ -537,20 +537,31 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
 
   const calculateProgress = (nominee: Nominee, round: number) => {
     if (!dynamicRequirements) return 0;
+
+    // Stage 2 override: 100% if Stage 3 is unlocked
+    if (round === 2 && nominee.round3Unlocked) return 100;
+
     const stageKey = round === 1 ? 'stage1' : round === 2 ? 'stage2' : 'stage3';
     const stageReqs = dynamicRequirements[stageKey] || [];
-    if (stageReqs.length === 0) return 0;
-
     const roundDocs = nominee.documents || [];
     const stagePrefix = round === 1 ? 'r1' : round === 2 ? 'r2' : 'r3';
 
-    const evaluatedCount = stageReqs.filter((req: any, idx: number) => {
+    let totalItems = stageReqs.length;
+    let evaluatedCount = stageReqs.filter((req: any, idx: number) => {
       const slotId = `${stagePrefix}-${idx}`;
       const doc = roundDocs.find(d => d.slotId === slotId);
       return doc?.verdict === 'pass' || doc?.verdict === 'fail';
     }).length;
 
-    return Math.round((evaluatedCount / stageReqs.length) * 100);
+    // Stage 3: Include dynamic deficiencies
+    if (round === 3) {
+      const deficiencies = roundDocs.filter(d => d.slotId?.startsWith('r3-deficiency-'));
+      totalItems += deficiencies.length;
+      evaluatedCount += deficiencies.filter(d => d.verdict === 'pass' || d.verdict === 'fail').length;
+    }
+
+    if (totalItems === 0) return 0;
+    return Math.round((evaluatedCount / totalItems) * 100);
   };
 
   const renderProgressBar = (nominee: Nominee, round: number) => {
