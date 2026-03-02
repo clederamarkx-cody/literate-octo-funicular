@@ -5,7 +5,7 @@ import {
 
 interface DocumentSlot {
     id: string;
-    category: 'Reportorial Compliance' | 'Legal & Administrative' | 'OSH Systems' | string;
+    category: 'Reportorial Compliance' | 'Legal & Administrative' | 'OSH Systems' | 'Deficiency Correction' | string;
     label: string;
     fileName: string | null;
     status: 'pending' | 'uploaded';
@@ -45,8 +45,9 @@ const DocumentGrid: React.FC<DocumentGridProps> = ({
             return doc.round === 1;
         }
         if (round === 3) {
-            // Stage 3 is for Stage 3 requirements + any previous failures (even if already corrected)
-            return doc.round === 3 || (doc.round < 3 && (doc.verdict === 'fail' || (doc as any).isCorrection));
+            // Stage 3 shows Stage 3 requirements AND deficiency slots
+            // Both are now explicitly set to round: 3 in NomineePortal
+            return doc.round === 3;
         }
         return false;
     });

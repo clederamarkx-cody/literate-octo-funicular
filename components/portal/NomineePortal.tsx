@@ -313,6 +313,27 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
           remarks: savedDoc?.remarks || undefined,
           verdict: savedDoc?.verdict || undefined
         });
+
+        // Deficiency Logic: If this is Stage 1 and it failed, create a corresponding Stage 3 deficiency slot
+        if (round === 1 && savedDoc?.verdict === 'fail') {
+          const deficiencySlotId = `r3-deficiency-${slotId}`;
+          const currentCorrection = nomineeData?.documents?.find((d: any) => d.slotId === deficiencySlotId);
+
+          initialDocs.push({
+            id: deficiencySlotId,
+            category: 'Deficiency Correction' as any,
+            label: `[DEFICIENCY] ${req.label}`,
+            fileName: currentCorrection ? currentCorrection.name : null,
+            status: currentCorrection ? 'uploaded' : 'pending',
+            lastUpdated: currentCorrection ? (currentCorrection.date || '-') : '-',
+            previewUrl: currentCorrection ? (currentCorrection.url || null) : null,
+            type: currentCorrection ? (currentCorrection.type || '') : '',
+            round: 3,
+            remarks: currentCorrection?.remarks || undefined,
+            verdict: currentCorrection?.verdict || undefined,
+            isCorrection: true
+          });
+        }
       });
     };
 
@@ -326,22 +347,28 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
   // Re-sync if nomineeData changes after mount
   useEffect(() => {
     if (nomineeData?.documents) {
-      setDocuments(prev => prev.map(doc => {
-        const savedDoc = nomineeData.documents.find((d: any) => d.slotId === doc.id);
-        if (savedDoc) {
-          return {
-            ...doc,
-            status: 'uploaded',
-            fileName: savedDoc.name,
-            lastUpdated: savedDoc.date || '-',
-            previewUrl: savedDoc.url || null,
-            type: savedDoc.type || '',
-            remarks: savedDoc.remarks || '',
-            verdict: savedDoc.verdict || undefined
-          };
-        }
-        return doc;
-      }));
+      setDocuments(prev => {
+        // We need to rebuild or update the list to handle cases where a verdict change
+        // in stage 1 might have triggered a new deficiency slot in stage 3
+        const updatedDocs = prev.map(doc => {
+          const savedDoc = nomineeData.documents.find((d: any) => d.slotId === doc.id);
+          if (savedDoc) {
+            return {
+              ...doc,
+              status: 'uploaded',
+              fileName: savedDoc.name,
+              lastUpdated: savedDoc.date || '-',
+              previewUrl: savedDoc.url || null,
+              type: savedDoc.type || '',
+              remarks: savedDoc.remarks || '',
+              verdict: savedDoc.verdict || undefined,
+              isCorrection: savedDoc.isCorrection || doc.isCorrection
+            };
+          }
+          return doc;
+        });
+        return updatedDocs;
+      });
     }
   }, [nomineeData?.documents]);
 
