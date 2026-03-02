@@ -699,19 +699,21 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
               )}
 
               {/* Industry Selection */}
-              <div>
-                <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Establishment Industry</label>
-                <select
-                  value={newKeyData.industry}
-                  onChange={(e) => setNewKeyData({ ...newKeyData, industry: e.target.value })}
-                  className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-gkk-gold/5 focus:border-gkk-gold outline-none transition-all font-bold text-sm tracking-tight appearance-none"
-                >
-                  <option value="">Select Industry...</option>
-                  {industrySectors.map(ind => (
-                    <option key={ind.id} value={ind.name}>{ind.name}</option>
-                  ))}
-                </select>
-              </div>
+              {newKeyData.role === 'nominee' && (
+                <div>
+                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Establishment Industry</label>
+                  <select
+                    value={newKeyData.industry}
+                    onChange={(e) => setNewKeyData({ ...newKeyData, industry: e.target.value })}
+                    className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-gkk-gold/5 focus:border-gkk-gold outline-none transition-all font-bold text-sm tracking-tight appearance-none"
+                  >
+                    <option value="">Select Industry...</option>
+                    {industrySectors.map(ind => (
+                      <option key={ind.id} value={ind.name}>{ind.name}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
             </div>
 
             <div className="flex justify-end pt-2">
