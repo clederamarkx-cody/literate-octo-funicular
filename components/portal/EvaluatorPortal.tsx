@@ -954,13 +954,20 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                         </button>
                       )}
                       {(['admin', 'scd_team_leader'].includes(userRole || '')) && (
-                        <button onClick={() => {
-                          const newStatus = !selectedNominee.round2Unlocked;
-                          if (onToggleRound2) onToggleRound2(selectedNominee.id, newStatus);
-                          const updated = { ...selectedNominee, round2Unlocked: newStatus };
-                          setSelectedNominee(updated);
-                          setLocalNominees(prev => prev.map(a => a.id === updated.id ? updated : a));
-                        }} className={`px-10 py-4 rounded-[20px] font-bold transition-all shadow-xl text-[10px] tracking-widest uppercase ${selectedNominee.round2Unlocked ? 'bg-red-50 text-red-600 border border-red-100 hover:bg-red-100' : 'bg-gkk-gold text-gkk-navy hover:bg-gkk-navy hover:text-white'}`}>{selectedNominee.round2Unlocked ? 'Deactivate Stage 2' : 'Activate Stage 2'}</button>
+                        <button
+                          onClick={() => {
+                            if (!selectedNominee.stage1PassedByReu && !selectedNominee.round2Unlocked) return;
+                            const newStatus = !selectedNominee.round2Unlocked;
+                            if (onToggleRound2) onToggleRound2(selectedNominee.id, newStatus);
+                            const updated = { ...selectedNominee, round2Unlocked: newStatus };
+                            setSelectedNominee(updated);
+                            setLocalNominees(prev => prev.map(a => a.id === updated.id ? updated : a));
+                          }}
+                          disabled={!selectedNominee.stage1PassedByReu && !selectedNominee.round2Unlocked}
+                          className={`px-10 py-4 rounded-[20px] font-bold transition-all shadow-xl text-[10px] tracking-widest uppercase ${selectedNominee.round2Unlocked ? 'bg-red-50 text-red-600 border border-red-100 hover:bg-red-100' : (!selectedNominee.stage1PassedByReu ? 'bg-gray-100 text-gray-400 cursor-not-allowed opacity-70' : 'bg-gkk-gold text-gkk-navy hover:bg-gkk-navy hover:text-white')}`}
+                        >
+                          {selectedNominee.round2Unlocked ? 'Deactivate Stage 2' : (!selectedNominee.stage1PassedByReu ? 'Waiting for Regional Verification' : 'Activate Stage 2')}
+                        </button>
                       )}
                       {userRole === 'reu' && !selectedNominee.round2Unlocked && (
                         <span className="text-[10px] font-bold text-amber-500 uppercase tracking-widest bg-amber-50 px-5 py-3 rounded-2xl border border-amber-100">Regional verification pending</span>
