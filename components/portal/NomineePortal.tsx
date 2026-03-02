@@ -308,8 +308,8 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
           verdict: savedDoc?.verdict || undefined
         });
 
-        // Deficiency Logic: If this is Stage 1 and it failed, create a corresponding Stage 3 deficiency slot
-        if (round === 1 && savedDoc?.verdict === 'fail') {
+        // Deficiency Logic: If this is Stage 1 or 2 and it failed, create a corresponding Stage 3 deficiency slot
+        if ((round === 1 || round === 2) && savedDoc?.verdict === 'fail') {
           const deficiencySlotId = `r3-deficiency-${slotId}`;
           const currentCorrection = nomineeData?.documents?.find((d: any) => d.slotId === deficiencySlotId);
 
@@ -336,7 +336,7 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
     if (dynamicRequirements.stage3) processStage(dynamicRequirements.stage3, 3, 'r3');
 
     setDocuments(initialDocs);
-  }, [dynamicRequirements, nomineeData?.id]);
+  }, [dynamicRequirements, nomineeData?.id, nomineeData?.documents]);
 
   // Re-sync if nomineeData changes after mount
   useEffect(() => {
@@ -376,7 +376,9 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
     if (!dynamicRequirements) return 0;
 
     // Stage 2 override: 100% if Stage 3 is unlocked
-    if (round === 2 && nomineeData?.round3Unlocked) return 100;
+    if (round === 2 && nomineeData?.round3Unlocked) {
+      return 100;
+    }
 
     if (round === 3) {
       // Stage 3 progress: Deficiency-only model (ignore base stage3 requirements)
@@ -390,7 +392,7 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
 
     const stageKey = round === 1 ? 'stage1' : 'stage2';
     const stageReqs = dynamicRequirements[stageKey] || [];
-    if (stageReqs.length === 0) return 0;
+    if (stageReqs.length === 0) return (round === 2 && nomineeData?.round2Unlocked) ? 100 : 0;
 
     const roundDocs = documents.filter(d => d.round === round);
     const completed = roundDocs.filter(d => d.status === 'uploaded').length;

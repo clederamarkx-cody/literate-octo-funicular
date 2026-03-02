@@ -409,24 +409,30 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
           <div className="flex items-center">
             <FileText size={22} className="text-gkk-navy mr-4" />
             <h4 className="font-bold text-gkk-navy text-sm uppercase tracking-wider">Evaluation Checklist</h4>
-            <span className={`ml-4 text-[10px] font-black px-3 py-1 rounded-full border ${(totalEvaluated + deficienciesEvaluated) === (activeRequirements.length + deficiencies.length) ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
-              {(totalEvaluated + deficienciesEvaluated)} / {(activeRequirements.length + deficiencies.length)} EVALUATED
+            <span className={`ml-4 text-[10px] font-black px-3 py-1 rounded-full border ${(round === 3 ? deficienciesEvaluated : totalEvaluated) === (round === 3 ? deficiencies.length : activeRequirements.length) ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
+              {round === 3 ? deficienciesEvaluated : totalEvaluated} / {round === 3 ? deficiencies.length : activeRequirements.length} EVALUATED
             </span>
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* Base Requirements */}
-          {activeRequirements.map((req: any, idx: number) => {
-            const stagePrefix = round === 3 ? 'r3' : 'r1';
+          {/* Base Requirements - Only for Stage 1 & 2. Stage 3 is correction-only. */}
+          {round < 3 && activeRequirements.map((req: any, idx: number) => {
+            const stagePrefix = round === 1 ? 'r1' : 'r2';
             const slotId = `${stagePrefix}-${idx}`;
             return renderRequirementCard(req, slotId);
           })}
 
           {/* Dynamic Deficiency Slots (Stage 3 Only) */}
           {round === 3 && deficiencies.map((doc: any, idx: number) => {
+            const originalSlotId = doc.slotId?.replace('r3-deficiency-', '');
+            const [prefix, indexStr] = (originalSlotId || '').split('-');
+            const index = parseInt(indexStr);
+            const stageKey = prefix === 'r1' ? 'stage1' : 'stage2';
+            const originalLabel = dynamicRequirements[stageKey]?.[index]?.label || 'Requirement';
+
             const mockReq = {
-              label: doc.category === 'Deficiency Correction' ? doc.label : `[DEFICIENCY] ${doc.label}`,
+              label: `[DEFICIENCY] ${originalLabel}`,
               category: 'Deficiency Correction'
             };
             return renderRequirementCard(mockReq, doc.slotId);
