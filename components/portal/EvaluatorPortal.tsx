@@ -551,7 +551,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
       <div className="w-full">
         <div className="flex justify-between items-center mb-1.5">
           <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">
-            {userRole === 'reu' ? 'REU Progress' : 'Evaluator Progress'}
+            {round === 1 ? 'REU Progress' : 'Evaluator Progress'}
           </span>
           <span className="text-[9px] font-bold text-gray-400">{progress}%</span>
         </div>
