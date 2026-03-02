@@ -152,14 +152,15 @@ const MicroPortalView: React.FC<MicroPortalViewProps> = ({
                     </div>
                     {/* Stage 2 Contents - Only visible if activated */}
                     <div className={`collapse-transition overflow-hidden ${!!nomineeData?.round2Unlocked && stage2Open ? 'max-h-[5000px] opacity-100 p-8' : 'max-h-0 opacity-0 px-8 pb-0'}`}>
-                        <div className="mb-6 p-4 bg-blue-50/50 rounded-2xl border border-blue-100 flex items-start gap-4">
-                            <div className="p-2 bg-blue-100 text-blue-600 rounded-xl"><ShieldAlert size={18} /></div>
+                        <div className="flex flex-col items-center justify-center py-12 text-center space-y-4 bg-gray-50/50 rounded-3xl border border-dashed border-gray-200">
+                            <div className="p-4 bg-white rounded-2xl shadow-sm text-gray-400">
+                                <ShieldAlert size={32} />
+                            </div>
                             <div>
-                                <h5 className="text-[11px] font-black text-blue-600 uppercase tracking-widest mb-1">Evaluation Logic</h5>
-                                <p className="text-xs text-blue-800 font-medium leading-relaxed">This section displays documents from Stage 1 that require attention. Use this for reference; corrections must be uploaded in <span className="font-bold">Stage 3</span> once triggered.</p>
+                                <h5 className="text-sm font-bold text-gray-600">Evaluation in Progress</h5>
+                                <p className="text-xs text-gray-400 mt-1 max-w-xs mx-auto">The Regional Board is currently reviewing your submissions. Preliminary findings will be released in Stage 3.</p>
                             </div>
                         </div>
-                        <DocumentGrid round={2} documents={documents} nomineeData={nomineeData} handleOpenUpload={handleOpenUpload} handlePreview={handlePreview} />
                     </div>
                 </div>
 
