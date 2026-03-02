@@ -499,778 +499,773 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
         </div>
       </div>
     );
-  })
-}
-        </div >
-      </div >
+  };
+
+  const calculateProgress = (nominee: Nominee, round: number) => {
+    if (!dynamicRequirements) return 0;
+    const stageKey = round === 1 ? 'stage1' : round === 2 ? 'stage2' : 'stage3';
+    const stageReqs = dynamicRequirements[stageKey] || [];
+    if (stageReqs.length === 0) return 0;
+
+    const roundDocs = nominee.documents || [];
+    const stagePrefix = round === 1 ? 'r1' : round === 2 ? 'r2' : 'r3';
+
+    const evaluatedCount = stageReqs.filter((req: any, idx: number) => {
+      const slotId = `${stagePrefix}-${idx}`;
+      const doc = roundDocs.find(d => d.slotId === slotId);
+      return doc?.verdict === 'pass' || doc?.verdict === 'fail';
+    }).length;
+
+    return Math.round((evaluatedCount / stageReqs.length) * 100);
+  };
+
+  const renderProgressBar = (nominee: Nominee, round: number) => {
+    const progress = calculateProgress(nominee, round);
+    const colorClass = round === 1 ? 'bg-gkk-navy' : round === 2 ? 'bg-blue-600' : 'bg-gkk-gold';
+
+    return (
+      <div className="w-full">
+        <div className="flex justify-between items-center mb-1.5">
+          <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Evaluator Progress</span>
+          <span className="text-[9px] font-bold text-gray-400">{progress}%</span>
+        </div>
+        <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+          <div
+            className={`h-full ${colorClass} transition-all duration-1000 ease-out`}
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+      </div>
     );
   };
 
-const calculateProgress = (nominee: Nominee, round: number) => {
-  if (!dynamicRequirements) return 0;
-  const stageKey = round === 1 ? 'stage1' : round === 2 ? 'stage2' : 'stage3';
-  const stageReqs = dynamicRequirements[stageKey] || [];
-  if (stageReqs.length === 0) return 0;
-
-  const roundDocs = nominee.documents || [];
-  const stagePrefix = round === 1 ? 'r1' : round === 2 ? 'r2' : 'r3';
-
-  const evaluatedCount = stageReqs.filter((req: any, idx: number) => {
-    const slotId = `${stagePrefix}-${idx}`;
-    const doc = roundDocs.find(d => d.slotId === slotId);
-    return doc?.verdict === 'pass' || doc?.verdict === 'fail';
-  }).length;
-
-  return Math.round((evaluatedCount / stageReqs.length) * 100);
-};
-
-const renderProgressBar = (nominee: Nominee, round: number) => {
-  const progress = calculateProgress(nominee, round);
-  const colorClass = round === 1 ? 'bg-gkk-navy' : round === 2 ? 'bg-blue-600' : 'bg-gkk-gold';
-
-  return (
-    <div className="w-full">
-      <div className="flex justify-between items-center mb-1.5">
-        <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Evaluator Progress</span>
-        <span className="text-[9px] font-bold text-gray-400">{progress}%</span>
+  const renderDashboard = () => (
+    <div className="space-y-8 animate-in fade-in duration-500">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="bg-white p-8 rounded-[35px] border border-gray-200 shadow-sm flex items-center justify-between group hover:border-gkk-gold/30 transition-all">
+          <div><p className="text-gray-400 text-[10px] font-bold uppercase tracking-[0.2em] mb-2">My Nominees</p><h3 className="text-4xl font-serif font-bold text-gkk-navy">{filteredNominees.length}</h3></div>
+          <div className="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform"><ClipboardCheck size={28} /></div>
+        </div>
+        <div className="bg-white p-8 rounded-[35px] border border-gray-200 shadow-sm flex items-center justify-between group hover:border-gkk-gold/30 transition-all">
+          <div><p className="text-gray-400 text-[10px] font-bold uppercase tracking-[0.2em] mb-2">Pending Validation</p><h3 className="text-4xl font-serif font-bold text-gkk-navy">{filteredNominees.filter(a => a.status !== 'completed').length}</h3></div>
+          <div className="w-14 h-14 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform"><Clock size={28} /></div>
+        </div>
+        <div className="bg-white p-8 rounded-[35px] border border-gray-200 shadow-sm flex items-center justify-between group hover:border-gkk-gold/30 transition-all">
+          <div><p className="text-gray-400 text-[10px] font-bold uppercase tracking-[0.2em] mb-2">Cycle Verified</p><h3 className="text-4xl font-serif font-bold text-gkk-navy">{filteredNominees.filter(a => a.status === 'completed').length}</h3></div>
+          <div className="w-14 h-14 bg-green-50 text-green-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform"><CheckCircle size={28} /></div>
+        </div>
       </div>
-      <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
-        <div
-          className={`h-full ${colorClass} transition-all duration-1000 ease-out`}
-          style={{ width: `${progress}%` }}
-        />
+      <div className="grid lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2 bg-white rounded-[40px] border border-gray-200 shadow-sm overflow-hidden">
+          <div className="p-8 border-b border-gray-100 flex justify-between items-center bg-gray-50/30"><h3 className="font-serif font-bold text-xl text-gkk-navy uppercase tracking-wider">Assigned Queue</h3><button onClick={() => setActiveTab('entries')} className="text-xs font-bold text-gkk-gold hover:text-gkk-navy uppercase tracking-widest">Full Pipeline</button></div>
+          <div className="divide-y divide-gray-50 overflow-y-auto max-h-[500px]">
+            {sortedApplicants.map(nominee => (
+              <div key={nominee.id} className="p-6 hover:bg-gray-50/50 transition-all flex items-center justify-between group">
+                <div className="flex items-center gap-5"><div className="w-12 h-12 bg-gkk-navy/5 text-gkk-navy rounded-2xl flex items-center justify-center font-bold border border-gkk-navy/5 group-hover:bg-gkk-navy group-hover:text-white transition-all">{(nominee.name || '?').charAt(0)}</div><div><h4 className="font-bold text-gkk-navy uppercase tracking-tighter text-sm">{nominee.name || 'Unknown'}</h4><p className="text-[9px] text-gray-400 font-bold uppercase tracking-[0.2em] mt-1">{nominee.industry || 'Unknown'}</p></div></div>
+                <div className="flex items-center gap-6"><span className={`px-4 py-1.5 rounded-full text-[10px] font-bold border tracking-widest uppercase ${getStatusColor(nominee.status || 'in_progress')}`}>{(nominee.status || 'in_progress').replace('_', ' ')}</span><button onClick={() => handleReview(nominee)} className="p-3 bg-gray-100 text-gray-400 hover:bg-gkk-navy hover:text-white rounded-2xl transition-all"><ChevronRight size={20} /></button></div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="bg-gkk-navy rounded-[40px] p-8 text-white relative overflow-hidden flex flex-col group">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-gkk-gold/10 rounded-full blur-3xl -mr-20 -mt-20 group-hover:scale-110 transition-transform duration-1000"></div>
+          <h3 className="font-serif font-bold text-2xl mb-2 text-gkk-gold uppercase tracking-widest">14<sup>th</sup> Cycle</h3>
+          <p className="text-gray-400 text-xs font-bold uppercase tracking-[0.3em] mb-12">Regional Board View</p>
+          <div className="space-y-6 relative z-10 flex-1">
+            <div className="bg-white/5 rounded-3xl p-6 border border-white/5 backdrop-blur-sm shadow-xl"><div className="flex items-center gap-3 mb-4"><div className="p-2 bg-gkk-gold/20 rounded-xl"><Clock size={20} className="text-gkk-gold" /></div><span className="font-bold text-[10px] uppercase tracking-[0.2em]">Validation Deadline</span></div><p className="text-3xl font-serif font-bold">Nov 30, 2024</p></div>
+            <div className="p-6 rounded-3xl border border-white/5 bg-white/5"><div className="flex items-center gap-3 mb-4"><div className="p-2 bg-blue-500/20 rounded-xl"><PieChart size={20} className="text-blue-400" /></div><span className="font-bold text-[10px] uppercase tracking-[0.2em]">Validation Velocity</span></div><div className="w-full bg-black/40 h-2.5 rounded-full mb-3"><div className="bg-gkk-gold h-full rounded-full transition-all duration-1000" style={{ width: '42%' }}></div></div><p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest text-right">42% Finalized</p></div>
+          </div>
+        </div>
       </div>
     </div>
   );
-};
 
-const renderDashboard = () => (
-  <div className="space-y-8 animate-in fade-in duration-500">
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-      <div className="bg-white p-8 rounded-[35px] border border-gray-200 shadow-sm flex items-center justify-between group hover:border-gkk-gold/30 transition-all">
-        <div><p className="text-gray-400 text-[10px] font-bold uppercase tracking-[0.2em] mb-2">My Nominees</p><h3 className="text-4xl font-serif font-bold text-gkk-navy">{filteredNominees.length}</h3></div>
-        <div className="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform"><ClipboardCheck size={28} /></div>
-      </div>
-      <div className="bg-white p-8 rounded-[35px] border border-gray-200 shadow-sm flex items-center justify-between group hover:border-gkk-gold/30 transition-all">
-        <div><p className="text-gray-400 text-[10px] font-bold uppercase tracking-[0.2em] mb-2">Pending Validation</p><h3 className="text-4xl font-serif font-bold text-gkk-navy">{filteredNominees.filter(a => a.status !== 'completed').length}</h3></div>
-        <div className="w-14 h-14 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform"><Clock size={28} /></div>
-      </div>
-      <div className="bg-white p-8 rounded-[35px] border border-gray-200 shadow-sm flex items-center justify-between group hover:border-gkk-gold/30 transition-all">
-        <div><p className="text-gray-400 text-[10px] font-bold uppercase tracking-[0.2em] mb-2">Cycle Verified</p><h3 className="text-4xl font-serif font-bold text-gkk-navy">{filteredNominees.filter(a => a.status === 'completed').length}</h3></div>
-        <div className="w-14 h-14 bg-green-50 text-green-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform"><CheckCircle size={28} /></div>
-      </div>
-    </div>
-    <div className="grid lg:grid-cols-3 gap-8">
-      <div className="lg:col-span-2 bg-white rounded-[40px] border border-gray-200 shadow-sm overflow-hidden">
-        <div className="p-8 border-b border-gray-100 flex justify-between items-center bg-gray-50/30"><h3 className="font-serif font-bold text-xl text-gkk-navy uppercase tracking-wider">Assigned Queue</h3><button onClick={() => setActiveTab('entries')} className="text-xs font-bold text-gkk-gold hover:text-gkk-navy uppercase tracking-widest">Full Pipeline</button></div>
-        <div className="divide-y divide-gray-50 overflow-y-auto max-h-[500px]">
-          {sortedApplicants.map(nominee => (
-            <div key={nominee.id} className="p-6 hover:bg-gray-50/50 transition-all flex items-center justify-between group">
-              <div className="flex items-center gap-5"><div className="w-12 h-12 bg-gkk-navy/5 text-gkk-navy rounded-2xl flex items-center justify-center font-bold border border-gkk-navy/5 group-hover:bg-gkk-navy group-hover:text-white transition-all">{(nominee.name || '?').charAt(0)}</div><div><h4 className="font-bold text-gkk-navy uppercase tracking-tighter text-sm">{nominee.name || 'Unknown'}</h4><p className="text-[9px] text-gray-400 font-bold uppercase tracking-[0.2em] mt-1">{nominee.industry || 'Unknown'}</p></div></div>
-              <div className="flex items-center gap-6"><span className={`px-4 py-1.5 rounded-full text-[10px] font-bold border tracking-widest uppercase ${getStatusColor(nominee.status || 'in_progress')}`}>{(nominee.status || 'in_progress').replace('_', ' ')}</span><button onClick={() => handleReview(nominee)} className="p-3 bg-gray-100 text-gray-400 hover:bg-gkk-navy hover:text-white rounded-2xl transition-all"><ChevronRight size={20} /></button></div>
-            </div>
-          ))}
+  const renderEntries = () => (
+    <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500">
+      <div className="flex flex-col md:flex-row justify-between items-center gap-6 bg-white p-6 rounded-[35px] border border-gray-200 shadow-sm">
+        <div className="relative w-full md:w-[450px] group"><Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-gkk-gold transition-colors" /><input type="text" placeholder="Filter Nominee Pipeline..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full pl-12 pr-6 py-4 bg-gray-50 border border-gray-100 rounded-[25px] focus:outline-none focus:ring-4 focus:ring-gkk-gold/5 focus:bg-white focus:border-gkk-gold transition-all font-bold text-sm tracking-tight" /></div>
+        <div className="flex gap-3 w-full md:w-auto">
+          <button onClick={onUnderDev} className="flex-1 lg:flex-none px-6 py-4 bg-white border border-gray-100 text-gray-400 font-bold rounded-2xl text-[10px] uppercase tracking-[0.2em] hover:text-gkk-navy transition-all"><Filter size={18} className="mr-2" /> Filter</button>
+          <button onClick={onUnderDev} className="flex-1 lg:flex-none px-6 py-4 bg-gkk-navy text-white font-bold rounded-2xl text-[10px] uppercase tracking-[0.2em] shadow-xl hover:bg-gkk-royalBlue transition-all"><Download size={18} className="mr-2" /> Export</button>
         </div>
       </div>
-      <div className="bg-gkk-navy rounded-[40px] p-8 text-white relative overflow-hidden flex flex-col group">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-gkk-gold/10 rounded-full blur-3xl -mr-20 -mt-20 group-hover:scale-110 transition-transform duration-1000"></div>
-        <h3 className="font-serif font-bold text-2xl mb-2 text-gkk-gold uppercase tracking-widest">14<sup>th</sup> Cycle</h3>
-        <p className="text-gray-400 text-xs font-bold uppercase tracking-[0.3em] mb-12">Regional Board View</p>
-        <div className="space-y-6 relative z-10 flex-1">
-          <div className="bg-white/5 rounded-3xl p-6 border border-white/5 backdrop-blur-sm shadow-xl"><div className="flex items-center gap-3 mb-4"><div className="p-2 bg-gkk-gold/20 rounded-xl"><Clock size={20} className="text-gkk-gold" /></div><span className="font-bold text-[10px] uppercase tracking-[0.2em]">Validation Deadline</span></div><p className="text-3xl font-serif font-bold">Nov 30, 2024</p></div>
-          <div className="p-6 rounded-3xl border border-white/5 bg-white/5"><div className="flex items-center gap-3 mb-4"><div className="p-2 bg-blue-500/20 rounded-xl"><PieChart size={20} className="text-blue-400" /></div><span className="font-bold text-[10px] uppercase tracking-[0.2em]">Validation Velocity</span></div><div className="w-full bg-black/40 h-2.5 rounded-full mb-3"><div className="bg-gkk-gold h-full rounded-full transition-all duration-1000" style={{ width: '42%' }}></div></div><p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest text-right">42% Finalized</p></div>
-        </div>
-      </div>
+      <div className="bg-white rounded-[40px] border border-gray-200 shadow-sm overflow-hidden"><table className="w-full text-left border-collapse"><thead className="bg-gray-50/50 text-[10px] font-black text-gray-400 uppercase tracking-[0.25em]"><tr className="border-b border-gray-100"><th className="px-8 py-6">Establishment Identity</th><th className="px-8 py-6">Sector</th><th className="px-8 py-6">Artifacts</th><th className="px-8 py-6">Status</th><th className="px-8 py-6 text-right">Action</th></tr></thead><tbody className="divide-y divide-gray-50">{sortedApplicants.filter(a => (a.name || '').toLowerCase().includes(searchTerm.toLowerCase())).map(nominee => (<tr key={nominee.id} className="hover:bg-gray-50/50 transition-all group cursor-pointer" onClick={() => handleReview(nominee)}><td className="px-8 py-6"><div className="flex items-center gap-4"><div className="w-12 h-12 bg-gkk-navy/5 text-gkk-navy rounded-2xl flex items-center justify-center font-bold border border-gkk-navy/5 group-hover:bg-gkk-navy group-hover:text-white transition-all">{(nominee.name || '?').charAt(0)}</div><div><p className="font-bold text-gkk-navy text-sm uppercase tracking-tight leading-none">{nominee.name}</p><p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-2">{nominee.regId}</p></div></div></td><td className="px-8 py-6"><p className="text-xs font-bold text-gray-700 uppercase tracking-wider">{nominee.industry}</p><p className="text-[10px] text-gray-400 font-bold uppercase mt-1">{nominee.region}</p></td><td className="px-8 py-6"><div className="flex items-center gap-2 text-[10px] font-bold text-gray-500 uppercase tracking-widest"><FileText size={16} className="text-gray-300" /> {nominee.documents?.length || 0} Records</div></td><td className="px-8 py-6"><span className={`px-4 py-1.5 rounded-full text-[9px] font-bold border tracking-widest uppercase ${getStatusColor(nominee.status || 'in_progress')}`}>{(nominee.status || 'in_progress').replace('_', ' ')}</span></td><td className="px-8 py-6 text-right"><button className="p-3 bg-gray-50 text-gray-400 group-hover:bg-gkk-gold group-hover:text-gkk-navy rounded-2xl transition-all"><ChevronRight size={20} /></button></td></tr>))}</tbody></table></div>
     </div>
-  </div>
-);
+  );
 
-const renderEntries = () => (
-  <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500">
-    <div className="flex flex-col md:flex-row justify-between items-center gap-6 bg-white p-6 rounded-[35px] border border-gray-200 shadow-sm">
-      <div className="relative w-full md:w-[450px] group"><Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-gkk-gold transition-colors" /><input type="text" placeholder="Filter Nominee Pipeline..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full pl-12 pr-6 py-4 bg-gray-50 border border-gray-100 rounded-[25px] focus:outline-none focus:ring-4 focus:ring-gkk-gold/5 focus:bg-white focus:border-gkk-gold transition-all font-bold text-sm tracking-tight" /></div>
-      <div className="flex gap-3 w-full md:w-auto">
-        <button onClick={onUnderDev} className="flex-1 lg:flex-none px-6 py-4 bg-white border border-gray-100 text-gray-400 font-bold rounded-2xl text-[10px] uppercase tracking-[0.2em] hover:text-gkk-navy transition-all"><Filter size={18} className="mr-2" /> Filter</button>
-        <button onClick={onUnderDev} className="flex-1 lg:flex-none px-6 py-4 bg-gkk-navy text-white font-bold rounded-2xl text-[10px] uppercase tracking-[0.2em] shadow-xl hover:bg-gkk-royalBlue transition-all"><Download size={18} className="mr-2" /> Export</button>
-      </div>
-    </div>
-    <div className="bg-white rounded-[40px] border border-gray-200 shadow-sm overflow-hidden"><table className="w-full text-left border-collapse"><thead className="bg-gray-50/50 text-[10px] font-black text-gray-400 uppercase tracking-[0.25em]"><tr className="border-b border-gray-100"><th className="px-8 py-6">Establishment Identity</th><th className="px-8 py-6">Sector</th><th className="px-8 py-6">Artifacts</th><th className="px-8 py-6">Status</th><th className="px-8 py-6 text-right">Action</th></tr></thead><tbody className="divide-y divide-gray-50">{sortedApplicants.filter(a => (a.name || '').toLowerCase().includes(searchTerm.toLowerCase())).map(nominee => (<tr key={nominee.id} className="hover:bg-gray-50/50 transition-all group cursor-pointer" onClick={() => handleReview(nominee)}><td className="px-8 py-6"><div className="flex items-center gap-4"><div className="w-12 h-12 bg-gkk-navy/5 text-gkk-navy rounded-2xl flex items-center justify-center font-bold border border-gkk-navy/5 group-hover:bg-gkk-navy group-hover:text-white transition-all">{(nominee.name || '?').charAt(0)}</div><div><p className="font-bold text-gkk-navy text-sm uppercase tracking-tight leading-none">{nominee.name}</p><p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-2">{nominee.regId}</p></div></div></td><td className="px-8 py-6"><p className="text-xs font-bold text-gray-700 uppercase tracking-wider">{nominee.industry}</p><p className="text-[10px] text-gray-400 font-bold uppercase mt-1">{nominee.region}</p></td><td className="px-8 py-6"><div className="flex items-center gap-2 text-[10px] font-bold text-gray-500 uppercase tracking-widest"><FileText size={16} className="text-gray-300" /> {nominee.documents?.length || 0} Records</div></td><td className="px-8 py-6"><span className={`px-4 py-1.5 rounded-full text-[9px] font-bold border tracking-widest uppercase ${getStatusColor(nominee.status || 'in_progress')}`}>{(nominee.status || 'in_progress').replace('_', ' ')}</span></td><td className="px-8 py-6 text-right"><button className="p-3 bg-gray-50 text-gray-400 group-hover:bg-gkk-gold group-hover:text-gkk-navy rounded-2xl transition-all"><ChevronRight size={20} /></button></td></tr>))}</tbody></table></div>
-  </div>
-);
-
-const renderManagement = () => (
-  <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500">
-    <div className="grid lg:grid-cols-1 gap-8">
-      {/* Issuance Form */}
-      <div className="bg-white rounded-[40px] border border-gray-200 shadow-sm overflow-hidden flex flex-col w-full">
-        <div className="p-8 border-b border-gray-100 bg-gray-50/30">
-          <h3 className="font-serif font-bold text-xl text-gkk-navy uppercase tracking-wider">GKK Access Key Generator</h3>
-          <p className="text-[14.5px] text-gray-400 font-semibold mt-2">Generate invitation keys for new nominees and staff.</p>
-        </div>
-        <form onSubmit={handleIssueKey} className="p-8 space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div>
-              <label className="block text-[14.5px] font-semibold text-gray-400 uppercase tracking-wide mb-2 ml-1">Establishment Name</label>
-              <input
-                type="text"
-                required
-                value={newKeyData.companyName}
-                onChange={(e) => setNewKeyData({ ...newKeyData, companyName: e.target.value })}
-                className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-gkk-gold/5 focus:border-gkk-gold outline-none transition-all font-semibold text-[14.5px]"
-                placeholder="e.g. Acme Corp Philippines"
-              />
-            </div>
-            <div>
-              <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Primary Focal Person</label>
-              <input
-                type="text"
-                required
-                value={newKeyData.focalName}
-                onChange={(e) => setNewKeyData({ ...newKeyData, focalName: e.target.value })}
-                className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-gkk-gold/5 focus:border-gkk-gold outline-none transition-all font-bold text-sm tracking-tight"
-                placeholder="e.g. Juan Dela Cruz"
-              />
-            </div>
-            <div>
-              <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Administrator Email</label>
-              <input
-                type="email"
-                required
-                value={newKeyData.email}
-                onChange={(e) => setNewKeyData({ ...newKeyData, email: e.target.value })}
-                className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-gkk-gold/5 focus:border-gkk-gold outline-none transition-all font-bold text-sm tracking-tight"
-                placeholder="safety@company.ph"
-              />
-            </div>
-
-            <div>
-              <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Assigned Role</label>
-              <select
-                value={newKeyData.role}
-                onChange={(e) => setNewKeyData({ ...newKeyData, role: e.target.value })}
-                className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-gkk-gold/5 focus:border-gkk-gold outline-none transition-all font-semibold text-[14.5px] appearance-none"
-              >
-                <option value="nominee">Nominee</option>
-                <option value="reu">REU (Regional Extension Unit)</option>
-                <option value="scd_team_leader">SCD Team Leader</option>
-                <option value="evaluator">Evaluator</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Assigned Region</label>
-              <select
-                value={newKeyData.region}
-                onChange={(e) => setNewKeyData({ ...newKeyData, region: e.target.value })}
-                className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-gkk-gold/5 focus:border-gkk-gold outline-none transition-all font-bold text-sm tracking-tight appearance-none"
-              >
-                {PH_REGIONS.map(reg => (
-                  <option key={reg} value={reg}>{reg}</option>
-                ))}
-              </select>
-            </div>
-
-            {newKeyData.role === 'nominee' ? (
+  const renderManagement = () => (
+    <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500">
+      <div className="grid lg:grid-cols-1 gap-8">
+        {/* Issuance Form */}
+        <div className="bg-white rounded-[40px] border border-gray-200 shadow-sm overflow-hidden flex flex-col w-full">
+          <div className="p-8 border-b border-gray-100 bg-gray-50/30">
+            <h3 className="font-serif font-bold text-xl text-gkk-navy uppercase tracking-wider">GKK Access Key Generator</h3>
+            <p className="text-[14.5px] text-gray-400 font-semibold mt-2">Generate invitation keys for new nominees and staff.</p>
+          </div>
+          <form onSubmit={handleIssueKey} className="p-8 space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
-                <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Nominee Sector / Class</label>
+                <label className="block text-[14.5px] font-semibold text-gray-400 uppercase tracking-wide mb-2 ml-1">Establishment Name</label>
+                <input
+                  type="text"
+                  required
+                  value={newKeyData.companyName}
+                  onChange={(e) => setNewKeyData({ ...newKeyData, companyName: e.target.value })}
+                  className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-gkk-gold/5 focus:border-gkk-gold outline-none transition-all font-semibold text-[14.5px]"
+                  placeholder="e.g. Acme Corp Philippines"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Primary Focal Person</label>
+                <input
+                  type="text"
+                  required
+                  value={newKeyData.focalName}
+                  onChange={(e) => setNewKeyData({ ...newKeyData, focalName: e.target.value })}
+                  className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-gkk-gold/5 focus:border-gkk-gold outline-none transition-all font-bold text-sm tracking-tight"
+                  placeholder="e.g. Juan Dela Cruz"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Administrator Email</label>
+                <input
+                  type="email"
+                  required
+                  value={newKeyData.email}
+                  onChange={(e) => setNewKeyData({ ...newKeyData, email: e.target.value })}
+                  className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-gkk-gold/5 focus:border-gkk-gold outline-none transition-all font-bold text-sm tracking-tight"
+                  placeholder="safety@company.ph"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Assigned Role</label>
                 <select
-                  value={newKeyData.category}
-                  onChange={(e) => setNewKeyData({ ...newKeyData, category: e.target.value })}
-                  className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-gkk-gold/5 focus:border-gkk-gold outline-none transition-all font-bold text-sm tracking-tight appearance-none"
+                  value={newKeyData.role}
+                  onChange={(e) => setNewKeyData({ ...newKeyData, role: e.target.value })}
+                  className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-gkk-gold/5 focus:border-gkk-gold outline-none transition-all font-semibold text-[14.5px] appearance-none"
                 >
-                  <option value="Private Sector">Private Sector</option>
-                  <option value="Individual">Individual</option>
-                  <option value="Micro Enterprise">Micro Enterprise</option>
-                  <option value="Government Agency">Government Agency</option>
+                  <option value="nominee">Nominee</option>
+                  <option value="reu">REU (Regional Extension Unit)</option>
+                  <option value="scd_team_leader">SCD Team Leader</option>
+                  <option value="evaluator">Evaluator</option>
                 </select>
               </div>
-            ) : (
-              <div className="flex items-end pb-1">
-                <div className="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 flex items-center justify-center">
-                  <p className="text-[14.5px] text-gray-400 font-semibold">Sector selection only for Nominees</p>
-                </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Assigned Region</label>
+                <select
+                  value={newKeyData.region}
+                  onChange={(e) => setNewKeyData({ ...newKeyData, region: e.target.value })}
+                  className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-gkk-gold/5 focus:border-gkk-gold outline-none transition-all font-bold text-sm tracking-tight appearance-none"
+                >
+                  {PH_REGIONS.map(reg => (
+                    <option key={reg} value={reg}>{reg}</option>
+                  ))}
+                </select>
               </div>
-            )}
-          </div>
 
-          <div className="flex justify-end pt-2">
-            <button
-              disabled={isIssuingKey}
-              className="px-12 py-4 bg-gkk-navy text-white font-semibold rounded-2xl shadow-xl shadow-gkk-navy/20 hover:bg-gkk-royalBlue transition-all uppercase tracking-wider text-[14.5px] disabled:opacity-50"
-            >
-              {isIssuingKey ? 'Generating...' : 'Issue GKK Access Key'}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+              {newKeyData.role === 'nominee' ? (
+                <div>
+                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Nominee Sector / Class</label>
+                  <select
+                    value={newKeyData.category}
+                    onChange={(e) => setNewKeyData({ ...newKeyData, category: e.target.value })}
+                    className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-gkk-gold/5 focus:border-gkk-gold outline-none transition-all font-bold text-sm tracking-tight appearance-none"
+                  >
+                    <option value="Private Sector">Private Sector</option>
+                    <option value="Individual">Individual</option>
+                    <option value="Micro Enterprise">Micro Enterprise</option>
+                    <option value="Government Agency">Government Agency</option>
+                  </select>
+                </div>
+              ) : (
+                <div className="flex items-end pb-1">
+                  <div className="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 flex items-center justify-center">
+                    <p className="text-[14.5px] text-gray-400 font-semibold">Sector selection only for Nominees</p>
+                  </div>
+                </div>
+              )}
+            </div>
 
-    {/* Access Key Log - Full Width Landscape */}
-    <div className="bg-white rounded-[40px] border border-gray-200 shadow-sm overflow-hidden">
-      <div className="p-8 border-b border-gray-100 bg-gray-50/30">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="font-serif font-bold text-xl text-gkk-navy uppercase tracking-wider">Access Key Log</h3>
-          <span className="text-[14.5px] bg-blue-50 text-blue-600 px-3 py-1 rounded-full font-semibold uppercase tracking-wide">
-            {allKeys.filter((k: any) => {
-              const matchesSearch = keySearchTerm === '' || (k.key_id || '').toLowerCase().includes(keySearchTerm.toLowerCase()) || (k.name || '').toLowerCase().includes(keySearchTerm.toLowerCase()) || (k.email || '').toLowerCase().includes(keySearchTerm.toLowerCase());
-              const matchesStatus = keyStatusFilter === 'all' || k.status === keyStatusFilter;
-              const matchesRole = keyRoleFilter === 'all' || k.role === keyRoleFilter;
-              return matchesSearch && matchesStatus && matchesRole;
-            }).length} of {allKeys.length} Keys
-          </span>
-        </div>
-        <div className="flex flex-col sm:flex-row gap-3">
-          <div className="relative group flex-1">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-gkk-gold transition-colors" size={16} />
-            <input
-              type="text"
-              placeholder="Search by key, name, or email..."
-              value={keySearchTerm}
-              onChange={(e) => setKeySearchTerm(e.target.value)}
-              className="pl-10 pr-4 py-3 bg-white border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-gkk-gold/5 focus:border-gkk-gold transition-all font-semibold text-[14.5px] w-full shadow-sm"
-            />
-          </div>
-          <select
-            value={keyStatusFilter}
-            onChange={(e) => setKeyStatusFilter(e.target.value)}
-            className="px-4 py-3 bg-white border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-gkk-gold/5 focus:border-gkk-gold transition-all font-semibold text-[14.5px] shadow-sm appearance-none min-w-[160px]"
-          >
-            <option value="all">All Status</option>
-            <option value="issued">Issued</option>
-            <option value="activated">Activated</option>
-            <option value="revoked">Revoked</option>
-            <option value="reusable">Reusable</option>
-          </select>
-          <select
-            value={keyRoleFilter}
-            onChange={(e) => setKeyRoleFilter(e.target.value)}
-            className="px-4 py-3 bg-white border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-gkk-gold/5 focus:border-gkk-gold transition-all font-semibold text-[14.5px] shadow-sm appearance-none min-w-[160px]"
-          >
-            <option value="all">All Roles</option>
-            <option value="nominee">Nominee</option>
-            <option value="evaluator">Evaluator</option>
-            <option value="reu">REU</option>
-            <option value="scd_team_leader">SCD Team Leader</option>
-            <option value="admin">Admin</option>
-          </select>
+            <div className="flex justify-end pt-2">
+              <button
+                disabled={isIssuingKey}
+                className="px-12 py-4 bg-gkk-navy text-white font-semibold rounded-2xl shadow-xl shadow-gkk-navy/20 hover:bg-gkk-royalBlue transition-all uppercase tracking-wider text-[14.5px] disabled:opacity-50"
+              >
+                {isIssuingKey ? 'Generating...' : 'Issue GKK Access Key'}
+              </button>
+            </div>
+          </form>
         </div>
       </div>
-      <div className="overflow-x-auto max-h-[600px]">
-        <table className="w-full text-left border-collapse min-w-[1000px]">
-          <thead>
-            <tr className="bg-gray-50/50 border-b border-gray-100">
-              <th className="px-6 py-4 text-[14.5px] font-semibold text-gray-400 uppercase tracking-wide">Pass Key</th>
-              <th className="px-6 py-4 text-[14.5px] font-semibold text-gray-400 uppercase tracking-wide">Establishment / User</th>
-              <th className="px-6 py-4 text-[14.5px] font-semibold text-gray-400 uppercase tracking-wide">Email</th>
-              <th className="px-6 py-4 text-[14.5px] font-semibold text-gray-400 uppercase tracking-wide">Role</th>
-              <th className="px-6 py-4 text-[14.5px] font-semibold text-gray-400 uppercase tracking-wide">Region</th>
-              <th className="px-6 py-4 text-[14.5px] font-semibold text-gray-400 uppercase tracking-wide">Category</th>
-              <th className="px-6 py-4 text-[14.5px] font-semibold text-gray-400 uppercase tracking-wide">Status</th>
-              <th className="px-6 py-4 text-[14.5px] font-semibold text-gray-400 uppercase tracking-wide text-right">Issued</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-50">
-            {(() => {
-              const filteredKeys = allKeys.filter((k: any) => {
+
+      {/* Access Key Log - Full Width Landscape */}
+      <div className="bg-white rounded-[40px] border border-gray-200 shadow-sm overflow-hidden">
+        <div className="p-8 border-b border-gray-100 bg-gray-50/30">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="font-serif font-bold text-xl text-gkk-navy uppercase tracking-wider">Access Key Log</h3>
+            <span className="text-[14.5px] bg-blue-50 text-blue-600 px-3 py-1 rounded-full font-semibold uppercase tracking-wide">
+              {allKeys.filter((k: any) => {
                 const matchesSearch = keySearchTerm === '' || (k.key_id || '').toLowerCase().includes(keySearchTerm.toLowerCase()) || (k.name || '').toLowerCase().includes(keySearchTerm.toLowerCase()) || (k.email || '').toLowerCase().includes(keySearchTerm.toLowerCase());
                 const matchesStatus = keyStatusFilter === 'all' || k.status === keyStatusFilter;
                 const matchesRole = keyRoleFilter === 'all' || k.role === keyRoleFilter;
                 return matchesSearch && matchesStatus && matchesRole;
-              });
-              return filteredKeys.length === 0 ? (
-                <tr>
-                  <td colSpan={8} className="p-10 text-center text-gray-400 font-semibold uppercase tracking-wide text-[14.5px]">{allKeys.length === 0 ? 'No keys issued yet.' : 'No keys match your filters.'}</td>
-                </tr>
-              ) : (
-                filteredKeys.sort((a: any, b: any) => new Date(b.created_at || b.issuedAt).getTime() - new Date(a.created_at || a.issuedAt).getTime()).map((key: any) => (
-                  <tr key={key.key_id || key.keyId} className="group hover:bg-gray-50/50 transition-colors">
-                    <td className="px-6 py-4">
-                      <span className="text-[14.5px] font-semibold text-gkk-navy uppercase tracking-wide select-all">{key.key_id || key.keyId}</span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="text-[14.5px] text-gkk-navy font-semibold uppercase">{key.name || '---'}</span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="text-[14.5px] text-gray-500 font-semibold">{key.email || '---'}</span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="px-2 py-0.5 rounded-md bg-gray-100 text-gray-500 text-[14.5px] font-semibold uppercase">
-                        {key.role.replace('_', ' ')}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="text-[14.5px] text-gray-500 font-semibold uppercase">{key.region}</span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="text-[14.5px] text-gray-500 font-semibold uppercase">{key.category || 'N/A'}</span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`px-2 py-0.5 rounded-full text-[14.5px] font-semibold uppercase border ${key.status === 'activated' ? 'bg-green-50 text-green-600 border-green-100' : 'bg-amber-50 text-amber-600 border-amber-100'}`}>
-                        {key.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <span className="text-[14.5px] text-gray-400 font-semibold uppercase">{new Date(key.created_at || key.issuedAt).toLocaleDateString()}</span>
-                    </td>
+              }).length} of {allKeys.length} Keys
+            </span>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="relative group flex-1">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-gkk-gold transition-colors" size={16} />
+              <input
+                type="text"
+                placeholder="Search by key, name, or email..."
+                value={keySearchTerm}
+                onChange={(e) => setKeySearchTerm(e.target.value)}
+                className="pl-10 pr-4 py-3 bg-white border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-gkk-gold/5 focus:border-gkk-gold transition-all font-semibold text-[14.5px] w-full shadow-sm"
+              />
+            </div>
+            <select
+              value={keyStatusFilter}
+              onChange={(e) => setKeyStatusFilter(e.target.value)}
+              className="px-4 py-3 bg-white border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-gkk-gold/5 focus:border-gkk-gold transition-all font-semibold text-[14.5px] shadow-sm appearance-none min-w-[160px]"
+            >
+              <option value="all">All Status</option>
+              <option value="issued">Issued</option>
+              <option value="activated">Activated</option>
+              <option value="revoked">Revoked</option>
+              <option value="reusable">Reusable</option>
+            </select>
+            <select
+              value={keyRoleFilter}
+              onChange={(e) => setKeyRoleFilter(e.target.value)}
+              className="px-4 py-3 bg-white border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-gkk-gold/5 focus:border-gkk-gold transition-all font-semibold text-[14.5px] shadow-sm appearance-none min-w-[160px]"
+            >
+              <option value="all">All Roles</option>
+              <option value="nominee">Nominee</option>
+              <option value="evaluator">Evaluator</option>
+              <option value="reu">REU</option>
+              <option value="scd_team_leader">SCD Team Leader</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+        </div>
+        <div className="overflow-x-auto max-h-[600px]">
+          <table className="w-full text-left border-collapse min-w-[1000px]">
+            <thead>
+              <tr className="bg-gray-50/50 border-b border-gray-100">
+                <th className="px-6 py-4 text-[14.5px] font-semibold text-gray-400 uppercase tracking-wide">Pass Key</th>
+                <th className="px-6 py-4 text-[14.5px] font-semibold text-gray-400 uppercase tracking-wide">Establishment / User</th>
+                <th className="px-6 py-4 text-[14.5px] font-semibold text-gray-400 uppercase tracking-wide">Email</th>
+                <th className="px-6 py-4 text-[14.5px] font-semibold text-gray-400 uppercase tracking-wide">Role</th>
+                <th className="px-6 py-4 text-[14.5px] font-semibold text-gray-400 uppercase tracking-wide">Region</th>
+                <th className="px-6 py-4 text-[14.5px] font-semibold text-gray-400 uppercase tracking-wide">Category</th>
+                <th className="px-6 py-4 text-[14.5px] font-semibold text-gray-400 uppercase tracking-wide">Status</th>
+                <th className="px-6 py-4 text-[14.5px] font-semibold text-gray-400 uppercase tracking-wide text-right">Issued</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-50">
+              {(() => {
+                const filteredKeys = allKeys.filter((k: any) => {
+                  const matchesSearch = keySearchTerm === '' || (k.key_id || '').toLowerCase().includes(keySearchTerm.toLowerCase()) || (k.name || '').toLowerCase().includes(keySearchTerm.toLowerCase()) || (k.email || '').toLowerCase().includes(keySearchTerm.toLowerCase());
+                  const matchesStatus = keyStatusFilter === 'all' || k.status === keyStatusFilter;
+                  const matchesRole = keyRoleFilter === 'all' || k.role === keyRoleFilter;
+                  return matchesSearch && matchesStatus && matchesRole;
+                });
+                return filteredKeys.length === 0 ? (
+                  <tr>
+                    <td colSpan={8} className="p-10 text-center text-gray-400 font-semibold uppercase tracking-wide text-[14.5px]">{allKeys.length === 0 ? 'No keys issued yet.' : 'No keys match your filters.'}</td>
                   </tr>
-                ))
-              );
-            })()}
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    {/* User Profiles Directory */}
-    <UserProfileTable />
-  </div>
-);
-
-const renderReview = () => {
-  if (!selectedNominee) return null;
-  return (
-    <div className="animate-in fade-in duration-500 space-y-8 pb-20">
-      <div className="bg-white p-6 rounded-[35px] border border-gray-200 shadow-xl sticky top-0 z-30 ring-1 ring-black/5">
-        <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-8">
-          {/* Left: Actions & Identity */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
-            <button
-              onClick={handleBackToList}
-              className="p-3.5 bg-gray-50 text-gray-400 hover:bg-gkk-navy hover:text-white rounded-[20px] transition-all border border-gray-100 hover:scale-110 active:scale-95 shadow-sm shrink-0"
-            >
-              <ChevronLeft size={24} />
-            </button>
-
-            <div className="flex items-center gap-5">
-              <div className="p-4 bg-gkk-navy/5 rounded-[22px] text-gkk-navy ring-1 ring-gkk-navy/10 hidden md:block">
-                <Building2 size={32} />
-              </div>
-              <div>
-                <h2 className="text-2xl font-serif font-black text-gkk-navy leading-none uppercase tracking-tight mb-2.5">
-                  {selectedNominee.name}
-                </h2>
-                <div className="flex flex-wrap items-center gap-2.5">
-                  <span className="bg-gray-100 px-3 py-1 rounded-full font-bold text-[9px] text-gray-500 uppercase tracking-widest border border-gray-200/50">
-                    ID: {selectedNominee.regId}
-                  </span>
-                  <span className={`px-3 py-1 rounded-full text-[9px] font-bold border uppercase tracking-widest ${getStatusColor(selectedNominee.status)}`}>
-                    {selectedNominee.status.replace('_', ' ')}
-                  </span>
-                  <div className="flex items-center gap-1.5 ml-2">
-                    <MapPin size={11} className="text-gkk-gold" />
-                    <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">
-                      {selectedNominee.region}, PH
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Right: Consolidated Progress Trackers */}
-          <div className="flex flex-wrap gap-4 items-center bg-gray-50/50 p-2 rounded-[25px] border border-gray-100/50">
-            <div className="w-36 bg-white rounded-[20px] p-4 text-center border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
-              {renderProgressBar(selectedNominee, 1)}
-            </div>
-            {(selectedNominee.round2Unlocked || ['admin', 'scd_team_leader', 'reu', 'evaluator'].includes(userRole || '')) && (
-              <div className="w-36 bg-white rounded-[20px] p-4 text-center border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
-                {renderProgressBar(selectedNominee, 2)}
-              </div>
-            )}
-            {(selectedNominee.round3Unlocked || ['admin', 'scd_team_leader', 'reu', 'evaluator'].includes(userRole || '')) && (
-              <div className="w-36 bg-white rounded-[20px] p-4 text-center border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
-                {renderProgressBar(selectedNominee, 3)}
-              </div>
-            )}
-          </div>
+                ) : (
+                  filteredKeys.sort((a: any, b: any) => new Date(b.created_at || b.issuedAt).getTime() - new Date(a.created_at || a.issuedAt).getTime()).map((key: any) => (
+                    <tr key={key.key_id || key.keyId} className="group hover:bg-gray-50/50 transition-colors">
+                      <td className="px-6 py-4">
+                        <span className="text-[14.5px] font-semibold text-gkk-navy uppercase tracking-wide select-all">{key.key_id || key.keyId}</span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="text-[14.5px] text-gkk-navy font-semibold uppercase">{key.name || '---'}</span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="text-[14.5px] text-gray-500 font-semibold">{key.email || '---'}</span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="px-2 py-0.5 rounded-md bg-gray-100 text-gray-500 text-[14.5px] font-semibold uppercase">
+                          {key.role.replace('_', ' ')}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="text-[14.5px] text-gray-500 font-semibold uppercase">{key.region}</span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="text-[14.5px] text-gray-500 font-semibold uppercase">{key.category || 'N/A'}</span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={`px-2 py-0.5 rounded-full text-[14.5px] font-semibold uppercase border ${key.status === 'activated' ? 'bg-green-50 text-green-600 border-green-100' : 'bg-amber-50 text-amber-600 border-amber-100'}`}>
+                          {key.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <span className="text-[14.5px] text-gray-400 font-semibold uppercase">{new Date(key.created_at || key.issuedAt).toLocaleDateString()}</span>
+                      </td>
+                    </tr>
+                  ))
+                );
+              })()}
+            </tbody>
+          </table>
         </div>
       </div>
 
-      <div className="space-y-8">
-        <div className="flex justify-between items-start">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => setIsStage1Folded(!isStage1Folded)}
-              className="p-2 hover:bg-gray-100 rounded-xl transition-colors text-gkk-navy/40 hover:text-gkk-navy"
-            >
-              {isStage1Folded ? <ChevronDown size={24} /> : <ChevronUp size={24} />}
-            </button>
-            <div>
-              <div className="flex items-center gap-3">
-                <h3 className="text-2xl font-serif font-bold text-gkk-navy uppercase tracking-widest leading-none">STAGE 1 (SUBMISSION)</h3>
-                {selectedNominee.stage1PassedByReu && (
-                  <span className="bg-emerald-100 text-emerald-700 text-[9px] font-black px-3 py-1 rounded-full border border-emerald-200 uppercase tracking-widest flex items-center gap-1.5 shadow-sm">
-                    <ShieldCheck size={12} /> REU VERIFIED
-                  </span>
-                )}
-              </div>
-              {!isStage1Folded && <p className="text-xs text-gray-500 mt-2 font-bold uppercase tracking-widest italic opacity-60">Evaluate the initial compliance records.</p>}
-            </div>
-          </div>
-          {!isStage1Folded && (
-            <div className="flex items-center gap-3">
-              {userRole === 'reu' && (
-                <button
-                  onClick={async () => {
-                    const newPassed = !selectedNominee.stage1PassedByReu;
-                    const msg = newPassed
-                      ? "Mark Stage 1 as VERIFIED and UNLOCK Stage 2 for this nominee?"
-                      : "Revert Stage 1 verification and RELOCK Stage 2?";
-
-                    setConfirmModal({
-                      isOpen: true,
-                      title: newPassed ? 'Verify Stage 1' : 'Revert Verification',
-                      message: msg,
-                      type: 'info',
-                      onConfirm: async () => {
-                        const updates = {
-                          stage1PassedByReu: newPassed,
-                          round2Unlocked: newPassed // Unlock round 2 if stage 1 passed
-                        };
-                        await updateNominee(selectedNominee.id, updates);
-                        const updated = { ...selectedNominee, ...updates };
-                        setSelectedNominee(updated);
-                        setLocalNominees(prev => prev.map(a => a.id === updated.id ? updated : a));
-                        setConfirmModal(prev => ({ ...prev, isOpen: false }));
-                      }
-                    });
-                  }}
-                  disabled={userRole === 'reu' && selectedNominee.stage1PassedByReu}
-                  className={`px-6 py-3 rounded-2xl font-bold transition-all text-[10px] uppercase tracking-widest flex items-center gap-2 shadow-sm ${selectedNominee.stage1PassedByReu ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-gkk-gold text-gkk-navy hover:bg-gkk-navy hover:text-white border border-gkk-gold/20'} ${userRole === 'reu' && selectedNominee.stage1PassedByReu ? 'opacity-50 cursor-not-allowed' : ''}`}
-                >
-                  {selectedNominee.stage1PassedByReu ? <ShieldCheck size={14} /> : <Zap size={14} />}
-                  {selectedNominee.stage1PassedByReu ? 'Passed & Unlocked' : 'Pass Stage 1 & Unlock Stage 2'}
-                </button>
-              )}
-              <button
-                onClick={() => handleExportStage(1)}
-                disabled={isExporting === 1}
-                className="px-6 py-3 bg-white border border-gray-200 text-gray-600 font-bold rounded-2xl hover:bg-gray-50 transition-all text-[10px] uppercase tracking-widest flex items-center gap-2 shadow-sm"
-              >
-                <Download size={14} /> {isExporting === 1 ? "Exporting..." : "Export PDFs"}
-              </button>
-            </div>
-          )}
-        </div>
-        {!isStage1Folded && (
-          <div className="animate-in slide-in-from-top-2 duration-300">
-            <div className="space-y-4">{renderDocumentGrid(1)}</div>
-          </div>
-        )}
-
-
-
-        {(userRole !== 'reu') && (
-          <>
-            <div className="space-y-4">
-              <div className={`rounded-[40px] border transition-all duration-300 overflow-hidden ${(selectedNominee.round2Unlocked || ['admin', 'scd_team_leader', 'evaluator'].includes(userRole || '')) ? 'bg-white border-gray-200 shadow-xl' : 'bg-gray-50 border-gray-100 opacity-60'}`}>
-                <div className="p-10 flex flex-col md:flex-row items-center justify-between gap-8">
-                  <div className="flex items-center space-x-8">
-                    <div className={`w-16 h-16 rounded-3xl flex items-center justify-center transition-all ${(selectedNominee.round2Unlocked || ['admin', 'scd_team_leader', 'evaluator'].includes(userRole || '')) ? 'bg-blue-600 text-white shadow-xl' : 'bg-gray-200 text-gray-400'}`}>{(selectedNominee.round2Unlocked || ['admin', 'scd_team_leader', 'evaluator'].includes(userRole || '')) ? <Unlock size={28} /> : <Lock size={28} />}</div>
-                    <div className="text-left"><h4 className="font-bold text-gkk-navy text-xl uppercase tracking-tighter leading-none">STAGE 2 (DOCUMENT EVALUATION)</h4><p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-3">{selectedNominee.round2Unlocked ? 'Reviewing national shortlist' : (['admin', 'scd_team_leader', 'evaluator'].includes(userRole || '')) ? 'Action Required: Trigger Stage 2' : 'Locked'}</p></div>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    {(selectedNominee.round2Unlocked || ['admin', 'scd_team_leader', 'evaluator'].includes(userRole || '')) && (
-                      <button
-                        onClick={() => handleExportStage(2)}
-                        disabled={isExporting === 2}
-                        className="px-6 py-4 bg-white border border-gray-200 text-gray-600 font-bold rounded-[20px] hover:bg-gray-50 transition-all text-[10px] uppercase tracking-widest flex items-center gap-2 shadow-sm"
-                      >
-                        <Download size={16} /> {isExporting === 2 ? "Export..." : "Export PDFs"}
-                      </button>
-                    )}
-                    {(['admin', 'scd_team_leader'].includes(userRole || '')) && (
-                      <button
-                        onClick={() => {
-                          if (!selectedNominee.stage1PassedByReu && !selectedNominee.round2Unlocked) return;
-                          const newStatus = !selectedNominee.round2Unlocked;
-                          if (onToggleRound2) onToggleRound2(selectedNominee.id, newStatus);
-                          const updated = { ...selectedNominee, round2Unlocked: newStatus };
-                          setSelectedNominee(updated);
-                          setLocalNominees(prev => prev.map(a => a.id === updated.id ? updated : a));
-                        }}
-                        disabled={!selectedNominee.stage1PassedByReu && !selectedNominee.round2Unlocked}
-                        className={`px-10 py-4 rounded-[20px] font-bold transition-all shadow-xl text-[10px] tracking-widest uppercase ${selectedNominee.round2Unlocked ? 'bg-red-50 text-red-600 border border-red-100 hover:bg-red-100' : (!selectedNominee.stage1PassedByReu ? 'bg-gray-100 text-gray-400 cursor-not-allowed opacity-70' : 'bg-gkk-gold text-gkk-navy hover:bg-gkk-navy hover:text-white')}`}
-                      >
-                        {selectedNominee.round2Unlocked ? 'Deactivate Stage 2' : (!selectedNominee.stage1PassedByReu ? 'Waiting for Regional Verification' : 'Activate Stage 2')}
-                      </button>
-                    )}
-                    {userRole === 'reu' && !selectedNominee.round2Unlocked && (
-                      <span className="text-[10px] font-bold text-amber-500 uppercase tracking-widest bg-amber-50 px-5 py-3 rounded-2xl border border-amber-100">Regional verification pending</span>
-                    )}
-                  </div>
-                </div>
-                {(selectedNominee.round2Unlocked || ['admin', 'scd_team_leader', 'reu', 'evaluator'].includes(userRole || '')) && (
-                  <div className="border-t border-gray-100 bg-white">
-                    <div className="p-10">{renderDocumentGrid(2)}</div>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <div className={`rounded-[40px] border transition-all duration-300 overflow-hidden ${(selectedNominee.round3Unlocked || ['admin', 'scd_team_leader', 'evaluator'].includes(userRole || '')) ? 'bg-white border-gray-200 shadow-xl' : 'bg-gray-50 border-gray-100 opacity-60'}`}>
-                <div className="p-10 flex flex-col md:flex-row items-center justify-between gap-8">
-                  <div className="flex items-center space-x-8">
-                    <div className={`w-16 h-16 rounded-3xl flex items-center justify-center transition-all ${(selectedNominee.round3Unlocked || ['admin', 'scd_team_leader', 'evaluator'].includes(userRole || '')) ? 'bg-gkk-gold text-gkk-navy shadow-xl' : 'bg-gray-200 text-gray-400'}`}>{(selectedNominee.round3Unlocked || ['admin', 'scd_team_leader', 'evaluator'].includes(userRole || '')) ? <Unlock size={28} /> : <Lock size={28} />}</div>
-                    <div className="text-left"><h4 className="font-bold text-gkk-navy text-xl uppercase tracking-tighter leading-none">STAGE 3 (SUBMISSION OF DEFICIENCIES)</h4><p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-3">{selectedNominee.round3Unlocked ? 'National Board Final Evaluation' : (['admin', 'scd_team_leader', 'evaluator'].includes(userRole || '')) ? 'SCD Trigger Required' : 'Locked'}</p></div>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    {(selectedNominee.round3Unlocked || ['admin', 'scd_team_leader', 'evaluator'].includes(userRole || '')) && (
-                      <button
-                        onClick={() => handleExportStage(3)}
-                        disabled={isExporting === 3}
-                        className="px-6 py-4 bg-white border border-gray-200 text-gray-600 font-bold rounded-[20px] hover:bg-gray-50 transition-all text-[10px] uppercase tracking-widest flex items-center gap-2 shadow-sm"
-                      >
-                        <Download size={16} /> {isExporting === 3 ? "Export..." : "Export PDFs"}
-                      </button>
-                    )}
-                    {(['admin', 'scd_team_leader'].includes(userRole || '')) && (
-                      <button onClick={() => {
-                        const newStatus = !selectedNominee.round3Unlocked;
-                        if (onToggleRound3) onToggleRound3(selectedNominee.id, newStatus);
-                        const updated = { ...selectedNominee, round3Unlocked: newStatus };
-                        setSelectedNominee(updated);
-                        setLocalNominees(prev => prev.map(a => a.id === updated.id ? updated : a));
-                      }} className={`px-10 py-4 rounded-[20px] font-bold transition-all shadow-xl text-[10px] tracking-widest uppercase ${selectedNominee.round3Unlocked ? 'bg-red-50 text-red-600 border border-red-100 hover:bg-red-100' : 'bg-gkk-navy text-white hover:bg-gkk-royalBlue'}`}>{selectedNominee.round3Unlocked ? 'Deactivate Stage 3' : 'Activate Stage 3'}</button>
-                    )}
-                    {['admin', 'scd_team_leader'].includes(userRole || '') ? (
-                      <button
-                        onClick={async () => {
-                          const isClosing = selectedNominee.status !== 'completed';
-                          const confirmMsg = isClosing
-                            ? "Are you sure you want to CLOSE this application? This will make it read-only for the nominee."
-                            : "Are you sure you want to OPEN this application? This will allow the nominee to make further changes.";
-
-                          setConfirmModal({
-                            isOpen: true,
-                            title: isClosing ? 'Close Application' : 'Reopen Application',
-                            message: confirmMsg,
-                            type: isClosing ? 'warning' : 'info',
-                            onConfirm: async () => {
-                              const newStatus = isClosing ? 'completed' : 'under_review';
-                              await updateNominee(selectedNominee.id, { status: newStatus as any });
-                              const updated = { ...selectedNominee, status: newStatus as any };
-                              setSelectedNominee(updated);
-                              setLocalNominees(prev => prev.map(a => a.id === updated.id ? updated : a));
-                              if (isClosing) {
-                                setView('list');
-                                setSelectedNominee(null);
-                              }
-                              setConfirmModal(prev => ({ ...prev, isOpen: false }));
-                            }
-                          });
-                        }}
-                        className={`px-10 py-4 rounded-[20px] font-bold transition-all shadow-xl text-[10px] tracking-widest uppercase ${selectedNominee.status === 'completed' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100 hover:bg-emerald-100' : 'bg-gkk-navy text-white hover:bg-gkk-royalBlue'}`}
-                      >
-                        {selectedNominee.status === 'completed' ? 'Open Application' : 'Close Application'}
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => { setView('list'); setSelectedNominee(null); }}
-                        className="px-10 py-4 rounded-[20px] font-semibold transition-all shadow-sm text-[14.5px] uppercase bg-white border border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gkk-navy"
-                      >Close</button>
-                    )}
-                  </div>
-                </div>
-                {(selectedNominee.round3Unlocked || ['admin', 'scd_team_leader', 'evaluator'].includes(userRole || '')) && (
-                  <div className="border-t border-gray-100">
-                    <div className="p-10 bg-white">{renderDocumentGrid(3)}</div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </>
-        )}
-      </div>
+      {/* User Profiles Directory */}
+      <UserProfileTable />
     </div>
   );
-};
 
-return (
-  <div className="flex h-screen bg-gray-50 font-sans overflow-hidden page-transition">
-    <aside className="w-64 bg-gkk-navy text-white flex flex-col flex-shrink-0 border-r border-white/5">
-      <div className="p-6 border-b border-white/5"><div className="flex items-center space-x-3"><div className="w-8 h-8 bg-gradient-to-tr from-gkk-gold to-yellow-200 rounded-lg flex items-center justify-center"><span className="text-gkk-navy font-bold text-sm">14<sup>th</sup></span></div><span className="font-serif font-bold tracking-widest text-lg uppercase">
-        {userRole === 'admin' ? 'Admin' : userRole === 'scd_team_leader' ? 'SCD Team' : userRole === 'reu' ? 'REU' : 'Validator'}
-      </span></div></div>
-      <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-        <button onClick={() => { setActiveTab('dashboard'); setView('list'); }} className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'dashboard' ? 'bg-gkk-gold text-gkk-navy font-bold shadow-lg shadow-yellow-500/10' : 'text-gray-400 hover:bg-white/5 hover:text-white'}`}><LayoutDashboard size={20} /><span className="text-sm font-medium">Dashboard</span></button>
-        <button onClick={() => { setActiveTab('entries'); setView('list'); }} className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'entries' || view === 'review' ? 'bg-gkk-gold text-gkk-navy font-bold shadow-lg shadow-yellow-500/10' : 'text-gray-400 hover:bg-white/5 hover:text-white'}`}><Users size={20} /><span className="text-sm font-medium">Nominee Queue</span></button>
+  const renderReview = () => {
+    if (!selectedNominee) return null;
+    return (
+      <div className="animate-in fade-in duration-500 space-y-8 pb-20">
+        <div className="bg-white p-6 rounded-[35px] border border-gray-200 shadow-xl sticky top-0 z-30 ring-1 ring-black/5">
+          <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-8">
+            {/* Left: Actions & Identity */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
+              <button
+                onClick={handleBackToList}
+                className="p-3.5 bg-gray-50 text-gray-400 hover:bg-gkk-navy hover:text-white rounded-[20px] transition-all border border-gray-100 hover:scale-110 active:scale-95 shadow-sm shrink-0"
+              >
+                <ChevronLeft size={24} />
+              </button>
 
-        {userRole === 'admin' && (
-          <button onClick={() => { setActiveTab('management'); setView('list'); }} className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'management' ? 'bg-gkk-gold text-gkk-navy font-bold shadow-lg shadow-yellow-500/10' : 'text-gray-400 hover:bg-white/5 hover:text-white'}`}>
-            <Zap size={20} />
-            <span className="text-sm font-medium">Management</span>
-          </button>
-        )}
-        <div className="pt-6 mt-6 border-t border-white/5">
-          <p className="px-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4">Board Tools</p>
-          <button
-            onClick={() => setActiveTab('profile')}
-            className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'profile' ? 'bg-gkk-gold text-gkk-navy font-bold shadow-lg shadow-yellow-500/10' : 'text-gray-400 hover:bg-white/5 hover:text-white'}`}
-          >
-            <User size={20} /><span className="text-sm font-medium">My Profile</span>
-          </button>
-          <button onClick={onUnderDev} className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-400 hover:bg-white/5 hover:text-white transition-all"><Scale size={20} /><span className="text-sm font-medium">Scoring Matrix</span></button>
-          <button onClick={onUnderDev} className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-400 hover:bg-white/5 hover:text-white transition-all"><ShieldAlert size={20} /><span className="text-sm font-medium">Audit Logs</span></button>
-        </div>
-      </nav>
-    </aside>
-    <main className="flex-1 flex flex-col overflow-hidden">
-      <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-8 z-40">
-        <div className="flex items-center text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em]">
-          <span>Validator Portal</span>
-          <ChevronRight size={14} className="mx-2" />
-          <span className="text-gkk-navy">
-            {activeTab === 'dashboard' ? 'Overview' : activeTab === 'management' ? 'Management' : activeTab === 'profile' ? 'My Profile' : 'Queue'}
-          </span>
-        </div>
-
-        <div className="flex items-center space-x-4">
-          <button onClick={onUnderDev} className="relative p-2 text-gray-400 hover:text-gkk-navy transition-colors">
-            <Bell size={20} />
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
-          </button>
-          <div className="h-6 w-px bg-gray-200 mx-2"></div>
-
-          {/* User Dropdown */}
-          <div className="relative" ref={dropdownRef}>
-            <button
-              onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
-              className="flex items-center space-x-3 group bg-gray-50 hover:bg-gray-100 p-1 rounded-2xl transition-all pr-4"
-            >
-              <div className="w-10 h-10 bg-gkk-navy rounded-xl flex items-center justify-center text-white font-bold border-2 border-gkk-gold group-hover:scale-105 transition-transform uppercase">
-                {(staffProfile?.name || 'JD').substring(0, 2)}
+              <div className="flex items-center gap-5">
+                <div className="p-4 bg-gkk-navy/5 rounded-[22px] text-gkk-navy ring-1 ring-gkk-navy/10 hidden md:block">
+                  <Building2 size={32} />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-serif font-black text-gkk-navy leading-none uppercase tracking-tight mb-2.5">
+                    {selectedNominee.name}
+                  </h2>
+                  <div className="flex flex-wrap items-center gap-2.5">
+                    <span className="bg-gray-100 px-3 py-1 rounded-full font-bold text-[9px] text-gray-500 uppercase tracking-widest border border-gray-200/50">
+                      ID: {selectedNominee.regId}
+                    </span>
+                    <span className={`px-3 py-1 rounded-full text-[9px] font-bold border uppercase tracking-widest ${getStatusColor(selectedNominee.status)}`}>
+                      {selectedNominee.status.replace('_', ' ')}
+                    </span>
+                    <div className="flex items-center gap-1.5 ml-2">
+                      <MapPin size={11} className="text-gkk-gold" />
+                      <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">
+                        {selectedNominee.region}, PH
+                      </span>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div className="text-left hidden sm:block">
-                <p className="text-xs font-bold text-gkk-navy leading-none">{staffProfile?.name || 'Judge J. Doe'}</p>
-                <p className="text-[10px] text-gray-400 mt-1 uppercase tracking-tighter">{staffProfile?.region || 'National HQ'}</p>
-              </div>
-              <ChevronDown size={14} className={`text-gray-400 transition-transform duration-300 ${isProfileDropdownOpen ? 'rotate-180' : ''}`} />
-            </button>
+            </div>
 
-            {isProfileDropdownOpen && (
-              <div className="absolute right-0 mt-3 w-64 bg-white rounded-2xl shadow-2xl border border-gray-100 py-3 animate-in slide-in-from-top-2 duration-300 overflow-hidden ring-4 ring-black/5">
-                <div className="px-5 py-3 border-b border-gray-50 mb-2 bg-gray-50/50">
-                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                    {userRole === 'admin' ? 'System Admin' : userRole === 'scd_team_leader' ? 'SCD Team Leader' : userRole === 'reu' ? 'Regional Evaluation Unit' : 'Evaluator'}
-                  </p>
-                  <p className="text-sm font-bold text-gkk-navy mt-1 truncate">Current User</p>
+            {/* Right: Consolidated Progress Trackers */}
+            <div className="flex flex-wrap gap-4 items-center bg-gray-50/50 p-2 rounded-[25px] border border-gray-100/50">
+              <div className="w-36 bg-white rounded-[20px] p-4 text-center border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+                {renderProgressBar(selectedNominee, 1)}
+              </div>
+              {(selectedNominee.round2Unlocked || ['admin', 'scd_team_leader', 'reu', 'evaluator'].includes(userRole || '')) && (
+                <div className="w-36 bg-white rounded-[20px] p-4 text-center border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+                  {renderProgressBar(selectedNominee, 2)}
                 </div>
-                <div className="px-2 space-y-1">
-                  <button onClick={() => { setActiveTab('profile'); setView('list'); setIsProfileDropdownOpen(false); }} className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 hover:text-gkk-navy rounded-xl transition-colors">
-                    <User size={18} className="text-gray-400" />
-                    <span className="font-medium">Account Settings</span>
+              )}
+              {(selectedNominee.round3Unlocked || ['admin', 'scd_team_leader', 'reu', 'evaluator'].includes(userRole || '')) && (
+                <div className="w-36 bg-white rounded-[20px] p-4 text-center border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+                  {renderProgressBar(selectedNominee, 3)}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-8">
+          <div className="flex justify-between items-start">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => setIsStage1Folded(!isStage1Folded)}
+                className="p-2 hover:bg-gray-100 rounded-xl transition-colors text-gkk-navy/40 hover:text-gkk-navy"
+              >
+                {isStage1Folded ? <ChevronDown size={24} /> : <ChevronUp size={24} />}
+              </button>
+              <div>
+                <div className="flex items-center gap-3">
+                  <h3 className="text-2xl font-serif font-bold text-gkk-navy uppercase tracking-widest leading-none">STAGE 1 (SUBMISSION)</h3>
+                  {selectedNominee.stage1PassedByReu && (
+                    <span className="bg-emerald-100 text-emerald-700 text-[9px] font-black px-3 py-1 rounded-full border border-emerald-200 uppercase tracking-widest flex items-center gap-1.5 shadow-sm">
+                      <ShieldCheck size={12} /> REU VERIFIED
+                    </span>
+                  )}
+                </div>
+                {!isStage1Folded && <p className="text-xs text-gray-500 mt-2 font-bold uppercase tracking-widest italic opacity-60">Evaluate the initial compliance records.</p>}
+              </div>
+            </div>
+            {!isStage1Folded && (
+              <div className="flex items-center gap-3">
+                {userRole === 'reu' && (
+                  <button
+                    onClick={async () => {
+                      const newPassed = !selectedNominee.stage1PassedByReu;
+                      const msg = newPassed
+                        ? "Mark Stage 1 as VERIFIED and UNLOCK Stage 2 for this nominee?"
+                        : "Revert Stage 1 verification and RELOCK Stage 2?";
+
+                      setConfirmModal({
+                        isOpen: true,
+                        title: newPassed ? 'Verify Stage 1' : 'Revert Verification',
+                        message: msg,
+                        type: 'info',
+                        onConfirm: async () => {
+                          const updates = {
+                            stage1PassedByReu: newPassed,
+                            round2Unlocked: newPassed // Unlock round 2 if stage 1 passed
+                          };
+                          await updateNominee(selectedNominee.id, updates);
+                          const updated = { ...selectedNominee, ...updates };
+                          setSelectedNominee(updated);
+                          setLocalNominees(prev => prev.map(a => a.id === updated.id ? updated : a));
+                          setConfirmModal(prev => ({ ...prev, isOpen: false }));
+                        }
+                      });
+                    }}
+                    disabled={userRole === 'reu' && selectedNominee.stage1PassedByReu}
+                    className={`px-6 py-3 rounded-2xl font-bold transition-all text-[10px] uppercase tracking-widest flex items-center gap-2 shadow-sm ${selectedNominee.stage1PassedByReu ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-gkk-gold text-gkk-navy hover:bg-gkk-navy hover:text-white border border-gkk-gold/20'} ${userRole === 'reu' && selectedNominee.stage1PassedByReu ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  >
+                    {selectedNominee.stage1PassedByReu ? <ShieldCheck size={14} /> : <Zap size={14} />}
+                    {selectedNominee.stage1PassedByReu ? 'Passed & Unlocked' : 'Pass Stage 1 & Unlock Stage 2'}
                   </button>
-                </div>
-                <div className="h-px bg-gray-50 my-2 mx-3"></div>
-                <div className="px-2">
-                  <button onClick={onLogout} className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 rounded-xl transition-colors group">
-                    <LogOut size={18} className="group-hover:-translate-x-1 transition-transform" />
-                    <span className="font-bold">Sign Out</span>
-                  </button>
-                </div>
+                )}
+                <button
+                  onClick={() => handleExportStage(1)}
+                  disabled={isExporting === 1}
+                  className="px-6 py-3 bg-white border border-gray-200 text-gray-600 font-bold rounded-2xl hover:bg-gray-50 transition-all text-[10px] uppercase tracking-widest flex items-center gap-2 shadow-sm"
+                >
+                  <Download size={14} /> {isExporting === 1 ? "Exporting..." : "Export PDFs"}
+                </button>
               </div>
             )}
           </div>
-        </div>
-      </header>
-      <div className="flex-1 overflow-y-auto p-8 scroll-smooth">
-        <div className="max-w-7xl mx-auto">
-          {view === 'list' ? (
-            activeTab === 'dashboard' ? renderDashboard() :
-              activeTab === 'management' ? renderManagement() :
-                activeTab === 'profile' ? (
-                  staffProfile ? (
-                    <StaffProfileEdit
-                      userData={staffProfile}
-                      onUpdateProfile={async (updates) => {
-                        if (!staffProfile?.userId) return false;
-                        // Spread staffProfile to ensure role and status are included for the upsert
-                        const success = await updateUserProfile(staffProfile.userId, { ...staffProfile, ...updates });
-                        if (success) {
-                          setStaffProfile(prev => prev ? { ...prev, ...updates } : null);
-                        }
-                        return success;
-                      }}
-                      onUnderDev={onUnderDev}
-                    />
-                  ) : (
-                    <div className="flex flex-col items-center justify-center py-40 bg-white rounded-[40px] border border-gray-100 shadow-sm animate-pulse">
-                      <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-200 mb-6">
-                        <User size={32} />
-                      </div>
-                      <h3 className="text-xl font-bold text-gray-300 uppercase tracking-widest">Loading Profile...</h3>
-                      <p className="text-xs text-gray-400 mt-2 font-bold uppercase tracking-tight">Syncing security credentials</p>
-                    </div>
-                  )
-                ) : renderEntries()
-          ) : renderReview()}
-        </div>
-      </div>
-    </main>
-    {/* Preview Modal */}
-    {previewModalOpen && previewDoc && (
-      <div className="fixed inset-0 z-[110] flex items-center justify-center bg-gkk-navy/90 backdrop-blur-md p-4 animate-in fade-in duration-500">
-        <div className="bg-white rounded-[40px] shadow-2xl w-full max-w-5xl h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-300">
-          <div className="p-8 border-b border-gray-100 flex justify-between items-center bg-white shadow-sm z-10">
-            <div className="flex items-center space-x-5">
-              <div className="p-3 bg-gkk-navy text-white rounded-2xl"><FileText size={24} /></div>
-              <div><h3 className="text-xl font-bold text-gkk-navy uppercase tracking-wider">{previewDoc.name}</h3><p className="text-[10px] text-gray-400 uppercase font-bold mt-1 tracking-widest">Verified Evidence Record</p></div>
+          {!isStage1Folded && (
+            <div className="animate-in slide-in-from-top-2 duration-300">
+              <div className="space-y-4">{renderDocumentGrid(1)}</div>
             </div>
-            <button onClick={() => setPreviewModalOpen(false)} className="p-3 text-gray-400 hover:text-red-500 transition-colors"><X size={32} /></button>
-          </div>
-          <div className="flex-1 bg-gray-50 p-10 flex items-center justify-center">
-            {previewDoc.url ? (
-              (previewDoc.type && previewDoc.type.includes('image')) ? <img src={previewDoc.url} alt="Evidence" className="max-w-full max-h-full rounded-3xl shadow-2xl border-8 border-white" /> : <iframe src={previewDoc.url} title="Reader" className="w-full h-full rounded-3xl shadow-2xl bg-white border-0" />
-            ) : <div className="text-center p-20 bg-white rounded-[40px] shadow-2xl max-w-md"><div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-8 text-gray-200"><FileIcon size={48} className="animate-pulse" /></div><h4 className="text-2xl font-bold text-gkk-navy uppercase tracking-widest text-gray-400 animate-pulse">Decrypting...</h4></div>}
-          </div>
+          )}
+
+
+
+          {(userRole !== 'reu') && (
+            <>
+              <div className="space-y-4">
+                <div className={`rounded-[40px] border transition-all duration-300 overflow-hidden ${(selectedNominee.round2Unlocked || ['admin', 'scd_team_leader', 'evaluator'].includes(userRole || '')) ? 'bg-white border-gray-200 shadow-xl' : 'bg-gray-50 border-gray-100 opacity-60'}`}>
+                  <div className="p-10 flex flex-col md:flex-row items-center justify-between gap-8">
+                    <div className="flex items-center space-x-8">
+                      <div className={`w-16 h-16 rounded-3xl flex items-center justify-center transition-all ${(selectedNominee.round2Unlocked || ['admin', 'scd_team_leader', 'evaluator'].includes(userRole || '')) ? 'bg-blue-600 text-white shadow-xl' : 'bg-gray-200 text-gray-400'}`}>{(selectedNominee.round2Unlocked || ['admin', 'scd_team_leader', 'evaluator'].includes(userRole || '')) ? <Unlock size={28} /> : <Lock size={28} />}</div>
+                      <div className="text-left"><h4 className="font-bold text-gkk-navy text-xl uppercase tracking-tighter leading-none">STAGE 2 (DOCUMENT EVALUATION)</h4><p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-3">{selectedNominee.round2Unlocked ? 'Reviewing national shortlist' : (['admin', 'scd_team_leader', 'evaluator'].includes(userRole || '')) ? 'Action Required: Trigger Stage 2' : 'Locked'}</p></div>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      {(selectedNominee.round2Unlocked || ['admin', 'scd_team_leader', 'evaluator'].includes(userRole || '')) && (
+                        <button
+                          onClick={() => handleExportStage(2)}
+                          disabled={isExporting === 2}
+                          className="px-6 py-4 bg-white border border-gray-200 text-gray-600 font-bold rounded-[20px] hover:bg-gray-50 transition-all text-[10px] uppercase tracking-widest flex items-center gap-2 shadow-sm"
+                        >
+                          <Download size={16} /> {isExporting === 2 ? "Export..." : "Export PDFs"}
+                        </button>
+                      )}
+                      {(['admin', 'scd_team_leader'].includes(userRole || '')) && (
+                        <button
+                          onClick={() => {
+                            if (!selectedNominee.stage1PassedByReu && !selectedNominee.round2Unlocked) return;
+                            const newStatus = !selectedNominee.round2Unlocked;
+                            if (onToggleRound2) onToggleRound2(selectedNominee.id, newStatus);
+                            const updated = { ...selectedNominee, round2Unlocked: newStatus };
+                            setSelectedNominee(updated);
+                            setLocalNominees(prev => prev.map(a => a.id === updated.id ? updated : a));
+                          }}
+                          disabled={!selectedNominee.stage1PassedByReu && !selectedNominee.round2Unlocked}
+                          className={`px-10 py-4 rounded-[20px] font-bold transition-all shadow-xl text-[10px] tracking-widest uppercase ${selectedNominee.round2Unlocked ? 'bg-red-50 text-red-600 border border-red-100 hover:bg-red-100' : (!selectedNominee.stage1PassedByReu ? 'bg-gray-100 text-gray-400 cursor-not-allowed opacity-70' : 'bg-gkk-gold text-gkk-navy hover:bg-gkk-navy hover:text-white')}`}
+                        >
+                          {selectedNominee.round2Unlocked ? 'Deactivate Stage 2' : (!selectedNominee.stage1PassedByReu ? 'Waiting for Regional Verification' : 'Activate Stage 2')}
+                        </button>
+                      )}
+                      {userRole === 'reu' && !selectedNominee.round2Unlocked && (
+                        <span className="text-[10px] font-bold text-amber-500 uppercase tracking-widest bg-amber-50 px-5 py-3 rounded-2xl border border-amber-100">Regional verification pending</span>
+                      )}
+                    </div>
+                  </div>
+                  {(selectedNominee.round2Unlocked || ['admin', 'scd_team_leader', 'reu', 'evaluator'].includes(userRole || '')) && (
+                    <div className="border-t border-gray-100 bg-white">
+                      <div className="p-10">{renderDocumentGrid(2)}</div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className={`rounded-[40px] border transition-all duration-300 overflow-hidden ${(selectedNominee.round3Unlocked || ['admin', 'scd_team_leader', 'evaluator'].includes(userRole || '')) ? 'bg-white border-gray-200 shadow-xl' : 'bg-gray-50 border-gray-100 opacity-60'}`}>
+                  <div className="p-10 flex flex-col md:flex-row items-center justify-between gap-8">
+                    <div className="flex items-center space-x-8">
+                      <div className={`w-16 h-16 rounded-3xl flex items-center justify-center transition-all ${(selectedNominee.round3Unlocked || ['admin', 'scd_team_leader', 'evaluator'].includes(userRole || '')) ? 'bg-gkk-gold text-gkk-navy shadow-xl' : 'bg-gray-200 text-gray-400'}`}>{(selectedNominee.round3Unlocked || ['admin', 'scd_team_leader', 'evaluator'].includes(userRole || '')) ? <Unlock size={28} /> : <Lock size={28} />}</div>
+                      <div className="text-left"><h4 className="font-bold text-gkk-navy text-xl uppercase tracking-tighter leading-none">STAGE 3 (SUBMISSION OF DEFICIENCIES)</h4><p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-3">{selectedNominee.round3Unlocked ? 'National Board Final Evaluation' : (['admin', 'scd_team_leader', 'evaluator'].includes(userRole || '')) ? 'SCD Trigger Required' : 'Locked'}</p></div>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      {(selectedNominee.round3Unlocked || ['admin', 'scd_team_leader', 'evaluator'].includes(userRole || '')) && (
+                        <button
+                          onClick={() => handleExportStage(3)}
+                          disabled={isExporting === 3}
+                          className="px-6 py-4 bg-white border border-gray-200 text-gray-600 font-bold rounded-[20px] hover:bg-gray-50 transition-all text-[10px] uppercase tracking-widest flex items-center gap-2 shadow-sm"
+                        >
+                          <Download size={16} /> {isExporting === 3 ? "Export..." : "Export PDFs"}
+                        </button>
+                      )}
+                      {(['admin', 'scd_team_leader'].includes(userRole || '')) && (
+                        <button onClick={() => {
+                          const newStatus = !selectedNominee.round3Unlocked;
+                          if (onToggleRound3) onToggleRound3(selectedNominee.id, newStatus);
+                          const updated = { ...selectedNominee, round3Unlocked: newStatus };
+                          setSelectedNominee(updated);
+                          setLocalNominees(prev => prev.map(a => a.id === updated.id ? updated : a));
+                        }} className={`px-10 py-4 rounded-[20px] font-bold transition-all shadow-xl text-[10px] tracking-widest uppercase ${selectedNominee.round3Unlocked ? 'bg-red-50 text-red-600 border border-red-100 hover:bg-red-100' : 'bg-gkk-navy text-white hover:bg-gkk-royalBlue'}`}>{selectedNominee.round3Unlocked ? 'Deactivate Stage 3' : 'Activate Stage 3'}</button>
+                      )}
+                      {['admin', 'scd_team_leader'].includes(userRole || '') ? (
+                        <button
+                          onClick={async () => {
+                            const isClosing = selectedNominee.status !== 'completed';
+                            const confirmMsg = isClosing
+                              ? "Are you sure you want to CLOSE this application? This will make it read-only for the nominee."
+                              : "Are you sure you want to OPEN this application? This will allow the nominee to make further changes.";
+
+                            setConfirmModal({
+                              isOpen: true,
+                              title: isClosing ? 'Close Application' : 'Reopen Application',
+                              message: confirmMsg,
+                              type: isClosing ? 'warning' : 'info',
+                              onConfirm: async () => {
+                                const newStatus = isClosing ? 'completed' : 'under_review';
+                                await updateNominee(selectedNominee.id, { status: newStatus as any });
+                                const updated = { ...selectedNominee, status: newStatus as any };
+                                setSelectedNominee(updated);
+                                setLocalNominees(prev => prev.map(a => a.id === updated.id ? updated : a));
+                                if (isClosing) {
+                                  setView('list');
+                                  setSelectedNominee(null);
+                                }
+                                setConfirmModal(prev => ({ ...prev, isOpen: false }));
+                              }
+                            });
+                          }}
+                          className={`px-10 py-4 rounded-[20px] font-bold transition-all shadow-xl text-[10px] tracking-widest uppercase ${selectedNominee.status === 'completed' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100 hover:bg-emerald-100' : 'bg-gkk-navy text-white hover:bg-gkk-royalBlue'}`}
+                        >
+                          {selectedNominee.status === 'completed' ? 'Open Application' : 'Close Application'}
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => { setView('list'); setSelectedNominee(null); }}
+                          className="px-10 py-4 rounded-[20px] font-semibold transition-all shadow-sm text-[14.5px] uppercase bg-white border border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gkk-navy"
+                        >Close</button>
+                      )}
+                    </div>
+                  </div>
+                  {(selectedNominee.round3Unlocked || ['admin', 'scd_team_leader', 'evaluator'].includes(userRole || '')) && (
+                    <div className="border-t border-gray-100">
+                      <div className="p-10 bg-white">{renderDocumentGrid(3)}</div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
-    )}
-    {/* Success Modal */}
-    {showSuccessModal && (
-      <div className="fixed inset-0 z-[120] flex items-center justify-center bg-gkk-navy/60 backdrop-blur-sm p-4 animate-in fade-in duration-300">
-        <div className="bg-white rounded-[40px] shadow-2xl w-full max-w-lg p-10 text-center animate-in zoom-in-95 duration-300 relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-gkk-gold via-yellow-400 to-gkk-gold"></div>
+    );
+  };
 
-          <div className="w-20 h-20 bg-green-50 text-green-500 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner ring-8 ring-green-50/50">
-            <CheckCircle size={40} />
+  return (
+    <div className="flex h-screen bg-gray-50 font-sans overflow-hidden page-transition">
+      <aside className="w-64 bg-gkk-navy text-white flex flex-col flex-shrink-0 border-r border-white/5">
+        <div className="p-6 border-b border-white/5"><div className="flex items-center space-x-3"><div className="w-8 h-8 bg-gradient-to-tr from-gkk-gold to-yellow-200 rounded-lg flex items-center justify-center"><span className="text-gkk-navy font-bold text-sm">14<sup>th</sup></span></div><span className="font-serif font-bold tracking-widest text-lg uppercase">
+          {userRole === 'admin' ? 'Admin' : userRole === 'scd_team_leader' ? 'SCD Team' : userRole === 'reu' ? 'REU' : 'Validator'}
+        </span></div></div>
+        <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+          <button onClick={() => { setActiveTab('dashboard'); setView('list'); }} className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'dashboard' ? 'bg-gkk-gold text-gkk-navy font-bold shadow-lg shadow-yellow-500/10' : 'text-gray-400 hover:bg-white/5 hover:text-white'}`}><LayoutDashboard size={20} /><span className="text-sm font-medium">Dashboard</span></button>
+          <button onClick={() => { setActiveTab('entries'); setView('list'); }} className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'entries' || view === 'review' ? 'bg-gkk-gold text-gkk-navy font-bold shadow-lg shadow-yellow-500/10' : 'text-gray-400 hover:bg-white/5 hover:text-white'}`}><Users size={20} /><span className="text-sm font-medium">Nominee Queue</span></button>
+
+          {userRole === 'admin' && (
+            <button onClick={() => { setActiveTab('management'); setView('list'); }} className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'management' ? 'bg-gkk-gold text-gkk-navy font-bold shadow-lg shadow-yellow-500/10' : 'text-gray-400 hover:bg-white/5 hover:text-white'}`}>
+              <Zap size={20} />
+              <span className="text-sm font-medium">Management</span>
+            </button>
+          )}
+          <div className="pt-6 mt-6 border-t border-white/5">
+            <p className="px-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4">Board Tools</p>
+            <button
+              onClick={() => setActiveTab('profile')}
+              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'profile' ? 'bg-gkk-gold text-gkk-navy font-bold shadow-lg shadow-yellow-500/10' : 'text-gray-400 hover:bg-white/5 hover:text-white'}`}
+            >
+              <User size={20} /><span className="text-sm font-medium">My Profile</span>
+            </button>
+            <button onClick={onUnderDev} className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-400 hover:bg-white/5 hover:text-white transition-all"><Scale size={20} /><span className="text-sm font-medium">Scoring Matrix</span></button>
+            <button onClick={onUnderDev} className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-400 hover:bg-white/5 hover:text-white transition-all"><ShieldAlert size={20} /><span className="text-sm font-medium">Audit Logs</span></button>
+          </div>
+        </nav>
+      </aside>
+      <main className="flex-1 flex flex-col overflow-hidden">
+        <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-8 z-40">
+          <div className="flex items-center text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em]">
+            <span>Validator Portal</span>
+            <ChevronRight size={14} className="mx-2" />
+            <span className="text-gkk-navy">
+              {activeTab === 'dashboard' ? 'Overview' : activeTab === 'management' ? 'Management' : activeTab === 'profile' ? 'My Profile' : 'Queue'}
+            </span>
           </div>
 
-          <h3 className="text-3xl font-serif font-bold text-gkk-navy uppercase tracking-tight mb-2">Key Issued!</h3>
-          <p className="text-gray-400 font-bold uppercase tracking-widest text-[10px] mb-8">Access key generated successfully</p>
+          <div className="flex items-center space-x-4">
+            <button onClick={onUnderDev} className="relative p-2 text-gray-400 hover:text-gkk-navy transition-colors">
+              <Bell size={20} />
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
+            </button>
+            <div className="h-6 w-px bg-gray-200 mx-2"></div>
 
-          <div className="bg-gray-50 rounded-3xl p-8 mb-8 border border-gray-100 relative group">
-            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em] mb-3">Your Unique Pass Key</p>
-            <h4 className="font-mono text-2xl font-black text-gkk-navy tracking-widest break-all px-4">{issuedKeyId}</h4>
+            {/* User Dropdown */}
+            <div className="relative" ref={dropdownRef}>
+              <button
+                onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
+                className="flex items-center space-x-3 group bg-gray-50 hover:bg-gray-100 p-1 rounded-2xl transition-all pr-4"
+              >
+                <div className="w-10 h-10 bg-gkk-navy rounded-xl flex items-center justify-center text-white font-bold border-2 border-gkk-gold group-hover:scale-105 transition-transform uppercase">
+                  {(staffProfile?.name || 'JD').substring(0, 2)}
+                </div>
+                <div className="text-left hidden sm:block">
+                  <p className="text-xs font-bold text-gkk-navy leading-none">{staffProfile?.name || 'Judge J. Doe'}</p>
+                  <p className="text-[10px] text-gray-400 mt-1 uppercase tracking-tighter">{staffProfile?.region || 'National HQ'}</p>
+                </div>
+                <ChevronDown size={14} className={`text-gray-400 transition-transform duration-300 ${isProfileDropdownOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {isProfileDropdownOpen && (
+                <div className="absolute right-0 mt-3 w-64 bg-white rounded-2xl shadow-2xl border border-gray-100 py-3 animate-in slide-in-from-top-2 duration-300 overflow-hidden ring-4 ring-black/5">
+                  <div className="px-5 py-3 border-b border-gray-50 mb-2 bg-gray-50/50">
+                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                      {userRole === 'admin' ? 'System Admin' : userRole === 'scd_team_leader' ? 'SCD Team Leader' : userRole === 'reu' ? 'Regional Evaluation Unit' : 'Evaluator'}
+                    </p>
+                    <p className="text-sm font-bold text-gkk-navy mt-1 truncate">Current User</p>
+                  </div>
+                  <div className="px-2 space-y-1">
+                    <button onClick={() => { setActiveTab('profile'); setView('list'); setIsProfileDropdownOpen(false); }} className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 hover:text-gkk-navy rounded-xl transition-colors">
+                      <User size={18} className="text-gray-400" />
+                      <span className="font-medium">Account Settings</span>
+                    </button>
+                  </div>
+                  <div className="h-px bg-gray-50 my-2 mx-3"></div>
+                  <div className="px-2">
+                    <button onClick={onLogout} className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 rounded-xl transition-colors group">
+                      <LogOut size={18} className="group-hover:-translate-x-1 transition-transform" />
+                      <span className="font-bold">Sign Out</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </header>
+        <div className="flex-1 overflow-y-auto p-8 scroll-smooth">
+          <div className="max-w-7xl mx-auto">
+            {view === 'list' ? (
+              activeTab === 'dashboard' ? renderDashboard() :
+                activeTab === 'management' ? renderManagement() :
+                  activeTab === 'profile' ? (
+                    staffProfile ? (
+                      <StaffProfileEdit
+                        userData={staffProfile}
+                        onUpdateProfile={async (updates) => {
+                          if (!staffProfile?.userId) return false;
+                          // Spread staffProfile to ensure role and status are included for the upsert
+                          const success = await updateUserProfile(staffProfile.userId, { ...staffProfile, ...updates });
+                          if (success) {
+                            setStaffProfile(prev => prev ? { ...prev, ...updates } : null);
+                          }
+                          return success;
+                        }}
+                        onUnderDev={onUnderDev}
+                      />
+                    ) : (
+                      <div className="flex flex-col items-center justify-center py-40 bg-white rounded-[40px] border border-gray-100 shadow-sm animate-pulse">
+                        <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-200 mb-6">
+                          <User size={32} />
+                        </div>
+                        <h3 className="text-xl font-bold text-gray-300 uppercase tracking-widest">Loading Profile...</h3>
+                        <p className="text-xs text-gray-400 mt-2 font-bold uppercase tracking-tight">Syncing security credentials</p>
+                      </div>
+                    )
+                  ) : renderEntries()
+            ) : renderReview()}
+          </div>
+        </div>
+      </main>
+      {/* Preview Modal */}
+      {previewModalOpen && previewDoc && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-gkk-navy/90 backdrop-blur-md p-4 animate-in fade-in duration-500">
+          <div className="bg-white rounded-[40px] shadow-2xl w-full max-w-5xl h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-300">
+            <div className="p-8 border-b border-gray-100 flex justify-between items-center bg-white shadow-sm z-10">
+              <div className="flex items-center space-x-5">
+                <div className="p-3 bg-gkk-navy text-white rounded-2xl"><FileText size={24} /></div>
+                <div><h3 className="text-xl font-bold text-gkk-navy uppercase tracking-wider">{previewDoc.name}</h3><p className="text-[10px] text-gray-400 uppercase font-bold mt-1 tracking-widest">Verified Evidence Record</p></div>
+              </div>
+              <button onClick={() => setPreviewModalOpen(false)} className="p-3 text-gray-400 hover:text-red-500 transition-colors"><X size={32} /></button>
+            </div>
+            <div className="flex-1 bg-gray-50 p-10 flex items-center justify-center">
+              {previewDoc.url ? (
+                (previewDoc.type && previewDoc.type.includes('image')) ? <img src={previewDoc.url} alt="Evidence" className="max-w-full max-h-full rounded-3xl shadow-2xl border-8 border-white" /> : <iframe src={previewDoc.url} title="Reader" className="w-full h-full rounded-3xl shadow-2xl bg-white border-0" />
+              ) : <div className="text-center p-20 bg-white rounded-[40px] shadow-2xl max-w-md"><div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-8 text-gray-200"><FileIcon size={48} className="animate-pulse" /></div><h4 className="text-2xl font-bold text-gkk-navy uppercase tracking-widest text-gray-400 animate-pulse">Decrypting...</h4></div>}
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Success Modal */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-gkk-navy/60 backdrop-blur-sm p-4 animate-in fade-in duration-300">
+          <div className="bg-white rounded-[40px] shadow-2xl w-full max-w-lg p-10 text-center animate-in zoom-in-95 duration-300 relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-gkk-gold via-yellow-400 to-gkk-gold"></div>
+
+            <div className="w-20 h-20 bg-green-50 text-green-500 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner ring-8 ring-green-50/50">
+              <CheckCircle size={40} />
+            </div>
+
+            <h3 className="text-3xl font-serif font-bold text-gkk-navy uppercase tracking-tight mb-2">Key Issued!</h3>
+            <p className="text-gray-400 font-bold uppercase tracking-widest text-[10px] mb-8">Access key generated successfully</p>
+
+            <div className="bg-gray-50 rounded-3xl p-8 mb-8 border border-gray-100 relative group">
+              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em] mb-3">Your Unique Pass Key</p>
+              <h4 className="font-mono text-2xl font-black text-gkk-navy tracking-widest break-all px-4">{issuedKeyId}</h4>
+
+              <button
+                onClick={() => copyToClipboard(issuedKeyId)}
+                className="mt-6 flex items-center gap-2 mx-auto px-4 py-2 bg-white border border-gray-200 text-gray-400 hover:text-gkk-navy hover:border-gkk-navy transition-all rounded-xl text-[10px] font-bold uppercase tracking-widest shadow-sm"
+              >
+                <Save size={14} /> Copy to Clipboard
+              </button>
+            </div>
 
             <button
-              onClick={() => copyToClipboard(issuedKeyId)}
-              className="mt-6 flex items-center gap-2 mx-auto px-4 py-2 bg-white border border-gray-200 text-gray-400 hover:text-gkk-navy hover:border-gkk-navy transition-all rounded-xl text-[10px] font-bold uppercase tracking-widest shadow-sm"
+              onClick={() => setShowSuccessModal(false)}
+              className="w-full py-5 bg-gkk-navy text-white font-bold rounded-2xl shadow-xl shadow-gkk-navy/20 hover:bg-gkk-royalBlue transition-all uppercase tracking-widest text-xs"
             >
-              <Save size={14} /> Copy to Clipboard
+              Done & Return
             </button>
           </div>
-
-          <button
-            onClick={() => setShowSuccessModal(false)}
-            className="w-full py-5 bg-gkk-navy text-white font-bold rounded-2xl shadow-xl shadow-gkk-navy/20 hover:bg-gkk-royalBlue transition-all uppercase tracking-widest text-xs"
-          >
-            Done & Return
-          </button>
         </div>
-      </div>
-    )}
-    <ConfirmationModal
-      isOpen={confirmModal.isOpen}
-      title={confirmModal.title}
-      message={confirmModal.message}
-      type={confirmModal.type}
-      onConfirm={confirmModal.onConfirm}
-      onClose={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
-    />
-  </div>
-);
+      )}
+      <ConfirmationModal
+        isOpen={confirmModal.isOpen}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        type={confirmModal.type}
+        onConfirm={confirmModal.onConfirm}
+        onClose={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+      />
+    </div>
+  );
 };
 export default EvaluatorPortal;
