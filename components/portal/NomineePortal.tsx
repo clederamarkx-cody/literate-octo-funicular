@@ -374,25 +374,22 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
 
   const getProgress = (round: number) => {
     if (!dynamicRequirements) return 0;
-    const stageKey = round === 1 ? 'stage1' : round === 2 ? 'stage2' : 'stage3';
-    const stageReqs = dynamicRequirements[stageKey] || [];
+
+    // Stage 2 override: 100% if Stage 3 is unlocked
+    if (round === 2 && nomineeData?.round3Unlocked) return 100;
 
     if (round === 3) {
-      // Stage 3 progress includes:
-      // 1. New documents uploaded for Stage 3 requirements
-      // 2. Previously failed documents from Round 1/2 that have been RE-UPLOADED (isCorrected)
-      const stage3ReqDocs = documents.filter(d => d.round === 3);
-      const stage3Uploaded = stage3ReqDocs.filter(d => d.status === 'uploaded').length;
-
-      const deficiencies = documents.filter(d => d.round < 3 && (d.verdict === 'fail' || (d as any).isCorrection));
-      const correctedDeficiencies = deficiencies.filter(d => (d as any).isCorrection).length;
-
-      const totalItems = stage3ReqDocs.length + deficiencies.length;
+      // Stage 3 progress: Deficiency-only model (ignore base stage3 requirements)
+      const deficiencies = documents.filter(d => d.id?.startsWith('r3-deficiency-'));
+      const totalItems = deficiencies.length;
       if (totalItems === 0) return nomineeData?.round3Unlocked ? 100 : 0;
 
-      return Math.round(((stage3Uploaded + correctedDeficiencies) / totalItems) * 100);
+      const completed = deficiencies.filter(d => d.status === 'uploaded').length;
+      return Math.round((completed / totalItems) * 100);
     }
 
+    const stageKey = round === 1 ? 'stage1' : 'stage2';
+    const stageReqs = dynamicRequirements[stageKey] || [];
     if (stageReqs.length === 0) return 0;
 
     const roundDocs = documents.filter(d => d.round === round);
