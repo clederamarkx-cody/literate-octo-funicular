@@ -418,7 +418,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {/* Base Requirements - Only for Stage 1 & 2. Stage 3 is correction-only. */}
           {round < 3 && activeRequirements.map((req: any, idx: number) => {
-            const stagePrefix = round === 1 ? 'r1' : 'r2';
+            const stagePrefix = 'r1';
             const slotId = `${stagePrefix}-${idx}`;
             return renderRequirementCard(req, slotId);
           })}
@@ -558,9 +558,9 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
       return Math.round((evaluatedCount / totalItems) * 100);
     }
 
-    const stageKey = round === 1 ? 'stage1' : 'stage2';
+    const stageKey = 'stage1';
     const stageReqs = dynamicRequirements[stageKey] || [];
-    const stagePrefix = round === 1 ? 'r1' : 'r2';
+    const stagePrefix = 'r1';
 
     const totalItems = stageReqs.length;
     if (totalItems === 0) return 0;
