@@ -60,7 +60,7 @@ interface EvaluatorPortalProps {
 }
 
 const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev, nomineesData: propNominees, userRole, onToggleRound2, onToggleRound3 }) => {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'entries' | 'management' | 'profile'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'entries' | 'management' | 'staff_directory' | 'profile'>('dashboard');
   const [view, setView] = useState<'list' | 'review'>('list');
   const [selectedNominee, setSelectedNominee] = useState<Nominee | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -844,8 +844,11 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
           </table>
         </div>
       </div>
+    </div>
+  );
 
-      {/* User Profiles Directory */}
+  const renderStaffDirectory = () => (
+    <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500">
       <UserProfileTable />
     </div>
   );
@@ -1127,6 +1130,13 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
               <span className="text-sm font-medium">Management</span>
             </button>
           )}
+
+          {(userRole === 'admin' || userRole === 'scd_team_leader') && (
+            <button onClick={() => { setActiveTab('staff_directory'); setView('list'); }} className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'staff_directory' ? 'bg-gkk-gold text-gkk-navy font-bold shadow-lg shadow-yellow-500/10' : 'text-gray-400 hover:bg-white/5 hover:text-white'}`}>
+              <Briefcase size={20} />
+              <span className="text-sm font-medium">Staff Directory</span>
+            </button>
+          )}
           <div className="pt-6 mt-6 border-t border-white/5">
             <p className="px-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4">Board Tools</p>
             <button
@@ -1146,7 +1156,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
             <span>Validator Portal</span>
             <ChevronRight size={14} className="mx-2" />
             <span className="text-gkk-navy">
-              {activeTab === 'dashboard' ? 'Overview' : activeTab === 'management' ? 'Management' : activeTab === 'profile' ? 'My Profile' : 'Queue'}
+              {activeTab === 'dashboard' ? 'Overview' : activeTab === 'management' ? 'Management' : activeTab === 'staff_directory' ? 'Staff Directory' : activeTab === 'profile' ? 'My Profile' : 'Queue'}
             </span>
           </div>
 
@@ -1204,31 +1214,32 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
             {view === 'list' ? (
               activeTab === 'dashboard' ? renderDashboard() :
                 activeTab === 'management' ? renderManagement() :
-                  activeTab === 'profile' ? (
-                    staffProfile ? (
-                      <StaffProfileEdit
-                        userData={staffProfile}
-                        onUpdateProfile={async (updates) => {
-                          if (!staffProfile?.userId) return false;
-                          // Spread staffProfile to ensure role and status are included for the upsert
-                          const success = await updateUserProfile(staffProfile.userId, { ...staffProfile, ...updates });
-                          if (success) {
-                            setStaffProfile(prev => prev ? { ...prev, ...updates } : null);
-                          }
-                          return success;
-                        }}
-                        onUnderDev={onUnderDev}
-                      />
-                    ) : (
-                      <div className="flex flex-col items-center justify-center py-40 bg-white rounded-[40px] border border-gray-100 shadow-sm animate-pulse">
-                        <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-200 mb-6">
-                          <User size={32} />
+                  activeTab === 'staff_directory' ? renderStaffDirectory() :
+                    activeTab === 'profile' ? (
+                      staffProfile ? (
+                        <StaffProfileEdit
+                          userData={staffProfile}
+                          onUpdateProfile={async (updates) => {
+                            if (!staffProfile?.userId) return false;
+                            // Spread staffProfile to ensure role and status are included for the upsert
+                            const success = await updateUserProfile(staffProfile.userId, { ...staffProfile, ...updates });
+                            if (success) {
+                              setStaffProfile(prev => prev ? { ...prev, ...updates } : null);
+                            }
+                            return success;
+                          }}
+                          onUnderDev={onUnderDev}
+                        />
+                      ) : (
+                        <div className="flex flex-col items-center justify-center py-40 bg-white rounded-[40px] border border-gray-100 shadow-sm animate-pulse">
+                          <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-200 mb-6">
+                            <User size={32} />
+                          </div>
+                          <h3 className="text-xl font-bold text-gray-300 uppercase tracking-widest">Loading Profile...</h3>
+                          <p className="text-xs text-gray-400 mt-2 font-bold uppercase tracking-tight">Syncing security credentials</p>
                         </div>
-                        <h3 className="text-xl font-bold text-gray-300 uppercase tracking-widest">Loading Profile...</h3>
-                        <p className="text-xs text-gray-400 mt-2 font-bold uppercase tracking-tight">Syncing security credentials</p>
-                      </div>
-                    )
-                  ) : renderEntries()
+                      )
+                    ) : renderEntries()
             ) : renderReview()}
           </div>
         </div>
