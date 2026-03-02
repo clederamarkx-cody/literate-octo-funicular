@@ -127,31 +127,31 @@ const GovernmentPortalView: React.FC<GovernmentPortalViewProps> = ({
                 {/* Stage 2 */}
                 <div id="round-2-lock" className={`rounded-3xl border transition-all duration-500 overflow-hidden ${nomineeData?.round2Unlocked ? 'bg-white border-gray-200 shadow-xl' : 'bg-gray-50 border-gray-100 opacity-60'}`}>
                     <div
-                        className={`w-full p-8 flex items-center justify-between border-b border-gray-100 ${nomineeData?.round2Unlocked ? 'cursor-pointer header-glass-hover' : ''}`}
-                        onClick={() => nomineeData?.round2Unlocked && setStage2Open(!stage2Open)}
+                        className={`w-full p-8 flex items-center justify-between border-b border-gray-100 ${nomineeData?.round2Unlocked && !nomineeData?.round3Unlocked ? 'cursor-pointer header-glass-hover' : ''}`}
+                        onClick={() => nomineeData?.round2Unlocked && !nomineeData?.round3Unlocked && setStage2Open(!stage2Open)}
                     >
                         <div className="flex items-center space-x-6">
-                            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all ${nomineeData?.round2Unlocked ? 'bg-gkk-navy text-white shadow-lg' : 'bg-gray-200 text-gray-400'}`}>{nomineeData?.round2Unlocked ? <Unlock size={24} /> : <Lock size={24} />}</div>
+                            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all ${nomineeData?.round2Unlocked && !nomineeData?.round3Unlocked ? 'bg-gkk-navy text-white shadow-lg' : 'bg-gray-200 text-gray-400'}`}>{nomineeData?.round2Unlocked && !nomineeData?.round3Unlocked ? <Unlock size={24} /> : <Lock size={24} />}</div>
                             <div className="text-left">
                                 <div className="flex items-center gap-3">
-                                    <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${nomineeData?.round2Unlocked ? 'bg-gkk-gold text-gkk-navy' : 'bg-gray-300 text-white'}`}>2</div>
+                                    <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${nomineeData?.round2Unlocked && !nomineeData?.round3Unlocked ? 'bg-gkk-gold text-gkk-navy' : 'bg-gray-300 text-white'}`}>2</div>
                                     <h4 className="font-bold text-gkk-navy text-xl leading-none">STAGE 2 (DOCUMENT EVALUATION)</h4>
-                                    {!!nomineeData?.round2Unlocked && (
+                                    {!!nomineeData?.round2Unlocked && !nomineeData?.round3Unlocked && (
                                         <div className={`transition-transform duration-300 ${stage2Open ? 'rotate-180' : 'rotate-0'}`}>
                                             <ChevronDown size={20} className="text-gray-400" />
                                         </div>
                                     )}
                                 </div>
                                 <div className="text-xs text-gray-500 mt-2 font-bold uppercase tracking-widest leading-relaxed">
-                                    {nomineeData?.round2Unlocked
+                                    {nomineeData?.round2Unlocked && !nomineeData?.round3Unlocked
                                         ? '- This stage focuses on the correctness and consistency of data and validity.'
-                                        : 'Locked - Monitoring current submission status'}
+                                        : nomineeData?.round3Unlocked ? 'Locked - Final Evaluation in Progress' : 'Locked - Monitoring current submission status'}
                                 </div>
                             </div>
                         </div>
                     </div>
-                    {/* Stage 2 Contents - Only visible if activated */}
-                    <div className={`collapse-transition overflow-hidden ${!!nomineeData?.round2Unlocked && stage2Open ? 'max-h-[5000px] opacity-100 p-8' : 'max-h-0 opacity-0 px-8 pb-0'}`}>
+                    {/* Stage 2 Contents - Only visible if activated and NOT locked by stage 3 */}
+                    <div className={`collapse-transition overflow-hidden ${!!nomineeData?.round2Unlocked && !nomineeData?.round3Unlocked && stage2Open ? 'max-h-[5000px] opacity-100 p-8' : 'max-h-0 opacity-0 px-8 pb-0'}`}>
                         <div className="flex flex-col items-center justify-center py-12 text-center space-y-4 bg-gray-50/50 rounded-3xl border border-dashed border-gray-200">
                             <div className="p-4 bg-white rounded-2xl shadow-sm text-gray-400">
                                 <ShieldAlert size={32} />
