@@ -541,26 +541,30 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
     // Stage 2 override: 100% if Stage 3 is unlocked
     if (round === 2 && nominee.round3Unlocked) return 100;
 
-    const stageKey = round === 1 ? 'stage1' : round === 2 ? 'stage2' : 'stage3';
-    const stageReqs = dynamicRequirements[stageKey] || [];
     const roundDocs = nominee.documents || [];
-    const stagePrefix = round === 1 ? 'r1' : round === 2 ? 'r2' : 'r3';
 
-    let totalItems = stageReqs.length;
-    let evaluatedCount = stageReqs.filter((req: any, idx: number) => {
+    // Stage 3: Deficiency-only model (no base requirements)
+    if (round === 3) {
+      const deficiencies = roundDocs.filter(d => d.slotId?.startsWith('r3-deficiency-'));
+      const totalItems = deficiencies.length;
+      if (totalItems === 0) return 0;
+      const evaluatedCount = deficiencies.filter(d => d.verdict === 'pass' || d.verdict === 'fail').length;
+      return Math.round((evaluatedCount / totalItems) * 100);
+    }
+
+    const stageKey = round === 1 ? 'stage1' : 'stage2';
+    const stageReqs = dynamicRequirements[stageKey] || [];
+    const stagePrefix = round === 1 ? 'r1' : 'r2';
+
+    const totalItems = stageReqs.length;
+    if (totalItems === 0) return 0;
+
+    const evaluatedCount = stageReqs.filter((req: any, idx: number) => {
       const slotId = `${stagePrefix}-${idx}`;
       const doc = roundDocs.find(d => d.slotId === slotId);
       return doc?.verdict === 'pass' || doc?.verdict === 'fail';
     }).length;
 
-    // Stage 3: Include dynamic deficiencies
-    if (round === 3) {
-      const deficiencies = roundDocs.filter(d => d.slotId?.startsWith('r3-deficiency-'));
-      totalItems += deficiencies.length;
-      evaluatedCount += deficiencies.filter(d => d.verdict === 'pass' || d.verdict === 'fail').length;
-    }
-
-    if (totalItems === 0) return 0;
     return Math.round((evaluatedCount / totalItems) * 100);
   };
 
