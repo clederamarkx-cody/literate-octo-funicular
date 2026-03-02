@@ -31,6 +31,7 @@ export const DOCUMENTS_COLLECTION = 'application_documents';
 export const REQUIREMENTS_COLLECTION = 'requirements';
 export const WINNERS_COLLECTION = 'gkk_winners';
 export const SYSTEM_LOGS_COLLECTION = 'system_logs';
+export const INDUSTRY_SECTORS_COLLECTION = 'industry_sectors';
 export const STORAGE_BUCKET = 'documents';
 
 export const TEST_MODE = false;
@@ -598,7 +599,7 @@ export const verifyAccessKey = async (passKey: string) => {
     };
 };
 
-export const issueAccessKey = async (data: { companyName: string, focalName: string, email: string, region: string, role?: string, category?: string }): Promise<string> => {
+export const issueAccessKey = async (data: { companyName: string, focalName: string, email: string, region: string, role?: string, category?: string, industry?: string }): Promise<string> => {
     const random = Math.floor(1000 + Math.random() * 9000).toString();
 
     // Check if user already exists to avoid unique constraint violations
@@ -650,7 +651,8 @@ export const issueAccessKey = async (data: { companyName: string, focalName: str
         name: data.companyName,
         focal_name: data.focalName,
         region: data.region,
-        category: data.category
+        category: data.category,
+        industry: data.industry
     });
 
     if (error) {
@@ -666,6 +668,15 @@ export const getAllAccessKeys = async () => {
     const { data, error } = await supabase
         .from(ACCESS_KEYS_COLLECTION)
         .select('*');
+
+    return data || [];
+};
+
+export const getAllIndustrySectors = async () => {
+    const { data, error } = await supabase
+        .from(INDUSTRY_SECTORS_COLLECTION)
+        .select('*')
+        .order('name', { ascending: true });
 
     return data || [];
 };

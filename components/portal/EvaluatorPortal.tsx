@@ -45,7 +45,7 @@ import {
 import ConfirmationModal from '../ui/ConfirmationModal';
 import { Nominee, NomineeDocument, UserRole, AccessKey, User as UserType } from '../../types';
 import { STAGE_1_REQUIREMENTS } from './NomineePortal';
-import { getAllNominees, resolveFileUrl, updateDocumentEvaluation, updateDocumentRemarks, getRequirementsByCategory, issueAccessKey, getAllAccessKeys, getUserProfile, updateUserProfile, updateNominee } from '../../services/dbService';
+import { getAllNominees, resolveFileUrl, updateDocumentEvaluation, updateDocumentRemarks, getRequirementsByCategory, issueAccessKey, getAllAccessKeys, getUserProfile, updateUserProfile, updateNominee, getAllIndustrySectors } from '../../services/dbService';
 import StaffProfileEdit from './StaffProfileEdit';
 import { UserProfileTable } from './management/UserProfileTable';
 import { PH_REGIONS } from '../../constants';
@@ -163,15 +163,25 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
   const [keyStatusFilter, setKeyStatusFilter] = useState<string>('all');
   const [keyRoleFilter, setKeyRoleFilter] = useState<string>('all');
   const [isIssuingKey, setIsIssuingKey] = useState(false);
-  const [newKeyData, setNewKeyData] = useState({ companyName: '', focalName: '', email: '', region: 'NCR', role: 'nominee', category: 'Private Sector' });
+  const [newKeyData, setNewKeyData] = useState({ companyName: '', focalName: '', email: '', region: 'NCR', role: 'nominee', category: 'Private Sector', industry: '' });
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [issuedKeyId, setIssuedKeyId] = useState('');
+  const [industrySectors, setIndustrySectors] = useState<any[]>([]);
 
   useEffect(() => {
     if (activeTab === 'management') {
       const fetchKeys = async () => {
-        const keys = await getAllAccessKeys();
+        const [keys, industries] = await Promise.all([
+          getAllAccessKeys(),
+          getAllIndustrySectors()
+        ]);
         setAllKeys(keys);
+        setIndustrySectors(industries);
+
+        // Default industry if sectors are loaded
+        if (industries.length > 0 && !newKeyData.industry) {
+          setNewKeyData(prev => ({ ...prev, industry: industries[0].name }));
+        }
       };
       fetchKeys();
     }
@@ -208,7 +218,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
       const keyId = await issueAccessKey(newKeyData);
       setIssuedKeyId(keyId);
       setShowSuccessModal(true);
-      setNewKeyData({ companyName: '', focalName: '', email: '', region: 'NCR', role: 'nominee', category: 'Private Sector' });
+      setNewKeyData({ companyName: '', focalName: '', email: '', region: 'NCR', role: 'nominee', category: 'Private Sector', industry: industrySectors[0]?.name || '' });
       const updatedKeys = await getAllAccessKeys();
       setAllKeys(updatedKeys);
     } catch (err) {
@@ -686,6 +696,21 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                   </div>
                 </div>
               )}
+
+              {/* Industry Selection */}
+              <div>
+                <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Establishment Industry</label>
+                <select
+                  value={newKeyData.industry}
+                  onChange={(e) => setNewKeyData({ ...newKeyData, industry: e.target.value })}
+                  className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-gkk-gold/5 focus:border-gkk-gold outline-none transition-all font-bold text-sm tracking-tight appearance-none"
+                >
+                  <option value="">Select Industry...</option>
+                  {industrySectors.map(ind => (
+                    <option key={ind.id} value={ind.name}>{ind.name}</option>
+                  ))}
+                </select>
+              </div>
             </div>
 
             <div className="flex justify-end pt-2">
@@ -760,6 +785,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                 <th className="px-6 py-4 text-[14.5px] font-semibold text-gray-400 uppercase tracking-wide">Role</th>
                 <th className="px-6 py-4 text-[14.5px] font-semibold text-gray-400 uppercase tracking-wide">Region</th>
                 <th className="px-6 py-4 text-[14.5px] font-semibold text-gray-400 uppercase tracking-wide">Category</th>
+                <th className="px-6 py-4 text-[14.5px] font-semibold text-gray-400 uppercase tracking-wide">Industry</th>
                 <th className="px-6 py-4 text-[14.5px] font-semibold text-gray-400 uppercase tracking-wide">Status</th>
                 <th className="px-6 py-4 text-[14.5px] font-semibold text-gray-400 uppercase tracking-wide text-right">Issued</th>
               </tr>
@@ -798,6 +824,9 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                       </td>
                       <td className="px-6 py-4">
                         <span className="text-[14.5px] text-gray-500 font-semibold uppercase">{key.category || 'N/A'}</span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="text-[14.5px] text-gray-500 font-semibold uppercase truncate max-w-[200px]" title={key.industry}>{key.industry || '---'}</span>
                       </td>
                       <td className="px-6 py-4">
                         <span className={`px-2 py-0.5 rounded-full text-[14.5px] font-semibold uppercase border ${key.status === 'activated' ? 'bg-green-50 text-green-600 border-green-100' : 'bg-amber-50 text-amber-600 border-amber-100'}`}>
