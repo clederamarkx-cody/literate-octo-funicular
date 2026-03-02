@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { Save, User, Building2, MapPin, Briefcase, Mail, Phone, Users, Lock } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Save, User, Building2, MapPin, Briefcase, Mail, Phone, Users, Lock, ChevronDown } from 'lucide-react';
+import { getAllIndustrySectors } from '../../../services/dbService';
 
 interface NomineeProfileEditProps {
     profileData: any;
@@ -22,7 +23,16 @@ const NomineeProfileEdit: React.FC<NomineeProfileEditProps> = ({ profileData, on
         phone: profileData?.phone || '',
     });
 
+    const [industrySectors, setIndustrySectors] = useState<any[]>([]);
     const [isSaving, setIsSaving] = useState(false);
+
+    useEffect(() => {
+        const fetchIndustries = async () => {
+            const sectors = await getAllIndustrySectors();
+            setIndustrySectors(sectors);
+        };
+        fetchIndustries();
+    }, []);
 
     const handleChange = (section: 'details' | 'root', field: string, value: string) => {
         setFormData(prev => {
@@ -152,17 +162,21 @@ const NomineeProfileEdit: React.FC<NomineeProfileEditProps> = ({ profileData, on
                             </select>
                         </div>
                         <div className="space-y-2">
-                            <label className="text-xs font-bold text-gray-500 uppercase tracking-widest px-1">Industry Sector</label>
+                            <label className="text-xs font-bold text-gray-500 uppercase tracking-widest px-1">Industry Category</label>
                             <div className="relative">
-                                <Briefcase size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-                                <input
-                                    type="text"
+                                <Briefcase size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 z-10" />
+                                <select
                                     value={formData.details.industry}
                                     onChange={(e) => handleChange('details', 'industry', e.target.value)}
-                                    className="w-full pl-11 pr-4 py-3 rounded-2xl border border-gray-200 focus:border-gkk-navy focus:ring-2 focus:ring-gkk-navy/10 outline-none transition-all font-medium text-gkk-navy bg-gray-50/50"
-                                    placeholder="e.g. Manufacturing, Construction"
+                                    className="w-full pl-11 pr-10 py-3 rounded-2xl border border-gray-200 focus:border-gkk-navy focus:ring-2 focus:ring-gkk-navy/10 outline-none transition-all font-medium text-gkk-navy bg-gray-50/50 appearance-none"
                                     required
-                                />
+                                >
+                                    <option value="">Select Industry...</option>
+                                    {industrySectors.map(ind => (
+                                        <option key={ind.id} value={ind.name}>{ind.name}</option>
+                                    ))}
+                                </select>
+                                <ChevronDown size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                             </div>
                         </div>
                         <div className="space-y-2">
