@@ -131,11 +131,21 @@ function App() {
 
   const handleToggleRound2 = useCallback(async (nomineeId: string, unlocked: boolean) => {
     try {
-      await updateNominee(nomineeId, { round2Unlocked: unlocked, stage2TriggeredByScd: unlocked });
+      const updates: any = {
+        round2Unlocked: unlocked,
+        stage2TriggeredByScd: unlocked
+      };
+
+      // If deactivating Stage 2, also reset REU verify lock to let them edit again
+      if (!unlocked) {
+        updates.stage1PassedByReu = false;
+      }
+
+      await updateNominee(nomineeId, updates);
+      setNominees(prev => prev.map(app => app.id === nomineeId ? { ...app, ...updates } : app));
     } catch (err) {
       console.error("Failed to toggle round 2 details to local database", err);
     }
-    setNominees(prev => prev.map(app => app.id === nomineeId ? { ...app, round2Unlocked: unlocked, stage2TriggeredByScd: unlocked } : app));
   }, []);
 
   const handleToggleRound3 = useCallback(async (nomineeId: string, unlocked: boolean) => {
