@@ -55,7 +55,7 @@ export const getRequirementsByCategory = async (category: string) => {
     if (category.toLowerCase() === 'private sector' || category.toLowerCase() === 'private') catId = 'cat_industry';
     if (category.toLowerCase() === 'government agency' || category.toLowerCase() === 'government') catId = 'cat_government';
     if (category.toLowerCase() === 'industry') catId = 'cat_industry';
-    if (category.toLowerCase() === 'construction') catId = 'cat_construction';
+    if (category.toLowerCase() === 'private construction' || category.toLowerCase() === 'construction') catId = 'cat_construction';
 
     const { data, error } = await supabase
         .from(REQUIREMENTS_COLLECTION)
