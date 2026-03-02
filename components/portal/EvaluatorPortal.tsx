@@ -698,8 +698,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                 </div>
               )}
 
-              {/* Industry Selection */}
-              {newKeyData.role === 'nominee' && (
+              {newKeyData.role === 'nominee' ? (
                 <div>
                   <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Establishment Industry</label>
                   <select
@@ -712,6 +711,12 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                       <option key={ind.id} value={ind.name}>{ind.name}</option>
                     ))}
                   </select>
+                </div>
+              ) : (
+                <div className="flex items-end pb-1">
+                  <div className="w-full p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 flex items-center justify-center">
+                    <p className="text-[14.5px] text-gray-400 font-semibold">Industry selection only for Nominees</p>
+                  </div>
                 </div>
               )}
             </div>
