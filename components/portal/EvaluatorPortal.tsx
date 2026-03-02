@@ -909,7 +909,8 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                         }
                       });
                     }}
-                    className={`px-6 py-3 rounded-2xl font-bold transition-all text-[10px] uppercase tracking-widest flex items-center gap-2 shadow-sm ${selectedNominee.stage1PassedByReu ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-gkk-gold text-gkk-navy hover:bg-gkk-navy hover:text-white border border-gkk-gold/20'}`}
+                    disabled={userRole === 'reu' && selectedNominee.stage1PassedByReu}
+                    className={`px-6 py-3 rounded-2xl font-bold transition-all text-[10px] uppercase tracking-widest flex items-center gap-2 shadow-sm ${selectedNominee.stage1PassedByReu ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-gkk-gold text-gkk-navy hover:bg-gkk-navy hover:text-white border border-gkk-gold/20'} ${userRole === 'reu' && selectedNominee.stage1PassedByReu ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
                     {selectedNominee.stage1PassedByReu ? <ShieldCheck size={14} /> : <Zap size={14} />}
                     {selectedNominee.stage1PassedByReu ? 'Passed & Unlocked' : 'Pass Stage 1 & Unlock Stage 2'}
