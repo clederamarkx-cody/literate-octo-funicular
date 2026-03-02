@@ -1092,7 +1092,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
           <button onClick={() => { setActiveTab('dashboard'); setView('list'); }} className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'dashboard' ? 'bg-gkk-gold text-gkk-navy font-bold shadow-lg shadow-yellow-500/10' : 'text-gray-400 hover:bg-white/5 hover:text-white'}`}><LayoutDashboard size={20} /><span className="text-sm font-medium">Dashboard</span></button>
           <button onClick={() => { setActiveTab('entries'); setView('list'); }} className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'entries' || view === 'review' ? 'bg-gkk-gold text-gkk-navy font-bold shadow-lg shadow-yellow-500/10' : 'text-gray-400 hover:bg-white/5 hover:text-white'}`}><Users size={20} /><span className="text-sm font-medium">Nominee Queue</span></button>
 
-          {userRole === 'admin' && (
+          {(userRole === 'admin' || userRole === 'scd_team_leader') && (
             <button onClick={() => { setActiveTab('management'); setView('list'); }} className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'management' ? 'bg-gkk-gold text-gkk-navy font-bold shadow-lg shadow-yellow-500/10' : 'text-gray-400 hover:bg-white/5 hover:text-white'}`}>
               <Zap size={20} />
               <span className="text-sm font-medium">Management</span>
