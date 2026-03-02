@@ -104,7 +104,9 @@ export const STAGE_1_REQUIREMENTS = [
   { category: 'Requirement', label: '50. Valid Construction Heavy Equipment (CHE) Testing' },
   { category: 'Requirement', label: '51. For CHE operators, valid Technical Education and Skills Development Authority (TESDA) Certification' },
   { category: 'Requirement', label: '52. Valid Worker’s Skills Certification for Critical Occupations (welding, scaffolding, rigging, heavy equipment operation, etc.), if applicable (If TESDA certification is not applicable, skills training and valid authorization issued by the company)' },
-  { category: 'Requirement', label: '53. Temporary Accommodation and Welfare Facilities' }
+  { category: 'Requirement', label: '53. Temporary Accommodation and Welfare Facilities' },
+  { category: 'Requirement', label: '54. Valid OSH-related Certifications / Accreditations / Awards (e.g. ISO 45001, 14001)' },
+  { category: 'Requirement', label: '55. Industry-specific compliances with guidelines set by authorities having jurisdiction as specified in the IRR of R.A. No. 11058' }
 ];
 interface NomineePortalProps {
   onLogout: () => void;
