@@ -188,13 +188,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
     }
   }, [activeTab]);
 
-  useEffect(() => {
-    if (selectedNominee?.round2Unlocked) {
-      setIsStage1Folded(true);
-    } else {
-      setIsStage1Folded(false);
-    }
-  }, [selectedNominee?.id, selectedNominee?.round2Unlocked]);
+  // Removed auto-folding logic to keep Stage 1 unfolded by default
 
   const docCategories = [
     { id: 'Compliance', name: 'Compliance Reports', icon: FileText },
@@ -449,15 +443,17 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
       }
     };
 
+    const isReuReadOnly = userRole === 'reu' && selectedNominee.stage1PassedByReu;
+
     return (
-      <div key={slotId} className={`p-5 border rounded-2xl transition-all ${docStatus === 'pass' ? 'bg-green-50 border-green-200 shadow-inner' : docStatus === 'fail' ? 'bg-red-50 border-red-200 shadow-inner' : doc ? 'bg-white border-gray-100 shadow-sm' : 'bg-gray-50/50 border-gray-100'}`}>
+      <div key={slotId} className={`p-5 border rounded-2xl transition-all ${(!isReuReadOnly && docStatus === 'pass') ? 'bg-green-50 border-green-200 shadow-inner' : (!isReuReadOnly && docStatus === 'fail') ? 'bg-red-50 border-red-200 shadow-inner' : doc ? 'bg-white border-gray-100 shadow-sm' : 'bg-gray-50/50 border-gray-100'}`}>
         <div className="flex justify-between items-start mb-3">
           <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{req.category === 'Deficiency Correction' ? 'Correction' : 'Evidence'}</span>
           <div className="flex gap-1.5">
-            {docStatus === 'pass' && <span className="text-[9px] font-black text-green-600 bg-green-100 px-2 py-0.5 rounded-md">PASSED</span>}
-            {docStatus === 'fail' && <span className="text-[9px] font-black text-red-600 bg-red-100 px-2 py-0.5 rounded-md">INCOMPLETE</span>}
+            {(!isReuReadOnly && docStatus === 'pass') && <span className="text-[9px] font-black text-green-600 bg-green-100 px-2 py-0.5 rounded-md">PASSED</span>}
+            {(!isReuReadOnly && docStatus === 'fail') && <span className="text-[9px] font-black text-red-600 bg-red-100 px-2 py-0.5 rounded-md">INCOMPLETE</span>}
             {(doc?.isCorrection || req.category === 'Deficiency Correction') && <span className="text-[9px] font-black text-amber-600 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-100 shadow-sm">DEFICIENCY</span>}
-            {doc ? <span className="text-[9px] font-black text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md">SUBMITTED</span> : <span className="text-[9px] font-black text-gray-400 bg-gray-100 px-2 py-0.5 rounded-md">EMPTY</span>}
+            {doc ? <span className="text-[9px] font-black text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md uppercase tracking-wider">SUBMITTED</span> : <span className="text-[9px] font-black text-gray-400 bg-gray-100 px-2 py-0.5 rounded-md">EMPTY</span>}
           </div>
         </div>
         <h5 className="text-sm font-bold text-gkk-navy mb-2 leading-relaxed min-h-[2.5em]">{req.label}</h5>
@@ -495,14 +491,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                 </div>
               )}
               <div className="mt-2">
-                {(userRole === 'reu' && selectedNominee.stage1PassedByReu) ? (
-                  (doc.remarks || docRemarks[slotId]) ? (
-                    <div className="px-4 py-3 bg-amber-50 border border-amber-100 rounded-xl">
-                      <span className="text-[10px] font-black text-amber-600 uppercase tracking-widest block mb-1">Evaluator Remarks</span>
-                      <p className="text-[11px] text-amber-800 font-semibold leading-relaxed">{docRemarks[slotId] ?? doc.remarks}</p>
-                    </div>
-                  ) : null
-                ) : (
+                {!isReuReadOnly && (
                   <textarea
                     placeholder="Add remarks for the nominee..."
                     disabled={userRole === 'reu' && selectedNominee.stage1PassedByReu}
