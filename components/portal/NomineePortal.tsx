@@ -413,21 +413,21 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
   const handleOpenUpload = (id: string) => {
     const doc = documents.find(d => d.id === id);
     if (doc?.status === 'uploaded') {
-      // Strict Lock Logic with Deficiency Exception:
-      // 1. Stage 1 is locked if Stage 2 is active, UNLESS Stage 3 is active and document FAILED.
-      // 2. Stage 2 is locked if not active OR if Stage 3 is active, UNLESS Stage 3 is active and document FAILED.
-      // 3. Stage 3 is locked if not active.
+      // Strict Lock Logic:
+      // 1. Documents with a verdict (pass/fail) are ALWAYS locked in Stage 1 and 2.
+      // 2. Stage 1 is locked if Stage 2 is active.
+      // 3. Stage 2 is locked if Stage 3 is active.
+      // 4. Stage 3 is locked if not yet unlocked.
       const isLocked =
-        (doc.round === 1 && nomineeData?.round2Unlocked && !(nomineeData?.round3Unlocked && doc.verdict === 'fail')) ||
-        (doc.round === 2 && (!nomineeData?.round2Unlocked || (nomineeData?.round3Unlocked && doc.verdict !== 'fail'))) ||
+        (doc.round < 3 && doc.verdict !== undefined) ||
+        (doc.round === 1 && nomineeData?.round2Unlocked) ||
+        (doc.round === 2 && nomineeData?.round3Unlocked) ||
         (doc.round === 3 && !nomineeData?.round3Unlocked);
 
       if (isLocked) {
-        let message = `Stage ${doc.round} is currently locked.`;
-        if (nomineeData?.round2Unlocked && doc.round === 1 && !nomineeData?.round3Unlocked) {
-          message = "Stage 1 is locked because Stage 2 is now active.";
-        } else if (nomineeData?.round3Unlocked && doc.verdict !== 'fail' && doc.round < 3) {
-          message = "Only documents marked as ACTION REQUIRED can be updated in Stage 3.";
+        let message = `This document is locked as it has already been evaluated or the stage is closed.`;
+        if (doc.round < 3 && doc.verdict === 'fail') {
+          message = "This document is locked. Please use the [DEFICIENCY] slot in Stage 3 for your correction.";
         }
 
         setToast({ message, type: 'info' });

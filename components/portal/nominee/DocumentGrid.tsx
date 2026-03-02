@@ -72,8 +72,9 @@ const DocumentGrid: React.FC<DocumentGridProps> = ({
                 // Stage 3 is locked if Stage 3 hasn't been triggered
                 const isLockedInThisRound =
                     (nomineeData?.status === 'completed') ||
+                    (round < 3 && doc.verdict !== undefined) ||
                     (round === 1 && nomineeData?.round2Unlocked) ||
-                    (round === 2) ||
+                    (round === 2 && nomineeData?.round3Unlocked) ||
                     (round === 3 && (!nomineeData?.round3Unlocked || (doc.status === 'uploaded' && doc.verdict !== 'fail')));
 
                 // Hide verdicts and remarks in Stage 1
