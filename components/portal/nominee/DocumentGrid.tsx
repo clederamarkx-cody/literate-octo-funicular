@@ -46,9 +46,9 @@ const DocumentGrid: React.FC<DocumentGridProps> = ({
             return doc.round === 1;
         }
         if (round === 3) {
-            // Stage 3 shows Stage 3 requirements AND deficiency slots
-            // Both are now explicitly set to round: 3 in NomineePortal
-            return doc.round === 3;
+            // Stage 3: Only show dynamic deficiency slots (corrections)
+            // We ignore base stage3 requirements as the workflow is deficiency-driven
+            return doc.round === 3 && (doc.id.startsWith('r3-deficiency-') || doc.isCorrection);
         }
         return false;
     });
