@@ -280,7 +280,8 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
 
       // Use dynamic requirements from DB for all stages
       const mergedReqs = {
-        ...reqs
+        ...reqs,
+        stage2: reqs.stage1 || STAGE_1_REQUIREMENTS // Mirror Stage 1 into Stage 2 for the Results Bank
       };
 
       setDynamicRequirements(mergedReqs);
