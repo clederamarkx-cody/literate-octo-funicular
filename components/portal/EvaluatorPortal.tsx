@@ -358,11 +358,11 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
   const renderDocumentGrid = (round: number) => {
     if (!selectedNominee || !dynamicRequirements) return <div className="p-10 text-center text-gray-400 font-bold uppercase tracking-widest text-xs">Loading Requirements...</div>;
 
-    const stageKey = round === 1 ? 'stage1' : round === 2 ? 'stage2' : 'stage3';
+    const stageKey = round === 3 ? 'stage3' : 'stage1';
     const activeRequirements = dynamicRequirements[stageKey] || [];
 
     const totalEvaluated = activeRequirements.filter((req: any, idx: number) => {
-      const stagePrefix = round === 1 ? 'r1' : round === 2 ? 'r2' : 'r3';
+      const stagePrefix = round === 3 ? 'r3' : 'r1';
       const slotId = `${stagePrefix}-${idx}`;
       const doc = selectedNominee.documents?.find(d => d.slotId === slotId);
       return doc?.verdict === 'pass' || doc?.verdict === 'fail';
@@ -382,7 +382,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {activeRequirements.map((req: any, idx: number) => {
-            const stagePrefix = round === 1 ? 'r1' : round === 2 ? 'r2' : 'r3';
+            const stagePrefix = round === 3 ? 'r3' : 'r1';
             const slotId = `${stagePrefix}-${idx}`;
 
             const doc = selectedNominee.documents?.find(d => d.slotId === slotId);

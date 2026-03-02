@@ -583,14 +583,13 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
         updates.status = 'under_review';
       }
 
-      await updateNominee(nomineeData.id, updates);
-
-      setToast({ message: `Stage ${targetSubmitStage} records successfully transmitted to the Regional Board.`, type: 'success' });
-      setShowTermsModal(false);
-
+      // Rely on App.tsx to handle the database update via onUpdateNominee
       if (onUpdateNominee) {
         onUpdateNominee(updates);
       }
+
+      setToast({ message: `Stage ${targetSubmitStage} records successfully transmitted to the Regional Board.`, type: 'success' });
+      setShowTermsModal(false);
     } catch (error) {
       console.error("Stage submission failed:", error);
       setToast({ message: `Failed to submit Stage ${targetSubmitStage}. Please try again.`, type: 'error' });
