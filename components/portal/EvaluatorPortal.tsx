@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
+import JSZip from 'jszip';
 import {
   LayoutDashboard,
   Users,
@@ -331,26 +332,39 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
     }
 
     try {
-      // Create hidden link element for sequential download triggers
+      const zip = new JSZip();
+
       for (const doc of docsToExport) {
         if (!doc.url) continue;
         const resolvedUrl = await resolveFileUrl(doc.url);
 
-        // Use a blank target to ensure it works across all browser security policies
-        const link = document.createElement('a');
-        link.href = resolvedUrl;
-        link.download = doc.name || `document_${doc.slotId}.pdf`;
-        link.target = '_blank';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
-        // Small delay to prevent browser from totally blocking multiple simultaneous popups
-        await new Promise(resolve => setTimeout(resolve, 300));
+        try {
+          const response = await fetch(resolvedUrl);
+          if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+          const blob = await response.blob();
+          const fileName = doc.name || `document_${doc.slotId}.pdf`;
+          zip.file(fileName, blob);
+        } catch (fetchError) {
+          console.error(`Failed to fetch ${doc.name}:`, fetchError);
+          // Fallback if fetch fails (cors issue etc), just add a placeholder or skip
+        }
       }
+
+      const content = await zip.generateAsync({ type: 'blob' });
+      const companyName = selectedNominee.name || 'Company';
+      const zipFileName = `${companyName} - Stage ${round} Requirements.zip`;
+
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(content);
+      link.download = zipFileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(link.href);
+
     } catch (error) {
       console.error("Export failed:", error);
-      alert("Failed to open documents. Check your browser's pop-up blocker.");
+      alert("Failed to generate ZIP archive. Please try again.");
     } finally {
       setIsExporting(null);
     }
@@ -462,43 +476,54 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
               >
                 <Eye size={14} /> VIEW DOCUMENT
               </button>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => handleDocVerdict('pass')}
-                  disabled={userRole === 'reu' && selectedNominee.stage1PassedByReu}
-                  className={`flex-1 py-1.5 rounded-xl text-xs font-black border transition-all ${userRole === 'reu' && selectedNominee.stage1PassedByReu ? 'opacity-50 cursor-not-allowed' : ''} ${docStatus === 'pass' ? 'bg-green-600 text-white border-green-600 shadow-md' : 'bg-white text-gray-400 border-gray-200 hover:text-green-600'}`}
-                >
-                  PASS
-                </button>
-                <button
-                  onClick={() => handleDocVerdict('fail')}
-                  disabled={userRole === 'reu' && selectedNominee.stage1PassedByReu}
-                  className={`flex-1 py-1.5 rounded-xl text-xs font-black border transition-all ${userRole === 'reu' && selectedNominee.stage1PassedByReu ? 'opacity-50 cursor-not-allowed' : ''} ${docStatus === 'fail' ? 'bg-red-600 text-white border-red-600 shadow-md' : 'bg-white text-gray-400 border-gray-200 hover:text-red-600'}`}
-                >
-                  INCOMPLETE
-                </button>
-              </div>
+              {!(userRole === 'reu' && selectedNominee.stage1PassedByReu) && (
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleDocVerdict('pass')}
+                    disabled={userRole === 'reu' && selectedNominee.stage1PassedByReu}
+                    className={`flex-1 py-1.5 rounded-xl text-xs font-black border transition-all ${userRole === 'reu' && selectedNominee.stage1PassedByReu ? 'opacity-50 cursor-not-allowed' : ''} ${docStatus === 'pass' ? 'bg-green-600 text-white border-green-600 shadow-md' : 'bg-white text-gray-400 border-gray-200 hover:text-green-600'}`}
+                  >
+                    PASS
+                  </button>
+                  <button
+                    onClick={() => handleDocVerdict('fail')}
+                    disabled={userRole === 'reu' && selectedNominee.stage1PassedByReu}
+                    className={`flex-1 py-1.5 rounded-xl text-xs font-black border transition-all ${userRole === 'reu' && selectedNominee.stage1PassedByReu ? 'opacity-50 cursor-not-allowed' : ''} ${docStatus === 'fail' ? 'bg-red-600 text-white border-red-600 shadow-md' : 'bg-white text-gray-400 border-gray-200 hover:text-red-600'}`}
+                  >
+                    INCOMPLETE
+                  </button>
+                </div>
+              )}
               <div className="mt-2">
-                <textarea
-                  placeholder="Add remarks for the nominee..."
-                  disabled={userRole === 'reu' && selectedNominee.stage1PassedByReu}
-                  value={docRemarks[slotId] ?? doc.remarks ?? ''}
-                  onChange={(e) => setDocRemarks(prev => ({ ...prev, [slotId]: e.target.value }))}
-                  onBlur={async () => {
-                    const remark = docRemarks[slotId];
-                    if (remark !== undefined && remark !== (doc.remarks ?? '')) {
-                      await updateDocumentRemarks(selectedNominee.id, slotId, remark);
-                      const updatedDocs = (selectedNominee.documents || []).map(d =>
-                        d.slotId === slotId ? { ...d, remarks: remark } : d
-                      );
-                      const updatedNominee = { ...selectedNominee, documents: updatedDocs };
-                      setSelectedNominee(updatedNominee);
-                      setLocalNominees(prev => prev.map(a => a.id === selectedNominee.id ? updatedNominee : a));
-                    }
-                  }}
-                  className={`w-full text-[11px] font-semibold text-gray-600 border border-gray-200 rounded-xl px-3 py-2 resize-none focus:outline-none focus:border-gkk-gold/50 focus:ring-1 focus:ring-gkk-gold/20 placeholder:text-gray-300 transition-all ${userRole === 'reu' && selectedNominee.stage1PassedByReu ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  rows={2}
-                />
+                {(userRole === 'reu' && selectedNominee.stage1PassedByReu) ? (
+                  (doc.remarks || docRemarks[slotId]) ? (
+                    <div className="px-4 py-3 bg-amber-50 border border-amber-100 rounded-xl">
+                      <span className="text-[10px] font-black text-amber-600 uppercase tracking-widest block mb-1">Evaluator Remarks</span>
+                      <p className="text-[11px] text-amber-800 font-semibold leading-relaxed">{docRemarks[slotId] ?? doc.remarks}</p>
+                    </div>
+                  ) : null
+                ) : (
+                  <textarea
+                    placeholder="Add remarks for the nominee..."
+                    disabled={userRole === 'reu' && selectedNominee.stage1PassedByReu}
+                    value={docRemarks[slotId] ?? doc.remarks ?? ''}
+                    onChange={(e) => setDocRemarks(prev => ({ ...prev, [slotId]: e.target.value }))}
+                    onBlur={async () => {
+                      const remark = docRemarks[slotId];
+                      if (remark !== undefined && remark !== (doc.remarks ?? '')) {
+                        await updateDocumentRemarks(selectedNominee.id, slotId, remark);
+                        const updatedDocs = (selectedNominee.documents || []).map(d =>
+                          d.slotId === slotId ? { ...d, remarks: remark } : d
+                        );
+                        const updatedNominee = { ...selectedNominee, documents: updatedDocs };
+                        setSelectedNominee(updatedNominee);
+                        setLocalNominees(prev => prev.map(a => a.id === selectedNominee.id ? updatedNominee : a));
+                      }
+                    }}
+                    className={`w-full text-[11px] font-semibold text-gray-600 border border-gray-200 rounded-xl px-3 py-2 resize-none focus:outline-none focus:border-gkk-gold/50 focus:ring-1 focus:ring-gkk-gold/20 placeholder:text-gray-300 transition-all ${userRole === 'reu' && selectedNominee.stage1PassedByReu ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    rows={2}
+                  />
+                )}
               </div>
             </>
           ) : (
