@@ -1036,7 +1036,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                       )}
                     </div>
                   </div>
-                  {(selectedNominee.round3Unlocked || ['admin', 'scd_team_leader', 'reu'].includes(userRole || '')) && (
+                  {(selectedNominee.round3Unlocked || ['admin', 'scd_team_leader', 'reu', 'evaluator'].includes(userRole || '')) && (
                     <div className="border-t border-gray-100">
                       <div className="p-10 bg-white">{renderDocumentGrid(3)}</div>
                     </div>
