@@ -6,6 +6,12 @@ Welcome to the official repository for the **14th Gawad Kaligtasan at Kalusugan 
 
 ## Recent Updates
 
+### UI Enhancements & Polishing (March 2026)
+- **Custom Confirmation Modals**: Replaced native browser `window.confirm` dialogues across the Evaluator Portal (specifically for closing and reopening applications) with a custom, elegantly styled React `ConfirmationModal` component using Lucide icons.
+- **Submission Locking**: Enhanced the upload process to enforce that the submission button for each specific stage remains locked until all required document slots for that stage are successfully populated.
+- **Progress Bar Refinements**: Updated calculation logic to ensure Stage 2 evaluation progress accurately reflects `verdict_r2` data, with visual distinction based on the logged-in role (REU Validation vs. SCD Evaluation).
+- **Accordion Clipping Fixes**: Increased max-height constraints on dynamic accordions to eliminate visual clipping of document lists within various portal views layout.
+
 ### GKK Requirement Update (2026)
 - **Expanded Checklist**: Updated the Stage 1 requirements to the latest 55-item list (48 General + 7 Construction-specific).
 - **Construction Sector**: Introduced a dedicated "Construction" sector with customized requirements to comply with IRR of R.A. No. 11058.
