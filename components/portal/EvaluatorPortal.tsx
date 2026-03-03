@@ -337,12 +337,14 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
     try {
       const zip = new JSZip();
 
+      console.log(`[EXPORT] Starting export for Stage ${round}. Found ${docsToExport.length} documents.`);
+
       // Parallelize fetching with individual timeouts
       await Promise.all(docsToExport.map(async (doc) => {
         if (!doc.url) return;
 
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout per file
+        const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout per file
 
         try {
           const resolvedUrl = await resolveFileUrl(doc.url);
@@ -351,11 +353,15 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
           if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
           const blob = await response.blob();
-          const fileName = doc.name || `document_${doc.slotId}.pdf`;
+          // Use slotId prefix to ensure unique filenames in ZIP and sanitize
+          const safeName = (doc.name || 'document').replace(/[/\\?%*:|"<>]/g, '-');
+          const fileName = `${doc.slotId}_${safeName}.pdf`;
+
           zip.file(fileName, blob);
+          console.log(`[EXPORT] Successfully added: ${fileName}`);
         } catch (fetchError: any) {
-          const name = fetchError.name === 'AbortError' ? 'Timeout' : 'Error';
-          console.error(`[EXPORT] ${name} fetching ${doc.name || doc.slotId}:`, fetchError);
+          const type = fetchError.name === 'AbortError' ? 'Timeout' : 'Error';
+          console.error(`[EXPORT] ${type} fetching ${doc.slotId}:`, fetchError);
         } finally {
           clearTimeout(timeoutId);
         }
@@ -372,8 +378,13 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
       link.download = zipFileName;
       document.body.appendChild(link);
       link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+
+      // Delay revocation to ensure browser handles the download stream properly
+      setTimeout(() => {
+        if (document.body.contains(link)) document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        console.log(`[EXPORT] Export complete and URL revoked.`);
+      }, 500);
 
     } catch (error) {
       console.error("Export failed:", error);
