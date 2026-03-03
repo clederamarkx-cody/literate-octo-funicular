@@ -44,8 +44,8 @@ const Contact: React.FC = () => {
                     <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Office Location</p>
                     <p className="text-gray-700 font-medium leading-relaxed">
                       Occupational Safety and Health Center<br />
-                      North Avenue corner Science Road, Diliman,<br />
-                      Quezon City, 1101 Philippines
+                      North Avenue corner Sen. Miriam P. Defensor-Santiago Avenue, Diliman,<br />
+                      Quezon City, Philippines 1105
                     </p>
                   </div>
                 </div>

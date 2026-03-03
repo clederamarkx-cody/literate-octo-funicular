@@ -15,7 +15,7 @@ const Footer: React.FC<FooterProps> = ({ onUnderDev }) => {
             <p className="text-gray-400 leading-relaxed mb-6 max-w-sm">
               Occupational Safety and Health Center<br />
               Department of Labor and Employment<br />
-              North Avenue corner Science Road, Diliman, Quezon City
+              North Avenue corner Sen. Miriam P. Defensor-Santiago Avenue, Diliman, Quezon City, Philippines 1105
             </p>
             <div className="flex space-x-4">
               <a href="#" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-gkk-gold hover:text-gkk-navy transition-all duration-300"><Facebook size={20} /></a>
