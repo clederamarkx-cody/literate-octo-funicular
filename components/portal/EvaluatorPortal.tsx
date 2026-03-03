@@ -308,14 +308,18 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
     setView('list');
   };
 
-  const handlePreview = async (doc: NomineeDocument) => {
+  const handlePreview = async (doc: any) => {
     setIsResolvingUrl(true);
-    setPreviewDoc({ name: doc.name, url: null, type: doc.type });
+    // Support both NomineeDocument and DocumentSlot structures
+    const docName = doc.name || doc.fileName || doc.label || 'Document';
+    const docUrl = doc.url || doc.previewUrl;
+
+    setPreviewDoc({ name: docName, url: null, type: doc.type });
     setPreviewModalOpen(true);
 
     try {
-      const resolvedUrl = await resolveFileUrl(doc.url);
-      setPreviewDoc({ name: doc.name, url: resolvedUrl, type: doc.type });
+      const resolvedUrl = await resolveFileUrl(docUrl);
+      setPreviewDoc({ name: docName, url: resolvedUrl, type: doc.type });
     } catch (e) {
       console.error("Failed to load document", e);
       alert("Failed to decrypt and load the evidence.");
