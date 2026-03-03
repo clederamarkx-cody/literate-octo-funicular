@@ -328,8 +328,7 @@ export const updateDocumentEvaluation = async (appId: string, slotId: string, ve
             .insert({
                 application_id: appId,
                 slot_id: slotId,
-                [updateField]: dbVerdict,
-                status: 'pending' // Default status for an empty evaluated slot
+                [updateField]: dbVerdict
             });
         error = insertError;
     }
@@ -370,8 +369,7 @@ export const updateDocumentRemarks = async (appId: string, slotId: string, remar
             .insert({
                 application_id: appId,
                 slot_id: slotId,
-                [updateField]: remarks,
-                status: 'pending' // Default status for an empty evaluated slot
+                [updateField]: remarks
             });
         error = insertError;
     }
