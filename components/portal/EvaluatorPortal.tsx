@@ -673,7 +673,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
       label = 'REU Validation';
       colorClass = 'bg-gkk-navy';
     } else if (round === 2) {
-      label = 'SCD Evaluation';
+      label = 'OSHC Evaluation';
       colorClass = 'bg-blue-600';
     } else if (round === 3) {
       label = 'Final Correction';
