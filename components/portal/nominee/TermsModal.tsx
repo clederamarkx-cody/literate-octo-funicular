@@ -33,39 +33,21 @@ const TermsModal: React.FC<TermsModalProps> = ({
                     <button onClick={() => setShowTermsModal(false)} className="p-2 text-gray-400 hover:text-red-500 transition-colors bg-white rounded-xl shadow-sm"><X size={24} /></button>
                 </div>
 
-                <div className="p-10 overflow-y-auto space-y-8 text-sm text-gray-600 leading-relaxed scrollbar-thin flex-1">
-                    <p className="font-medium text-base">By uploading documents to this platform, the submitting party — whether an individual, micro-enterprise, industry organization, or government entity — acknowledges and agrees to the following:</p>
-
+                <div className="p-10 overflow-y-auto space-y-8 text-base text-gray-700 leading-relaxed scrollbar-thin flex-1">
                     <div className="space-y-6">
-                        <div className="bg-gray-50/50 p-6 rounded-2xl border border-gray-100 relative overflow-hidden group hover:border-gkk-gold/30 transition-colors">
-                            <div className="absolute top-0 left-0 w-1 h-full bg-gkk-gold"></div>
-                            <h5 className="font-bold text-gkk-navy uppercase tracking-widest text-xs mb-2">Authorization to Upload</h5>
-                            <p>The submitting party confirms that they are duly authorized to provide the documents and that such submission is within their rights and responsibilities.</p>
+                        <div className="bg-blue-50/50 p-6 rounded-2xl border border-blue-100 relative overflow-hidden group hover:border-gkk-gold/30 transition-colors">
+                            <div className="absolute top-0 left-0 w-1.5 h-full bg-gkk-navy"></div>
+                            <p className="font-medium text-gkk-navy">I am giving my consent to the OSHC to collect, process, retain, store, and dispose our company's data in accordance with the provisions of Republic Act 10173, or the Data Privacy Act of 2012.</p>
                         </div>
+
                         <div className="bg-gray-50/50 p-6 rounded-2xl border border-gray-100 relative overflow-hidden group hover:border-gkk-gold/30 transition-colors">
-                            <div className="absolute top-0 left-0 w-1 h-full bg-gkk-gold"></div>
-                            <h5 className="font-bold text-gkk-navy uppercase tracking-widest text-xs mb-2">Nature of Documents</h5>
-                            <p>The submitting party understands that uploaded documents may contain sensitive, confidential, or proprietary information belonging to themselves, their organization, or the company.</p>
+                            <div className="absolute top-0 left-0 w-1.5 h-full bg-gkk-gold"></div>
+                            <p>I hereby certify that I am the duly authorized representative of the company and have been granted the express authority to submit the application form and documentary requirements, and provide the required company details on behalf of the establishment and its registered owner/s.</p>
                         </div>
+
                         <div className="bg-gray-50/50 p-6 rounded-2xl border border-gray-100 relative overflow-hidden group hover:border-gkk-gold/30 transition-colors">
-                            <div className="absolute top-0 left-0 w-1 h-full bg-gkk-gold"></div>
-                            <h5 className="font-bold text-gkk-navy uppercase tracking-widest text-xs mb-2">Accuracy and Authenticity</h5>
-                            <p>The submitting party certifies that all documents submitted are authentic, accurate, and final versions, free from unauthorized alterations or falsifications.</p>
-                        </div>
-                        <div className="bg-gray-50/50 p-6 rounded-2xl border border-gray-100 relative overflow-hidden group hover:border-gkk-gold/30 transition-colors">
-                            <div className="absolute top-0 left-0 w-1 h-full bg-gkk-gold"></div>
-                            <h5 className="font-bold text-gkk-navy uppercase tracking-widest text-xs mb-2">Company Rights</h5>
-                            <p>The company reserves the right to review, verify, and reject any documents that do not meet authenticity, compliance, or security standards.</p>
-                        </div>
-                        <div className="bg-gray-50/50 p-6 rounded-2xl border border-gray-100 relative overflow-hidden group hover:border-gkk-gold/30 transition-colors">
-                            <div className="absolute top-0 left-0 w-1 h-full bg-gkk-gold"></div>
-                            <h5 className="font-bold text-gkk-navy uppercase tracking-widest text-xs mb-2">Confidential Handling</h5>
-                            <p>The company will handle uploaded documents with appropriate safeguards. However, submission implies consent to internal review, processing, and storage in accordance with company policies.</p>
-                        </div>
-                        <div className="bg-gray-50/50 p-6 rounded-2xl border border-gray-100 relative overflow-hidden group hover:border-gkk-gold/30 transition-colors">
-                            <div className="absolute top-0 left-0 w-1 h-full bg-red-400"></div>
-                            <h5 className="font-bold text-red-600 uppercase tracking-widest text-xs mb-2">Liability</h5>
-                            <p className="font-medium text-gray-700">The submitting party accepts full responsibility for the content of the documents they upload. The company is not liable for any misrepresentation, falsification, or unauthorized disclosure originating from the submission.</p>
+                            <div className="absolute top-0 left-0 w-1.5 h-full bg-gkk-gold"></div>
+                            <p>I certify that the information I provided are true and correct to the best of my knowledge and belief, and have been vetted and approved for submission by the company management. I authorize the OSHC and other agencies to investigate the authenticity of all the information provided.</p>
                         </div>
                     </div>
                 </div>
@@ -78,8 +60,8 @@ const TermsModal: React.FC<TermsModalProps> = ({
                                 <CheckCircle size={18} className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-gkk-navy opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity font-bold scale-50 peer-checked:scale-100 duration-300" />
                             </div>
                             <span className="text-sm font-bold text-gkk-navy leading-tight mt-1 group-hover:text-gkk-gold transition-colors block">
-                                <strong className="block mb-1">Data Privacy Act Compliance</strong>
-                                I consent to the collection, processing, and storage of my organization's data strictly for the purposes of the GKK Awards evaluation in accordance with the Data Privacy Act of 2012.
+                                <strong className="block mb-1 text-xs uppercase tracking-widest text-gray-500">Data Consent</strong>
+                                I consent to the OSHC data processing and retention policy as stated above.
                             </span>
                         </label>
 
@@ -89,8 +71,8 @@ const TermsModal: React.FC<TermsModalProps> = ({
                                 <CheckCircle size={18} className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-gkk-navy opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity font-bold scale-50 peer-checked:scale-100 duration-300" />
                             </div>
                             <span className="text-sm font-bold text-gkk-navy leading-tight mt-1 group-hover:text-gkk-gold transition-colors block">
-                                <strong className="block mb-1">Authority to Submit</strong>
-                                I certify that I am duly authorized by my organization to submit these documents and that all information provided is true, correct, and unaltered.
+                                <strong className="block mb-1 text-xs uppercase tracking-widest text-gray-500">Certification</strong>
+                                I certify the authority, correctness, and authenticity of this submission.
                             </span>
                         </label>
                     </div>

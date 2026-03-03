@@ -140,7 +140,7 @@ const PrivateSectorPortalView: React.FC<PrivateSectorPortalViewProps> = ({
                                         e.stopPropagation();
                                         handleStageSubmit(1);
                                     }}
-                                    disabled={stage1Progress === 0 || !!nomineeData?.round2Unlocked}
+                                    disabled={stage1Progress < 100 || !!nomineeData?.round2Unlocked}
                                     className="px-8 py-3 bg-gkk-navy text-white font-bold rounded-2xl shadow-xl hover:shadow-gkk-navy/40 hover:-translate-y-1 transition-all disabled:opacity-30 flex items-center gap-2 text-xs uppercase tracking-widest truncate"
                                 >
                                     Submit Stage 1
