@@ -326,46 +326,54 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
     setIsExporting(round);
 
     const stagePrefix = round === 1 ? 'r1' : round === 2 ? 'r2' : 'r3';
-    const docsToExport = selectedNominee.documents.filter(doc => doc.slotId?.startsWith(stagePrefix) && doc.url);
+    const allDocs = selectedNominee.documents || [];
+    // Use case-insensitive matching for slotId
+    const stageDocs = allDocs.filter(doc => doc.slotId?.toLowerCase().startsWith(stagePrefix));
+    const docsToExport = stageDocs.filter(doc => doc.url);
+
+    console.log(`[EXPORT] Diagnostics - Total: ${allDocs.length}, Stage ${round}: ${stageDocs.length}, With URL: ${docsToExport.length}`);
 
     if (docsToExport.length === 0) {
-      alert("No documents uploaded for this stage yet.");
+      alert(`No documents found for Stage ${round}.\n(Slots found: ${stageDocs.length}, with valid URLs: 0)`);
       setIsExporting(null);
       return;
+    }
+
+    if (docsToExport.length < stageDocs.length) {
+      alert(`Exporting ${docsToExport.length} files. Note: ${stageDocs.length - docsToExport.length} files were skipped because they lack a valid upload URL.`);
     }
 
     try {
       const zip = new JSZip();
 
-      console.log(`[EXPORT] Starting export for Stage ${round}. Found ${docsToExport.length} documents.`);
+      console.log(`[EXPORT] Starting batched fetch for ${docsToExport.length} files...`);
 
-      // Parallelize fetching with individual timeouts
-      await Promise.all(docsToExport.map(async (doc) => {
-        if (!doc.url) return;
+      const batchSize = 5;
+      for (let i = 0; i < docsToExport.length; i += batchSize) {
+        const batch = docsToExport.slice(i, i + batchSize);
+        console.log(`[EXPORT] Fetching batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(docsToExport.length / batchSize)}...`);
 
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout per file
+        await Promise.all(batch.map(async (doc) => {
+          if (!doc.url) return;
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
 
-        try {
-          const resolvedUrl = await resolveFileUrl(doc.url);
-          const response = await fetch(resolvedUrl, { signal: controller.signal });
-
-          if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-          const blob = await response.blob();
-          // Use slotId prefix to ensure unique filenames in ZIP and sanitize
-          const safeName = (doc.name || 'document').replace(/[/\\?%*:|"<>]/g, '-');
-          const fileName = `${doc.slotId}_${safeName}.pdf`;
-
-          zip.file(fileName, blob);
-          console.log(`[EXPORT] Successfully added: ${fileName}`);
-        } catch (fetchError: any) {
-          const type = fetchError.name === 'AbortError' ? 'Timeout' : 'Error';
-          console.error(`[EXPORT] ${type} fetching ${doc.slotId}:`, fetchError);
-        } finally {
-          clearTimeout(timeoutId);
-        }
-      }));
+          try {
+            const resolvedUrl = await resolveFileUrl(doc.url);
+            const response = await fetch(resolvedUrl, { signal: controller.signal });
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const blob = await response.blob();
+            const safeName = (doc.name || 'document').replace(/[/\\?%*:|"<>]/g, '-');
+            const fileName = `${doc.slotId}_${safeName}.pdf`;
+            zip.file(fileName, blob);
+            console.log(`[EXPORT] Added: ${fileName}`);
+          } catch (fetchError: any) {
+            console.error(`[EXPORT] Error/Timeout fetching ${doc.slotId}:`, fetchError);
+          } finally {
+            clearTimeout(timeoutId);
+          }
+        }));
+      }
 
       // Generate and download ZIP
       const content = await zip.generateAsync({ type: 'blob' });
@@ -383,8 +391,8 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
       setTimeout(() => {
         if (document.body.contains(link)) document.body.removeChild(link);
         URL.revokeObjectURL(url);
-        console.log(`[EXPORT] Export complete and URL revoked.`);
-      }, 500);
+        console.log(`[EXPORT] Export process complete.`);
+      }, 1000);
 
     } catch (error) {
       console.error("Export failed:", error);
