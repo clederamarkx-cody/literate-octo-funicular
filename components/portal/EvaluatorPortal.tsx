@@ -337,33 +337,43 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
     try {
       const zip = new JSZip();
 
-      for (const doc of docsToExport) {
-        if (!doc.url) continue;
-        const resolvedUrl = await resolveFileUrl(doc.url);
+      // Parallelize fetching with individual timeouts
+      await Promise.all(docsToExport.map(async (doc) => {
+        if (!doc.url) return;
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout per file
 
         try {
-          const response = await fetch(resolvedUrl);
-          if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+          const resolvedUrl = await resolveFileUrl(doc.url);
+          const response = await fetch(resolvedUrl, { signal: controller.signal });
+
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
           const blob = await response.blob();
           const fileName = doc.name || `document_${doc.slotId}.pdf`;
           zip.file(fileName, blob);
-        } catch (fetchError) {
-          console.error(`Failed to fetch ${doc.name}:`, fetchError);
-          // Fallback if fetch fails (cors issue etc), just add a placeholder or skip
+        } catch (fetchError: any) {
+          const name = fetchError.name === 'AbortError' ? 'Timeout' : 'Error';
+          console.error(`[EXPORT] ${name} fetching ${doc.name || doc.slotId}:`, fetchError);
+        } finally {
+          clearTimeout(timeoutId);
         }
-      }
+      }));
 
+      // Generate and download ZIP
       const content = await zip.generateAsync({ type: 'blob' });
       const companyName = selectedNominee.name || 'Company';
       const zipFileName = `${companyName} - Stage ${round} Requirements.zip`;
 
+      const url = URL.createObjectURL(content);
       const link = document.createElement('a');
-      link.href = URL.createObjectURL(content);
+      link.href = url;
       link.download = zipFileName;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      URL.revokeObjectURL(link.href);
+      URL.revokeObjectURL(url);
 
     } catch (error) {
       console.error("Export failed:", error);
