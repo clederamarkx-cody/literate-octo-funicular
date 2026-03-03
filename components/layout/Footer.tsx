@@ -12,7 +12,7 @@ const Footer: React.FC<FooterProps> = ({ onUnderDev }) => {
         <div className="grid md:grid-cols-4 gap-12 mb-12">
           <div className="col-span-1 md:col-span-2">
             <h2 className="font-serif text-2xl font-bold text-gkk-gold mb-4">14<sup>th</sup> GKK Awards</h2>
-            <p className="text-gray-400 leading-relaxed mb-6 max-w-sm">
+            <p className="text-gray-400 font-bold leading-relaxed mb-6 max-w-sm">
               Occupational Safety and Health Center<br />
               Department of Labor and Employment<br />
               North Avenue corner Sen. Miriam P. Defensor-Santiago Avenue, Diliman, Quezon City, Philippines 1105
