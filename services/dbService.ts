@@ -247,7 +247,9 @@ export const getNominee = async (uid: string): Promise<Nominee | null> => {
             date: d.date,
             slotId: d.slot_id,
             remarks: d.remarks,
+            remarks_r2: d.remarks_r2,
             verdict: d.verdict?.toLowerCase(),
+            verdict_r2: d.verdict_r2?.toLowerCase(),
             isCorrection: d.is_correction
         })) || []
     } as unknown as Nominee;
@@ -293,8 +295,12 @@ export const updateNominee = async (uid: string, updates: Partial<Nominee>) => {
         .update(supabaseUpdates)
         .eq('id', uid);
 
-    if (error) console.error("Update nominee failed:", error);
+    if (error) {
+        console.error("Update nominee failed:", error);
+        return false;
+    }
     await logAction('UPDATE_NOMINEE', `Fields: ${Object.keys(updates).join(', ')}`, uid);
+    return true;
 };
 
 export const updateDocumentEvaluation = async (appId: string, slotId: string, verdict: 'pass' | 'fail', round: number = 1) => {
@@ -438,7 +444,9 @@ export const getAllNominees = async (): Promise<Nominee[]> => {
             date: d.date,
             slotId: d.slot_id,
             remarks: d.remarks,
+            remarks_r2: d.remarks_r2,
             verdict: d.verdict?.toLowerCase(),
+            verdict_r2: d.verdict_r2?.toLowerCase(),
             isCorrection: d.is_correction
         })) || []
     })) as unknown as Nominee[];

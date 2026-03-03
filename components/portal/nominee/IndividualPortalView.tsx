@@ -138,7 +138,7 @@ const IndividualPortalView: React.FC<IndividualPortalViewProps> = ({
                 {/* Stage 2 */}
                 <div id="round-2-lock" className={`rounded-3xl border transition-all duration-500 overflow-hidden ${nomineeData?.round2Unlocked ? 'bg-white border-gray-200 shadow-xl' : 'bg-gray-50 border-gray-100 opacity-60'}`}>
                     <div
-                        className={`w-full p-8 flex items-center justify-between border-b border-gray-100 ${nomineeData?.round2Unlocked && (isReviewMode || !nomineeData?.round3Unlocked) ? 'cursor-pointer header-glass-hover' : ''}`}
+                        className={`w-full p-8 flex flex-col md:flex-row items-start md:items-center justify-between border-b border-gray-100 ${nomineeData?.round2Unlocked && (isReviewMode || !nomineeData?.round3Unlocked) ? 'cursor-pointer header-glass-hover' : ''}`}
                         onClick={() => nomineeData?.round2Unlocked && (isReviewMode || !nomineeData?.round3Unlocked) && setStage2Open(!stage2Open)}
                     >
                         <div className="flex items-center space-x-6">
@@ -160,6 +160,18 @@ const IndividualPortalView: React.FC<IndividualPortalViewProps> = ({
                                 </div>
                             </div>
                         </div>
+                        {nomineeData?.round2Unlocked && !isReviewMode && !nomineeData?.round3Unlocked && nomineeData?.status !== 'completed' && (
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleStageSubmit(2);
+                                }}
+                                disabled={stage2Progress === 0}
+                                className="mt-4 md:mt-0 px-8 py-3 bg-gkk-navy text-white font-bold rounded-2xl shadow-xl hover:shadow-gkk-navy/40 hover:-translate-y-1 transition-all disabled:opacity-30 flex items-center gap-2 text-xs uppercase tracking-widest truncate"
+                            >
+                                <Send size={16} /> Submit Stage 2
+                            </button>
+                        )}
                     </div>
                     {/* Stage 2 Contents */}
                     <div className={`collapse-transition overflow-hidden ${!!nomineeData?.round2Unlocked && (isReviewMode || (!nomineeData?.round3Unlocked && stage2Open)) ? 'max-h-[5000px] opacity-100 p-8' : 'max-h-0 opacity-0 px-8 pb-0'}`}>

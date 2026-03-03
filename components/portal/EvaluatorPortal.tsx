@@ -1009,6 +1009,60 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                   </div>
                 </div>
               </div>
+
+              {/* SCD Team Leader Controls */}
+              {(userRole === 'admin' || userRole === 'scd_team_leader') && (
+                <div className="flex flex-wrap gap-3">
+                  {!selectedNominee.round2Unlocked && (
+                    <button
+                      onClick={async () => {
+                        if (confirm("Unlock Stage 2 for this nominee?")) {
+                          const success = await updateNominee(selectedNominee.id, { round2Unlocked: true });
+                          if (success) {
+                            setSelectedNominee({ ...selectedNominee, round2Unlocked: true });
+                            setLocalNominees(prev => prev.map(n => n.id === selectedNominee.id ? { ...n, round2Unlocked: true } : n));
+                          }
+                        }
+                      }}
+                      className="px-4 py-2 bg-gkk-gold text-gkk-navy font-bold rounded-xl text-[10px] uppercase tracking-widest shadow-lg hover:scale-105 transition-all flex items-center gap-2"
+                    >
+                      <Unlock size={14} /> Unlock Stage 2
+                    </button>
+                  )}
+                  {selectedNominee.round2Unlocked && !selectedNominee.round3Unlocked && (
+                    <button
+                      onClick={async () => {
+                        if (confirm("Unlock Stage 3 (Deficiencies) for this nominee?")) {
+                          const success = await updateNominee(selectedNominee.id, { round3Unlocked: true });
+                          if (success) {
+                            setSelectedNominee({ ...selectedNominee, round3Unlocked: true });
+                            setLocalNominees(prev => prev.map(n => n.id === selectedNominee.id ? { ...n, round3Unlocked: true } : n));
+                          }
+                        }
+                      }}
+                      className="px-4 py-2 bg-amber-500 text-white font-bold rounded-xl text-[10px] uppercase tracking-widest shadow-lg hover:scale-105 transition-all flex items-center gap-2"
+                    >
+                      <AlertTriangle size={14} /> Unlock Stage 3
+                    </button>
+                  )}
+                  {selectedNominee.status !== 'completed' && (
+                    <button
+                      onClick={async () => {
+                        if (confirm("Finalize this application? This will lock most edits.")) {
+                          const success = await updateNominee(selectedNominee.id, { status: 'completed' });
+                          if (success) {
+                            setSelectedNominee({ ...selectedNominee, status: 'completed' });
+                            setLocalNominees(prev => prev.map(n => n.id === selectedNominee.id ? { ...n, status: 'completed' } : n));
+                          }
+                        }
+                      }}
+                      className="px-4 py-2 bg-green-600 text-white font-bold rounded-xl text-[10px] uppercase tracking-widest shadow-lg hover:scale-105 transition-all flex items-center gap-2"
+                    >
+                      <CheckCircle size={14} /> Finalize Selection
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Right: Consolidated Progress Trackers */}
@@ -1033,25 +1087,84 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
         <div className="space-y-8">
           {(() => {
             const category = selectedNominee.details?.nomineeCategory || 'Private Sector';
+
+            // Sync logic for requirement slots
+            const mappedDocuments: any[] = [];
+            if (dynamicRequirements) {
+              // Stage 1 & 2 share the same requirement base
+              const s1Reqs = dynamicRequirements.stage1 || [];
+              const s2Reqs = dynamicRequirements.stage2 || s1Reqs; // Default to s1 if s2 missing
+
+              // Map Stage 1
+              s1Reqs.forEach((req: any, idx: number) => {
+                const slotId = `r1-${idx}`;
+                const saved = selectedNominee.documents?.find(d => d.slotId === slotId);
+                mappedDocuments.push({
+                  id: slotId,
+                  label: req.label,
+                  category: req.category,
+                  fileName: saved?.name || null,
+                  status: saved ? 'uploaded' : 'pending',
+                  previewUrl: saved?.url || null,
+                  type: saved?.type || '',
+                  round: 1,
+                  verdict: saved?.verdict,
+                  remarks: saved?.remarks
+                });
+              });
+
+              // Map Stage 2 (National review of Stage 1 documents)
+              s2Reqs.forEach((req: any, idx: number) => {
+                const r1SlotId = `r1-${idx}`;
+                const saved_r1 = selectedNominee.documents?.find(d => d.slotId === r1SlotId);
+
+                mappedDocuments.push({
+                  // Crucial: Use r1- ID so evaluations save to the Stage 1 document record's r2 columns
+                  id: r1SlotId,
+                  label: req.label,
+                  category: req.category,
+                  fileName: saved_r1?.name || null,
+                  status: saved_r1 ? 'uploaded' : 'pending',
+                  previewUrl: saved_r1?.url || null,
+                  type: saved_r1?.type || '',
+                  round: 2,
+                  verdict: saved_r1?.verdict, // Regional verdict
+                  verdict_r2: saved_r1?.verdict_r2, // National verdict
+                  remarks: saved_r1?.remarks, // Regional remarks
+                  remarks_r2: saved_r1?.remarks_r2 // National remarks
+                });
+              });
+
+              // Map Stage 3 (Deficiencies only)
+              const deficiencies = selectedNominee.documents?.filter(d => d.slotId?.startsWith('r3-deficiency-')) || [];
+              deficiencies.forEach(d => {
+                mappedDocuments.push({
+                  ...d,
+                  id: d.slotId,
+                  round: 3
+                });
+              });
+            }
+
             const commonProps = {
               nomineeData: selectedNominee,
-              documents: selectedNominee.documents,
+              documents: mappedDocuments,
               stage1Progress: calculateProgress(selectedNominee, 1),
               stage2Progress: calculateProgress(selectedNominee, 2),
               stage3Progress: calculateProgress(selectedNominee, 3),
               handleOpenUpload: () => { }, // Read-only for evaluators
               handlePreview: handlePreview,
               handleStageSubmit: () => { }, // Evaluators don't submit
-              failedDocs: (selectedNominee.documents || []).filter(d => d.verdict === 'fail'),
+              failedDocs: mappedDocuments.filter(d =>
+                (d.round === 1 && d.verdict === 'fail') ||
+                (d.round === 2 && d.verdict_r2 === 'fail')
+              ),
               stage1Open: !isStage1Folded,
               setStage1Open: (open: boolean) => setIsStage1Folded(!open),
               stage2Open: true, // Evaluators usually want to see stage 2
               setStage2Open: () => { },
               isReviewMode: true,
               onVerdict: (slotId: string, verdict: 'pass' | 'fail', round: number = 1) => {
-                // If we are looking at round 2, we use round 2
-                // But wait, the PortalView doesn't know the round yet.
-                // I'll handle the round logic inside the callback by checking slotIds or passing it from DocumentGrid
                 handleDocVerdict(slotId, verdict, round);
               },
               onRemarkChange: (slotId: string, remark: string, round: number = 1) => {
