@@ -248,6 +248,8 @@ export const getNominee = async (uid: string): Promise<Nominee | null> => {
             slotId: d.slot_id,
             remarks: d.remarks,
             verdict: d.verdict?.toLowerCase(),
+            verdict_r2: d.verdict_r2?.toLowerCase(),
+            remarks_r2: d.remarks_r2,
             isCorrection: d.is_correction
         })) || []
     } as unknown as Nominee;
@@ -487,6 +489,8 @@ export const getAllNominees = async (): Promise<Nominee[]> => {
             slotId: d.slot_id,
             remarks: d.remarks,
             verdict: d.verdict?.toLowerCase(),
+            verdict_r2: d.verdict_r2?.toLowerCase(),
+            remarks_r2: d.remarks_r2,
             isCorrection: d.is_correction
         })) || []
     })) as unknown as Nominee[];
@@ -563,7 +567,38 @@ export const getNomineeByPassKey = async (passKey: string): Promise<Nominee | nu
         .single();
 
     if (error || !data) return null;
-    return data as unknown as Nominee;
+    return {
+        ...data,
+        regId: data.reg_id,
+        submittedDate: data.submitted_date,
+        round2Unlocked: data.round2_unlocked,
+        round3Unlocked: data.round3_unlocked,
+        stage1PassedByReu: data.stage1_passed_by_reu,
+        stage2TriggeredByScd: data.stage2_triggered_by_scd,
+        stage3TriggeredByScd: data.stage3_triggered_by_scd,
+        stage1Verdict: data.stage1_verdict,
+        stage2Verdict: data.stage2_verdict,
+        stage3Verdict: data.stage3_verdict,
+        organizationName: data.organization_name,
+        industrySector: data.industry_sector,
+        workforceSize: data.workforce_size,
+        focalName: data.focal_name,
+        email: data.user?.email || "",
+        focalPhone: data.focal_phone,
+        addressObj: data.address_obj,
+        documents: data.documents?.map((d: any) => ({
+            name: d.name,
+            type: d.type,
+            url: d.url,
+            date: d.date,
+            slotId: d.slot_id,
+            remarks: d.remarks,
+            verdict: d.verdict?.toLowerCase(),
+            verdict_r2: d.verdict_r2?.toLowerCase(),
+            remarks_r2: d.remarks_r2,
+            isCorrection: d.is_correction
+        })) || []
+    } as unknown as Nominee;
 };
 
 export const activateAccessKey = async (
