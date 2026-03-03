@@ -198,12 +198,12 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-white font-sans text-slate-800 scroll-smooth">
+    <div className="h-screen overflow-hidden bg-white font-sans text-slate-800">
       {!isPortalView && (
         <Navbar onNavigate={navigateTo} isNominationPage={isSpecialView} />
       )}
 
-      <main key={view} className={!isPortalView ? "h-screen overflow-y-auto snap-y snap-mandatory page-transition" : "h-screen overflow-hidden page-transition"}>
+      <main key={view} className={!isPortalView ? "h-full overflow-y-auto snap-y snap-mandatory scrollbar-hide page-transition" : "h-full overflow-hidden page-transition"}>
         {view === 'home' && (
           <>
             <Hero onNominate={() => navigateTo('nominate')} onUnderDev={() => navigateTo('under-development')} />
@@ -287,10 +287,7 @@ function App() {
       </main>
 
       {!isPortalView && (
-        <>
-          <Footer onUnderDev={() => navigateTo('under-development')} />
-          <ChatWidget />
-        </>
+        <ChatWidget />
       )}
     </div>
   );
