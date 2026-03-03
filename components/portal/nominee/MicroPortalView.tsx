@@ -54,47 +54,47 @@ const MicroPortalView: React.FC<MicroPortalViewProps> = ({
     return (
         <div className="animate-in fade-in duration-500 space-y-8">
             {/* Header Info */}
-            <div className="bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden relative group">
-                <div className="absolute top-0 left-0 w-2 bg-gkk-navy h-full group-hover:w-3 transition-all"></div>
-                <div className="p-8">
-                    <div className="flex flex-col md:flex-row justify-between gap-10">
-                        <div className="flex-1 space-y-8">
-                            <div className="flex items-center space-x-5">
-                                <div className="p-4 bg-gkk-navy/5 rounded-3xl text-gkk-navy ring-1 ring-gkk-navy/10 transition-colors">
-                                    <Building2 size={36} />
+            {!isReviewMode && (
+                <div className="bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden relative group">
+                    <div className="absolute top-0 left-0 w-2 bg-gkk-navy h-full group-hover:w-3 transition-all"></div>
+                    <div className="p-8">
+                        <div className="flex flex-col md:flex-row justify-between gap-10">
+                            <div className="flex-1 space-y-8">
+                                <div className="flex items-center space-x-5">
+                                    <div className="p-4 bg-gkk-navy/5 rounded-3xl text-gkk-navy ring-1 ring-gkk-navy/10 transition-colors">
+                                        <Building2 size={36} />
+                                    </div>
+                                    <div>
+                                        <h2 className="text-3xl font-serif font-bold text-gkk-navy leading-tight">{nomineeData?.name || nomineeData?.organizationName}</h2>
+                                        <p className="text-gray-500 flex items-center gap-2 mt-2 font-medium"><MapPin size={14} className="text-gkk-gold" /> {nomineeData?.details?.address}, {nomineeData?.region}</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <h2 className="text-3xl font-serif font-bold text-gkk-navy leading-tight">{nomineeData?.name || nomineeData?.organizationName}</h2>
-                                    <p className="text-gray-500 flex items-center gap-2 mt-2 font-medium"><MapPin size={14} className="text-gkk-gold" /> {nomineeData?.details?.address}, {nomineeData?.region}</p>
+
+                                {!!nomineeData?.round3Unlocked && nomineeData?.status !== 'completed' && failedDocs.length > 0 && (
+                                    <div className="animate-in slide-in-from-top-4 duration-500">
+                                        <FailedDocumentsAlert failedDocs={failedDocs} />
+                                    </div>
+                                )}
+
+                                <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
+                                    <div className="space-y-2"><span className="text-[10px] font-bold text-gray-400 uppercase block">Micro Sector</span><div className="flex items-center gap-2 text-sm font-bold text-gkk-navy"><Briefcase size={16} className="text-gkk-gold" /> {nomineeData?.details?.industry || nomineeData?.industrySector}</div></div>
+                                    <div className="space-y-2"><span className="text-[10px] font-bold text-gray-400 uppercase block">Employee Count</span><div className="flex items-center gap-2 text-sm font-bold text-gkk-navy"><Users size={16} className="text-gkk-gold" /> {nomineeData?.details?.employees || nomineeData?.workforceSize} Pax</div></div>
+                                    <div className="space-y-2"><span className="text-[10px] font-bold text-gray-400 uppercase block">Micro ID</span><div className="flex items-center gap-2 text-sm font-bold text-gkk-navy font-mono"><Hash size={16} className="text-gkk-gold" /> {nomineeData?.regId}</div></div>
+                                    <div className="space-y-2"><span className="text-[10px] font-bold text-gray-400 uppercase block">Safety Contact</span><div className="flex items-center gap-2 text-sm font-bold text-gkk-navy"><HardHat size={16} className="text-gkk-gold" /> {nomineeData?.details?.safetyOfficer}</div></div>
+                                    <div className="space-y-2"><span className="text-[10px] font-bold text-gray-400 uppercase block">Application Status</span><div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider ${nomineeData?.status === 'completed' ? 'bg-green-100 text-green-700' : 'bg-gkk-gold/10 text-gkk-gold'}`}>{nomineeData?.status?.replace('_', ' ') || 'Pending'}</div></div>
                                 </div>
+
                             </div>
-
-                            {!!nomineeData?.round3Unlocked && nomineeData?.status !== 'completed' && failedDocs.length > 0 && (
-                                <div className="animate-in slide-in-from-top-4 duration-500">
-                                    <FailedDocumentsAlert failedDocs={failedDocs} />
-                                </div>
-                            )}
-
-                            <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-                                <div className="space-y-2"><span className="text-[10px] font-bold text-gray-400 uppercase block">Micro Sector</span><div className="flex items-center gap-2 text-sm font-bold text-gkk-navy"><Briefcase size={16} className="text-gkk-gold" /> {nomineeData?.details?.industry || nomineeData?.industrySector}</div></div>
-                                <div className="space-y-2"><span className="text-[10px] font-bold text-gray-400 uppercase block">Employee Count</span><div className="flex items-center gap-2 text-sm font-bold text-gkk-navy"><Users size={16} className="text-gkk-gold" /> {nomineeData?.details?.employees || nomineeData?.workforceSize} Pax</div></div>
-                                <div className="space-y-2"><span className="text-[10px] font-bold text-gray-400 uppercase block">Micro ID</span><div className="flex items-center gap-2 text-sm font-bold text-gkk-navy font-mono"><Hash size={16} className="text-gkk-gold" /> {nomineeData?.regId}</div></div>
-                                <div className="space-y-2"><span className="text-[10px] font-bold text-gray-400 uppercase block">Safety Contact</span><div className="flex items-center gap-2 text-sm font-bold text-gkk-navy"><HardHat size={16} className="text-gkk-gold" /> {nomineeData?.details?.safetyOfficer}</div></div>
-                                <div className="space-y-2"><span className="text-[10px] font-bold text-gray-400 uppercase block">Application Status</span><div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider ${nomineeData?.status === 'completed' ? 'bg-green-100 text-green-700' : 'bg-gkk-gold/10 text-gkk-gold'}`}>{nomineeData?.status?.replace('_', ' ') || 'Pending'}</div></div>
-                            </div>
-
-                        </div>
-                        {!isReviewMode && (
                             <StageProgress
                                 stage1Progress={stage1Progress}
                                 stage2Progress={stage2Progress}
                                 stage3Progress={stage3Progress}
                                 nomineeData={nomineeData}
                             />
-                        )}
+                        </div>
                     </div>
                 </div>
-            </div>
+            )}
 
             <div id="documents-section" className="space-y-8 pb-20">
                 {/* Stage 1 */}
