@@ -1158,16 +1158,14 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                   // No, Stage 2 has its own `r2-` slots or it evaluates `r1-`? 
                   // If `dynamicRequirements.stage2` has its own slots (`r2-x`), then `isR2Failed` is correct.
 
-                  // Let's just completely restrict deficiency pushing to ONLY happen during a specific condition
-                  // such that it doesn't accidentally trigger for empty/unspecified states.
                   // THE REQUIREMENT IS: Stage 3 should ONLY pull items strictly marked as "INCOMPLETE" from Stage 2.
                   // AND it should ONLY show them once Stage 3 is actually unlocked/authorized.
-                  const isR2Failed = round === 2 && savedDoc?.verdict_r2 === 'fail' && selectedNominee?.round3Unlocked;
+                  // Note: Stage 2 evaluation happens on Stage 1 documents (r1-x).
+                  const isR2Failed = (round === 1 || round === 2) && savedDoc?.verdict_r2 === 'fail' && selectedNominee?.round3Unlocked;
 
                   if (isR2Failed) {
-                    // Normalize the deficiency ID to always point back to the r1 origin if it's an r2 failure
-                    // so we don't get double deficiencies for the same requirement.
-                    const originSlotId = slotId.replace('r2-', 'r1-');
+                    // Normalize the deficiency ID to always point back to the r1 origin
+                    const originSlotId = slotId.startsWith('r2-') ? slotId.replace('r2-', 'r1-') : slotId;
                     const deficiencySlotId = `r3-deficiency-${originSlotId}`;
                     const currentCorrection = selectedNominee.documents?.find(d => d.slotId === deficiencySlotId);
 

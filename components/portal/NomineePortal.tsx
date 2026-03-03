@@ -319,11 +319,12 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
 
         // THE REQUIREMENT IS: Stage 3 should ONLY pull items strictly marked as "INCOMPLETE" from Stage 2.
         // AND it should ONLY show them once Stage 3 is actually unlocked/authorized.
-        const isR2Failed = round === 2 && savedDoc?.verdict_r2 === 'fail' && nomineeData?.round3Unlocked;
+        // Note: Stage 2 evaluation happens on Stage 1 documents (r1-x).
+        const isR2Failed = (round === 1 || round === 2) && savedDoc?.verdict_r2 === 'fail' && nomineeData?.round3Unlocked;
 
         if (isR2Failed) {
-          // Normalize the deficiency ID to always point back to the r1 origin if it's an r2 failure
-          const originSlotId = slotId.replace('r2-', 'r1-');
+          // Normalize the deficiency ID to always point back to the r1 origin
+          const originSlotId = slotId.startsWith('r2-') ? slotId.replace('r2-', 'r1-') : slotId;
           const deficiencySlotId = `r3-deficiency-${originSlotId}`;
           const currentCorrection = nomineeData?.documents?.find((d: any) => d.slotId === deficiencySlotId);
 
