@@ -27,6 +27,7 @@ interface DocumentGridProps {
     handleOpenUpload: (id: string) => void;
     handlePreview: (doc: any) => void;
     isReviewMode?: boolean;
+    isReadOnly?: boolean;
     onVerdict?: (slotId: string, verdict: 'pass' | 'fail') => void;
     onRemarkChange?: (slotId: string, remark: string) => void;
 }
@@ -38,6 +39,7 @@ const DocumentGrid: React.FC<DocumentGridProps> = ({
     handleOpenUpload,
     handlePreview,
     isReviewMode = false,
+    isReadOnly = false,
     onVerdict,
     onRemarkChange
 }) => {
@@ -168,24 +170,25 @@ const DocumentGrid: React.FC<DocumentGridProps> = ({
                                 <div className="flex gap-2">
                                     <button
                                         onClick={() => handleVerdictClick(doc.id, 'pass', round)}
-                                        disabled={pendingSlots[doc.id]}
-                                        className={`flex-1 py-3 px-4 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 ${effectiveVerdict === 'pass' ? 'bg-emerald-600 text-white shadow-lg' : 'bg-white text-gray-400 border border-gray-200 hover:bg-emerald-50 hover:text-emerald-600'} ${pendingSlots[doc.id] ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                        disabled={pendingSlots[doc.id] || isReadOnly}
+                                        className={`flex-1 py-3 px-4 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 ${effectiveVerdict === 'pass' ? 'bg-emerald-600 text-white shadow-lg' : 'bg-white text-gray-400 border border-gray-200 hover:bg-emerald-50 hover:text-emerald-600'} ${pendingSlots[doc.id] || isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
                                     >
                                         {pendingSlots[doc.id] ? <Loader2 size={14} className="animate-spin" /> : 'PASS'}
                                     </button>
                                     <button
                                         onClick={() => handleVerdictClick(doc.id, 'fail', round)}
-                                        disabled={pendingSlots[doc.id]}
-                                        className={`flex-1 py-3 px-4 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 ${effectiveVerdict === 'fail' ? 'bg-red-600 text-white shadow-lg' : 'bg-white text-gray-400 border border-gray-200 hover:bg-red-50 hover:text-red-600'} ${pendingSlots[doc.id] ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                        disabled={pendingSlots[doc.id] || isReadOnly}
+                                        className={`flex-1 py-3 px-4 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 ${effectiveVerdict === 'fail' ? 'bg-red-600 text-white shadow-lg' : 'bg-white text-gray-400 border border-gray-200 hover:bg-red-50 hover:text-red-600'} ${pendingSlots[doc.id] || isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
                                     >
                                         {pendingSlots[doc.id] ? <Loader2 size={14} className="animate-spin" /> : 'INCOMPLETE'}
                                     </button>
                                 </div>
                                 <textarea
-                                    placeholder="Add remarks for the nominee..."
+                                    placeholder={isReadOnly ? "Evaluation is locked..." : "Add remarks for the nominee..."}
                                     value={effectiveRemarks || ''}
+                                    readOnly={isReadOnly}
                                     onChange={(e) => onRemarkChange?.(doc.id, e.target.value, round)}
-                                    className="w-full p-3 text-[11px] font-medium bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-gkk-gold/20 outline-none resize-none min-h-[60px] text-gkk-navy"
+                                    className={`w-full p-3 text-[11px] font-medium bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-gkk-gold/20 outline-none resize-none min-h-[60px] text-gkk-navy ${isReadOnly ? 'bg-gray-50 cursor-not-allowed' : ''}`}
                                 />
                             </div>
                         )}

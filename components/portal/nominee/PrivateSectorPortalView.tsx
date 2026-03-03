@@ -25,6 +25,7 @@ interface PrivateSectorPortalViewProps {
     stage2Open: boolean;
     setStage2Open: (open: boolean) => void;
     isReviewMode?: boolean;
+    isReadOnly?: boolean;
     onVerdict?: (slotId: string, verdict: 'pass' | 'fail', round?: number) => void;
     onRemarkChange?: (slotId: string, remark: string, round?: number) => void;
     handleExportStage?: (round: number) => void;
@@ -46,6 +47,7 @@ const PrivateSectorPortalView: React.FC<PrivateSectorPortalViewProps> = ({
     stage2Open,
     setStage2Open,
     isReviewMode = false,
+    isReadOnly = false,
     onVerdict,
     onRemarkChange,
     handleExportStage,
@@ -154,6 +156,7 @@ const PrivateSectorPortalView: React.FC<PrivateSectorPortalViewProps> = ({
                             handleOpenUpload={handleOpenUpload}
                             handlePreview={handlePreview}
                             isReviewMode={isReviewMode}
+                            isReadOnly={isReadOnly}
                             onVerdict={(sid, v) => onVerdict?.(sid, v, 1)}
                             onRemarkChange={(sid, r) => onRemarkChange?.(sid, r, 1)}
                         />
@@ -209,6 +212,7 @@ const PrivateSectorPortalView: React.FC<PrivateSectorPortalViewProps> = ({
                                     handleOpenUpload={handleOpenUpload}
                                     handlePreview={handlePreview}
                                     isReviewMode={isReviewMode}
+                                    isReadOnly={isReadOnly}
                                     onVerdict={(sid, v) => onVerdict?.(sid, v, 2)}
                                     onRemarkChange={(sid, r) => onRemarkChange?.(sid, r, 2)}
                                 />
@@ -268,6 +272,7 @@ const PrivateSectorPortalView: React.FC<PrivateSectorPortalViewProps> = ({
                                 handleOpenUpload={handleOpenUpload}
                                 handlePreview={handlePreview}
                                 isReviewMode={isReviewMode}
+                                isReadOnly={isReadOnly}
                                 onVerdict={(sid, v) => onVerdict?.(sid, v, 3)}
                                 onRemarkChange={(sid, r) => onRemarkChange?.(sid, r, 3)}
                             />

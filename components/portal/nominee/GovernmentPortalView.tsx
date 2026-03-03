@@ -25,6 +25,7 @@ interface GovernmentPortalViewProps {
     stage2Open: boolean;
     setStage2Open: (open: boolean) => void;
     isReviewMode?: boolean;
+    isReadOnly?: boolean;
     onVerdict?: (slotId: string, verdict: 'pass' | 'fail', round?: number) => void;
     onRemarkChange?: (slotId: string, remark: string, round?: number) => void;
 }
@@ -44,6 +45,7 @@ const GovernmentPortalView: React.FC<GovernmentPortalViewProps> = ({
     stage2Open,
     setStage2Open,
     isReviewMode = false,
+    isReadOnly = false,
     onVerdict,
     onRemarkChange
 }) => {
@@ -136,6 +138,7 @@ const GovernmentPortalView: React.FC<GovernmentPortalViewProps> = ({
                             handleOpenUpload={handleOpenUpload}
                             handlePreview={handlePreview}
                             isReviewMode={isReviewMode}
+                            isReadOnly={isReadOnly}
                             onVerdict={(sid, v) => onVerdict?.(sid, v, 1)}
                             onRemarkChange={(sid, r) => onRemarkChange?.(sid, r, 1)}
                         />
@@ -178,6 +181,7 @@ const GovernmentPortalView: React.FC<GovernmentPortalViewProps> = ({
                                 handleOpenUpload={handleOpenUpload}
                                 handlePreview={handlePreview}
                                 isReviewMode={isReviewMode}
+                                isReadOnly={isReadOnly}
                                 onVerdict={(sid, v) => onVerdict?.(sid, v, 2)}
                                 onRemarkChange={(sid, r) => onRemarkChange?.(sid, r, 2)}
                             />
@@ -224,6 +228,7 @@ const GovernmentPortalView: React.FC<GovernmentPortalViewProps> = ({
                                 handleOpenUpload={handleOpenUpload}
                                 handlePreview={handlePreview}
                                 isReviewMode={isReviewMode}
+                                isReadOnly={isReadOnly}
                                 onVerdict={(sid, v) => onVerdict?.(sid, v, 3)}
                                 onRemarkChange={(sid, r) => onRemarkChange?.(sid, r, 3)}
                             />

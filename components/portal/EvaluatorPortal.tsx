@@ -1211,6 +1211,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
               stage2Open: round2Open, // Tied to the actual state
               setStage2Open: (open: boolean) => setRound2Open(open),
               isReviewMode: true,
+              isReadOnly: userRole === 'reu' && selectedNominee.round2Unlocked,
               onVerdict: (slotId: string, verdict: 'pass' | 'fail', round: number = 1) => {
                 // If we are looking at round 2, we use round 2
                 // But wait, the PortalView doesn't know the round yet.
