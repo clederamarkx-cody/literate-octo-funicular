@@ -13,8 +13,8 @@ const Footer: React.FC<FooterProps> = ({ onUnderDev }) => {
           <div className="col-span-1 md:col-span-2">
             <h2 className="font-serif text-2xl font-bold text-gkk-gold mb-4">14<sup>th</sup> GKK Awards</h2>
             <p className="text-gray-400 leading-relaxed mb-6 max-w-sm">
-              Occupational Safety and Health Center<br/>
-              Department of Labor and Employment<br/>
+              Occupational Safety and Health Center<br />
+              Department of Labor and Employment<br />
               North Avenue corner Science Road, Diliman, Quezon City
             </p>
             <div className="flex space-x-4">
@@ -39,7 +39,7 @@ const Footer: React.FC<FooterProps> = ({ onUnderDev }) => {
           </div>
         </div>
         <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center text-[10px] font-bold text-gray-500 uppercase tracking-widest">
-          <p> 2024 Occupational Safety and Health Center. All rights reserved.</p>
+          <p> 2026 Occupational Safety and Health Center. All rights reserved.</p>
           <p className="mt-2 md:mt-0">Republic of the Philippines</p>
         </div>
       </div>
