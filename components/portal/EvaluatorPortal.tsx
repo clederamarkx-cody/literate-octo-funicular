@@ -50,6 +50,10 @@ import { getAllNominees, resolveFileUrl, updateDocumentEvaluation, updateDocumen
 import StaffProfileEdit from './StaffProfileEdit';
 import { UserProfileTable } from './management/UserProfileTable';
 import { PH_REGIONS } from '../../constants';
+import PrivateSectorPortalView from './nominee/PrivateSectorPortalView';
+import GovernmentPortalView from './nominee/GovernmentPortalView';
+import MicroPortalView from './nominee/MicroPortalView';
+import IndividualPortalView from './nominee/IndividualPortalView';
 
 interface EvaluatorPortalProps {
   onLogout: () => void;
@@ -318,6 +322,36 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
       setPreviewModalOpen(false);
     } finally {
       setIsResolvingUrl(false);
+    }
+  };
+
+  const handleDocVerdict = async (slotId: string, verdict: 'pass' | 'fail', round: number = 1) => {
+    if (!selectedNominee) return;
+    const success = await updateDocumentEvaluation(selectedNominee.id, slotId, verdict, round);
+    if (success) {
+      const updatedDocs = (selectedNominee.documents || []).map(d =>
+        d.slotId === slotId
+          ? (round === 2 ? { ...d, verdict_r2: verdict } : { ...d, verdict })
+          : d
+      );
+      const updatedNominee = { ...selectedNominee, documents: updatedDocs };
+      setSelectedNominee(updatedNominee);
+      setLocalNominees(prev => prev.map(a => a.id === selectedNominee.id ? updatedNominee : a));
+    }
+  };
+
+  const handleDocRemark = async (slotId: string, remark: string, round: number = 1) => {
+    if (!selectedNominee) return;
+    const success = await updateDocumentRemarks(selectedNominee.id, slotId, remark, round);
+    if (success) {
+      const updatedDocs = (selectedNominee.documents || []).map(d =>
+        d.slotId === slotId
+          ? (round === 2 ? { ...d, remarks_r2: remark } : { ...d, remarks: remark })
+          : d
+      );
+      const updatedNominee = { ...selectedNominee, documents: updatedDocs };
+      setSelectedNominee(updatedNominee);
+      setLocalNominees(prev => prev.map(a => a.id === selectedNominee.id ? updatedNominee : a));
     }
   };
 
@@ -997,224 +1031,48 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
         </div>
 
         <div className="space-y-8">
-          <div className="flex justify-between items-start">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => setIsStage1Folded(!isStage1Folded)}
-                className="p-2 hover:bg-gray-100 rounded-xl transition-colors text-gkk-navy/40 hover:text-gkk-navy"
-              >
-                {isStage1Folded ? <ChevronDown size={24} /> : <ChevronUp size={24} />}
-              </button>
-              <div>
-                <div className="flex items-center gap-3">
-                  <h3 className="text-2xl font-serif font-bold text-gkk-navy uppercase tracking-widest leading-none">STAGE 1 (SUBMISSION)</h3>
-                  {selectedNominee.stage1PassedByReu && (
-                    <span className="bg-emerald-100 text-emerald-700 text-[9px] font-black px-3 py-1 rounded-full border border-emerald-200 uppercase tracking-widest flex items-center gap-1.5 shadow-sm">
-                      <ShieldCheck size={12} /> REU VERIFIED
-                    </span>
-                  )}
-                </div>
-                {!isStage1Folded && <p className="text-xs text-gray-500 mt-2 font-bold uppercase tracking-widest italic opacity-60">Evaluate the initial compliance records.</p>}
-              </div>
-            </div>
-            {!isStage1Folded && (
-              <div className="flex items-center gap-3">
-                {userRole === 'reu' && (
-                  <button
-                    onClick={async () => {
-                      const newPassed = !selectedNominee.stage1PassedByReu;
-                      const msg = newPassed
-                        ? "Mark Stage 1 as VERIFIED and UNLOCK Stage 2 for this nominee?"
-                        : "Revert Stage 1 verification and RELOCK Stage 2?";
+          {(() => {
+            const category = selectedNominee.details?.nomineeCategory || 'Private Sector';
+            const commonProps = {
+              nomineeData: selectedNominee,
+              documents: selectedNominee.documents,
+              stage1Progress: calculateProgress(selectedNominee, 1),
+              stage2Progress: calculateProgress(selectedNominee, 2),
+              stage3Progress: calculateProgress(selectedNominee, 3),
+              handleOpenUpload: () => { }, // Read-only for evaluators
+              handlePreview: handlePreview,
+              handleStageSubmit: () => { }, // Evaluators don't submit
+              failedDocs: (selectedNominee.documents || []).filter(d => d.verdict === 'fail'),
+              stage1Open: !isStage1Folded,
+              setStage1Open: (open: boolean) => setIsStage1Folded(!open),
+              stage2Open: true, // Evaluators usually want to see stage 2
+              setStage2Open: () => { },
+              isReviewMode: true,
+              onVerdict: (slotId: string, verdict: 'pass' | 'fail', round: number = 1) => {
+                // If we are looking at round 2, we use round 2
+                // But wait, the PortalView doesn't know the round yet.
+                // I'll handle the round logic inside the callback by checking slotIds or passing it from DocumentGrid
+                handleDocVerdict(slotId, verdict, round);
+              },
+              onRemarkChange: (slotId: string, remark: string, round: number = 1) => {
+                handleDocRemark(slotId, remark, round);
+              }
+            };
 
-                      setConfirmModal({
-                        isOpen: true,
-                        title: newPassed ? 'Verify Stage 1' : 'Revert Verification',
-                        message: msg,
-                        type: 'info',
-                        onConfirm: async () => {
-                          const updates = {
-                            stage1PassedByReu: newPassed,
-                            round2Unlocked: newPassed // Unlock round 2 if stage 1 passed
-                          };
-                          await updateNominee(selectedNominee.id, updates);
-                          const updated = { ...selectedNominee, ...updates };
-                          setSelectedNominee(updated);
-                          setLocalNominees(prev => prev.map(a => a.id === updated.id ? updated : a));
-                          setConfirmModal(prev => ({ ...prev, isOpen: false }));
-                        }
-                      });
-                    }}
-                    disabled={userRole === 'reu' && selectedNominee.stage1PassedByReu}
-                    className={`px-6 py-3 rounded-2xl font-bold transition-all text-[10px] uppercase tracking-widest flex items-center gap-2 shadow-sm ${selectedNominee.stage1PassedByReu ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-gkk-gold text-gkk-navy hover:bg-gkk-navy hover:text-white border border-gkk-gold/20'} ${userRole === 'reu' && selectedNominee.stage1PassedByReu ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  >
-                    {selectedNominee.stage1PassedByReu ? <ShieldCheck size={14} /> : <Zap size={14} />}
-                    {selectedNominee.stage1PassedByReu ? 'Passed & Unlocked' : 'Pass Stage 1 & Unlock Stage 2'}
-                  </button>
-                )}
-                <button
-                  onClick={() => handleExportStage(1)}
-                  disabled={isExporting === 1}
-                  className="px-6 py-3 bg-white border border-gray-200 text-gray-600 font-bold rounded-2xl hover:bg-gray-50 transition-all text-[10px] uppercase tracking-widest flex items-center gap-2 shadow-sm"
-                >
-                  <Download size={14} /> {isExporting === 1 ? "Exporting..." : "Export PDFs"}
-                </button>
-              </div>
-            )}
-          </div>
-          {!isStage1Folded && (
-            <div className="animate-in slide-in-from-top-2 duration-300">
-              <div className="space-y-4">{renderDocumentGrid(1)}</div>
-            </div>
-          )}
-
-
-
-          {(userRole !== 'reu') && (
-            <>
-              <div className="space-y-4">
-                <div className={`rounded-[40px] border transition-all duration-300 overflow-hidden ${(selectedNominee.round2Unlocked || ['admin', 'scd_team_leader', 'evaluator'].includes(userRole || '')) ? 'bg-white border-gray-200 shadow-xl' : 'bg-gray-50 border-gray-100 opacity-60'}`}>
-                  <div className="p-10 flex flex-col md:flex-row items-center justify-between gap-8">
-                    <div className="flex items-center space-x-8">
-                      <div className={`w-16 h-16 rounded-3xl flex items-center justify-center transition-all ${(selectedNominee.round2Unlocked || ['admin', 'scd_team_leader', 'evaluator'].includes(userRole || '')) ? 'bg-blue-600 text-white shadow-xl' : 'bg-gray-200 text-gray-400'}`}>{(selectedNominee.round2Unlocked || ['admin', 'scd_team_leader', 'evaluator'].includes(userRole || '')) ? <Unlock size={28} /> : <Lock size={28} />}</div>
-                      <div className="text-left"><h4 className="font-bold text-gkk-navy text-xl uppercase tracking-tighter leading-none">STAGE 2 (DOCUMENT EVALUATION)</h4><p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-3">{selectedNominee.round2Unlocked ? 'Reviewing national shortlist' : (['admin', 'scd_team_leader', 'evaluator'].includes(userRole || '')) ? 'Action Required: Trigger Stage 2' : 'Locked'}</p></div>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      {(selectedNominee.round2Unlocked || ['admin', 'scd_team_leader', 'evaluator'].includes(userRole || '')) && (
-                        <button
-                          onClick={() => handleExportStage(2)}
-                          disabled={isExporting === 2}
-                          className="px-6 py-4 bg-white border border-gray-200 text-gray-600 font-bold rounded-[20px] hover:bg-gray-50 transition-all text-[10px] uppercase tracking-widest flex items-center gap-2 shadow-sm"
-                        >
-                          <Download size={16} /> {isExporting === 2 ? "Export..." : "Export PDFs"}
-                        </button>
-                      )}
-                      {(['admin', 'scd_team_leader'].includes(userRole || '')) && (
-                        <button
-                          onClick={() => {
-                            if (!selectedNominee.stage1PassedByReu && !selectedNominee.round2Unlocked) return;
-                            const newStatus = !selectedNominee.round2Unlocked;
-                            if (onToggleRound2) onToggleRound2(selectedNominee.id, newStatus);
-                            const updated = { ...selectedNominee, round2Unlocked: newStatus };
-                            setSelectedNominee(updated);
-                            setLocalNominees(prev => prev.map(a => a.id === updated.id ? updated : a));
-                          }}
-                          disabled={!selectedNominee.stage1PassedByReu && !selectedNominee.round2Unlocked}
-                          className={`px-10 py-4 rounded-[20px] font-bold transition-all shadow-xl text-[10px] tracking-widest uppercase ${selectedNominee.round2Unlocked ? 'bg-red-50 text-red-600 border border-red-100 hover:bg-red-100' : (!selectedNominee.stage1PassedByReu ? 'bg-gray-100 text-gray-400 cursor-not-allowed opacity-70' : 'bg-gkk-gold text-gkk-navy hover:bg-gkk-navy hover:text-white')}`}
-                        >
-                          {selectedNominee.round2Unlocked ? 'Deactivate Stage 2' : (!selectedNominee.stage1PassedByReu ? 'Waiting for Regional Verification' : 'Activate Stage 2')}
-                        </button>
-                      )}
-                      {userRole === 'scd_team_leader' && !selectedNominee.stage1PassedByReu && !selectedNominee.round2Unlocked && (
-                        <button
-                          onClick={() => {
-                            setConfirmModal({
-                              isOpen: true,
-                              title: 'Bypass Regional Verification',
-                              message: 'Force activate Stage 2? This will bypass the Regional Evaluation Unit verification.',
-                              type: 'warning',
-                              onConfirm: () => {
-                                const newStatus = true;
-                                if (onToggleRound2) onToggleRound2(selectedNominee.id, newStatus);
-                                const updated = { ...selectedNominee, round2Unlocked: newStatus };
-                                setSelectedNominee(updated);
-                                setLocalNominees(prev => prev.map(a => a.id === updated.id ? updated : a));
-                                setConfirmModal(prev => ({ ...prev, isOpen: false }));
-                              }
-                            });
-                          }}
-                          className="px-10 py-4 rounded-[20px] font-bold bg-gkk-navy text-white hover:bg-gkk-royalBlue transition-all shadow-xl text-[10px] tracking-widest uppercase flex items-center gap-2 border border-white/10"
-                        >
-                          <Zap size={16} className="text-gkk-gold" /> Bypass & Activate Stage 2
-                        </button>
-                      )}
-                      {userRole === 'reu' && !selectedNominee.round2Unlocked && (
-                        <span className="text-[10px] font-bold text-amber-500 uppercase tracking-widest bg-amber-50 px-5 py-3 rounded-2xl border border-amber-100">Regional verification pending</span>
-                      )}
-                    </div>
-                  </div>
-                  {(selectedNominee.round2Unlocked || ['admin', 'scd_team_leader', 'reu', 'evaluator'].includes(userRole || '')) && (
-                    <div className="border-t border-gray-100 bg-white">
-                      <div className="p-10">{renderDocumentGrid(2)}</div>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <div className={`rounded-[40px] border transition-all duration-300 overflow-hidden ${(selectedNominee.round3Unlocked || ['admin', 'scd_team_leader', 'evaluator'].includes(userRole || '')) ? 'bg-white border-gray-200 shadow-xl' : 'bg-gray-50 border-gray-100 opacity-60'}`}>
-                  <div className="p-10 flex flex-col md:flex-row items-center justify-between gap-8">
-                    <div className="flex items-center space-x-8">
-                      <div className={`w-16 h-16 rounded-3xl flex items-center justify-center transition-all ${(selectedNominee.round3Unlocked || ['admin', 'scd_team_leader', 'evaluator'].includes(userRole || '')) ? 'bg-gkk-gold text-gkk-navy shadow-xl' : 'bg-gray-200 text-gray-400'}`}>{(selectedNominee.round3Unlocked || ['admin', 'scd_team_leader', 'evaluator'].includes(userRole || '')) ? <Unlock size={28} /> : <Lock size={28} />}</div>
-                      <div className="text-left"><h4 className="font-bold text-gkk-navy text-xl uppercase tracking-tighter leading-none">STAGE 3 (SUBMISSION OF DEFICIENCIES)</h4><p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-3">{selectedNominee.round3Unlocked ? 'National Board Final Evaluation' : (['admin', 'scd_team_leader', 'evaluator'].includes(userRole || '')) ? 'SCD Trigger Required' : 'Locked'}</p></div>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      {(selectedNominee.round3Unlocked || ['admin', 'scd_team_leader', 'evaluator'].includes(userRole || '')) && (
-                        <button
-                          onClick={() => handleExportStage(3)}
-                          disabled={isExporting === 3}
-                          className="px-6 py-4 bg-white border border-gray-200 text-gray-600 font-bold rounded-[20px] hover:bg-gray-50 transition-all text-[10px] uppercase tracking-widest flex items-center gap-2 shadow-sm"
-                        >
-                          <Download size={16} /> {isExporting === 3 ? "Export..." : "Export PDFs"}
-                        </button>
-                      )}
-                      {(['admin', 'scd_team_leader'].includes(userRole || '')) && (
-                        <button onClick={() => {
-                          const newStatus = !selectedNominee.round3Unlocked;
-                          if (onToggleRound3) onToggleRound3(selectedNominee.id, newStatus);
-                          const updated = { ...selectedNominee, round3Unlocked: newStatus };
-                          setSelectedNominee(updated);
-                          setLocalNominees(prev => prev.map(a => a.id === updated.id ? updated : a));
-                        }} className={`px-10 py-4 rounded-[20px] font-bold transition-all shadow-xl text-[10px] tracking-widest uppercase ${selectedNominee.round3Unlocked ? 'bg-red-50 text-red-600 border border-red-100 hover:bg-red-100' : 'bg-gkk-navy text-white hover:bg-gkk-royalBlue'}`}>{selectedNominee.round3Unlocked ? 'Deactivate Stage 3' : 'Activate Stage 3'}</button>
-                      )}
-                      {['admin', 'scd_team_leader'].includes(userRole || '') ? (
-                        <button
-                          onClick={async () => {
-                            const isClosing = selectedNominee.status !== 'completed';
-                            const confirmMsg = isClosing
-                              ? "Are you sure you want to CLOSE this application? This will make it read-only for the nominee."
-                              : "Are you sure you want to OPEN this application? This will allow the nominee to make further changes.";
-
-                            setConfirmModal({
-                              isOpen: true,
-                              title: isClosing ? 'Close Application' : 'Reopen Application',
-                              message: confirmMsg,
-                              type: isClosing ? 'warning' : 'info',
-                              onConfirm: async () => {
-                                const newStatus = isClosing ? 'completed' : 'under_review';
-                                await updateNominee(selectedNominee.id, { status: newStatus as any });
-                                const updated = { ...selectedNominee, status: newStatus as any };
-                                setSelectedNominee(updated);
-                                setLocalNominees(prev => prev.map(a => a.id === updated.id ? updated : a));
-                                if (isClosing) {
-                                  setView('list');
-                                  setSelectedNominee(null);
-                                }
-                                setConfirmModal(prev => ({ ...prev, isOpen: false }));
-                              }
-                            });
-                          }}
-                          className={`px-10 py-4 rounded-[20px] font-bold transition-all shadow-xl text-[10px] tracking-widest uppercase ${selectedNominee.status === 'completed' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100 hover:bg-emerald-100' : 'bg-gkk-navy text-white hover:bg-gkk-royalBlue'}`}
-                        >
-                          {selectedNominee.status === 'completed' ? 'Open Application' : 'Close Application'}
-                        </button>
-                      ) : (
-                        <button
-                          onClick={() => { setView('list'); setSelectedNominee(null); }}
-                          className="px-10 py-4 rounded-[20px] font-semibold transition-all shadow-sm text-[14.5px] uppercase bg-white border border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gkk-navy"
-                        >Close</button>
-                      )}
-                    </div>
-                  </div>
-                  {(selectedNominee.round3Unlocked || ['admin', 'scd_team_leader', 'evaluator'].includes(userRole || '')) && (
-                    <div className="border-t border-gray-100">
-                      <div className="p-10 bg-white">{renderDocumentGrid(3)}</div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </>
-          )}
+            switch (category) {
+              case 'Industry':
+              case 'Private Sector':
+                return <PrivateSectorPortalView {...commonProps} />;
+              case 'Government':
+                return <GovernmentPortalView {...commonProps} />;
+              case 'Micro Enterprise':
+                return <MicroPortalView {...commonProps} />;
+              case 'Individual':
+                return <IndividualPortalView {...commonProps} />;
+              default:
+                return <PrivateSectorPortalView {...commonProps} />;
+            }
+          })()}
         </div>
       </div>
     );

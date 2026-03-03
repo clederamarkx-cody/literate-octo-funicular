@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-    FileText, ShieldAlert, Zap, Lock, Upload, Eye
+    FileText, ShieldAlert, Zap, Lock, Upload, Eye, Check, X
 } from 'lucide-react';
 
 interface DocumentSlot {
@@ -15,6 +15,8 @@ interface DocumentSlot {
     round: number;
     remarks?: string;
     verdict?: 'pass' | 'fail';
+    verdict_r2?: 'pass' | 'fail';
+    remarks_r2?: string;
     isCorrection?: boolean;
 }
 
@@ -24,6 +26,9 @@ interface DocumentGridProps {
     nomineeData: any;
     handleOpenUpload: (id: string) => void;
     handlePreview: (doc: any) => void;
+    isReviewMode?: boolean;
+    onVerdict?: (slotId: string, verdict: 'pass' | 'fail') => void;
+    onRemarkChange?: (slotId: string, remark: string) => void;
 }
 
 const DocumentGrid: React.FC<DocumentGridProps> = ({
@@ -31,7 +36,10 @@ const DocumentGrid: React.FC<DocumentGridProps> = ({
     documents,
     nomineeData,
     handleOpenUpload,
-    handlePreview
+    handlePreview,
+    isReviewMode = false,
+    onVerdict,
+    onRemarkChange
 }) => {
     // Filter logic for Document Migration:
     // Stage 1: Show only Stage 1 docs.
@@ -67,13 +75,14 @@ const DocumentGrid: React.FC<DocumentGridProps> = ({
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {roundDocs.map(doc => {
-                // Determine if this document should be locked in the CURRENT view
+                // Stage 2 evaluation logic
+                const effectiveVerdict = round === 2 ? doc.verdict_r2 : doc.verdict;
+                const effectiveRemarks = round === 2 ? doc.remarks_r2 : doc.remarks;
+
                 // Stage 1 is locked if Stage 2 is active
-                // Stage 2 is ALWAYS read-only/locked
-                // Stage 3 is locked if Stage 3 hasn't been triggered
+                // Stage 2 is locked if Stage 3 is active
                 const isLockedInThisRound =
                     (nomineeData?.status === 'completed') ||
-                    (round < 3 && doc.verdict !== undefined) ||
                     (round === 1 && nomineeData?.round2Unlocked) ||
                     (round === 2 && nomineeData?.round3Unlocked) ||
                     (round === 3 && (!nomineeData?.round3Unlocked || (doc.status === 'uploaded' && doc.verdict !== 'fail')));
@@ -88,14 +97,14 @@ const DocumentGrid: React.FC<DocumentGridProps> = ({
                                 <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-lg ${doc.status === 'uploaded' ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700'}`}>
                                     {doc.status === 'uploaded' ? 'SUBMITTED' : 'PENDING'}
                                 </span>
-                                {showVerdicts && doc.verdict === 'fail' && (
-                                    <span className="text-[10px] font-black uppercase tracking-wider px-2 py-1 rounded-lg bg-red-100 text-red-600 animate-pulse border border-red-200">
-                                        ACTION REQUIRED
+                                {showVerdicts && effectiveVerdict === 'fail' && (
+                                    <span className="text-[10px] font-black uppercase tracking-wider px-2 py-1 rounded-lg bg-red-100 text-red-600 border border-red-200">
+                                        INCOMPLETE
                                     </span>
                                 )}
-                                {showVerdicts && doc.verdict === 'pass' && (
+                                {showVerdicts && effectiveVerdict === 'pass' && (
                                     <span className="text-[10px] font-black uppercase tracking-wider px-2 py-1 rounded-lg bg-emerald-100 text-emerald-600 border border-emerald-200">
-                                        APPROVED
+                                        PASSED
                                     </span>
                                 )}
                             </div>
@@ -132,10 +141,35 @@ const DocumentGrid: React.FC<DocumentGridProps> = ({
                             <div className="mb-4 h-[34px]"></div>
                         )}
 
-                        {showVerdicts && doc.remarks && (
+                        {showVerdicts && effectiveRemarks && !isReviewMode && (
                             <div className="mb-3 px-3 py-2 bg-amber-50 border border-amber-200/50 rounded-xl">
                                 <span className="text-[9px] font-black text-amber-600 uppercase tracking-widest block mb-1">Evaluator Remarks</span>
-                                <p className="text-[11px] text-amber-800 font-semibold leading-relaxed">{doc.remarks}</p>
+                                <p className="text-[11px] text-amber-800 font-semibold leading-relaxed">{effectiveRemarks}</p>
+                            </div>
+                        )}
+
+                        {isReviewMode && doc.status === 'uploaded' && (
+                            <div className="mb-3 space-y-3">
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={() => onVerdict?.(doc.id, 'pass')}
+                                        className={`flex-1 py-3 px-4 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 ${effectiveVerdict === 'pass' ? 'bg-emerald-600 text-white shadow-lg' : 'bg-white text-gray-400 border border-gray-200 hover:bg-emerald-50 hover:text-emerald-600'}`}
+                                    >
+                                        <Check size={16} /> PASS
+                                    </button>
+                                    <button
+                                        onClick={() => onVerdict?.(doc.id, 'fail')}
+                                        className={`flex-1 py-3 px-4 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 ${effectiveVerdict === 'fail' ? 'bg-red-600 text-white shadow-lg' : 'bg-white text-gray-400 border border-gray-200 hover:bg-red-50 hover:text-red-600'}`}
+                                    >
+                                        <X size={16} /> INCOMPLETE
+                                    </button>
+                                </div>
+                                <textarea
+                                    placeholder="Add remarks for the nominee..."
+                                    value={effectiveRemarks || ''}
+                                    onChange={(e) => onRemarkChange?.(doc.id, e.target.value)}
+                                    className="w-full p-3 text-[11px] font-medium bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-gkk-gold/20 outline-none resize-none min-h-[60px] text-gkk-navy"
+                                />
                             </div>
                         )}
 

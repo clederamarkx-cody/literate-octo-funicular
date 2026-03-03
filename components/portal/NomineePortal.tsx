@@ -372,6 +372,14 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
     { id: 'OSH Systems', name: 'OSH Management', icon: ShieldCheck },
   ], []);
 
+  useEffect(() => {
+    if (nomineeData?.status === 'completed') {
+      setToast({ message: "Your application has been finalized. You can now view your verification artifacts.", type: 'success' });
+    } else if (nomineeData?.status === 'rejected') {
+      setToast({ message: "The application period has closed.", type: 'info' });
+    }
+  }, [nomineeData?.status]);
+
   const getProgress = (round: number) => {
     if (!dynamicRequirements) return 0;
 

@@ -1,6 +1,6 @@
 import React from 'react';
-import { Building2, MapPin, Briefcase, Users, Hash, HardHat, Unlock, Lock, ChevronUp, ChevronDown, Send, ShieldAlert, FileText, Eye, Upload } from 'lucide-react';
-import { Nominee, NomineeDocument } from '../../../types';
+import { Building2, MapPin, Briefcase, Users, Hash, HardHat, Unlock, Lock, ChevronDown, Send } from 'lucide-react';
+import { Nominee } from '../../../types';
 import StageProgress from './StageProgress';
 import DocumentGrid from './DocumentGrid';
 import FailedDocumentsAlert from './FailedDocumentsAlert';
@@ -15,15 +15,18 @@ interface GovernmentPortalViewProps {
     handleOpenUpload: (id: string) => void;
     handlePreview: (doc: any) => void;
     handleStageSubmit: (stage: number) => void;
-    round2Open: boolean;
-    setRound2Open: (open: boolean) => void;
-    round3Open: boolean;
-    setRound3Open: (open: boolean) => void;
+    round2Open?: boolean;
+    setRound2Open?: (open: boolean) => void;
+    round3Open?: boolean;
+    setRound3Open?: (open: boolean) => void;
     failedDocs: any[];
     stage1Open: boolean;
     setStage1Open: (open: boolean) => void;
     stage2Open: boolean;
     setStage2Open: (open: boolean) => void;
+    isReviewMode?: boolean;
+    onVerdict?: (slotId: string, verdict: 'pass' | 'fail', round?: number) => void;
+    onRemarkChange?: (slotId: string, remark: string, round?: number) => void;
 }
 
 const GovernmentPortalView: React.FC<GovernmentPortalViewProps> = ({
@@ -35,15 +38,14 @@ const GovernmentPortalView: React.FC<GovernmentPortalViewProps> = ({
     handleOpenUpload,
     handlePreview,
     handleStageSubmit,
-    round2Open,
-    setRound2Open,
-    round3Open,
-    setRound3Open,
     failedDocs,
     stage1Open,
     setStage1Open,
     stage2Open,
-    setStage2Open
+    setStage2Open,
+    isReviewMode = false,
+    onVerdict,
+    onRemarkChange
 }) => {
     return (
         <div className="animate-in fade-in duration-500 space-y-8">
@@ -107,7 +109,7 @@ const GovernmentPortalView: React.FC<GovernmentPortalViewProps> = ({
                                 <p>- This stage focuses on completeness of the submissions.</p>
                             </div>
                         </div>
-                        {nomineeData?.status !== 'completed' && (
+                        {nomineeData?.status !== 'completed' && !isReviewMode && (
                             <button
                                 onClick={(e) => {
                                     e.stopPropagation();
@@ -121,39 +123,61 @@ const GovernmentPortalView: React.FC<GovernmentPortalViewProps> = ({
                         )}
                     </div>
                     <div className={`collapse-transition overflow-hidden ${stage1Open ? 'max-h-[5000px] opacity-100 px-8 pb-8' : 'max-h-0 opacity-0 px-8 pb-0'}`}>
-                        <DocumentGrid round={1} documents={documents} nomineeData={nomineeData} handleOpenUpload={handleOpenUpload} handlePreview={handlePreview} />
+                        <DocumentGrid
+                            round={1}
+                            documents={documents}
+                            nomineeData={nomineeData}
+                            handleOpenUpload={handleOpenUpload}
+                            handlePreview={handlePreview}
+                            isReviewMode={isReviewMode}
+                            onVerdict={(sid, v) => onVerdict?.(sid, v, 1)}
+                            onRemarkChange={(sid, r) => onRemarkChange?.(sid, r, 1)}
+                        />
                     </div>
                 </div>
 
                 {/* Stage 2 */}
                 <div id="round-2-lock" className={`rounded-3xl border transition-all duration-500 overflow-hidden ${nomineeData?.round2Unlocked ? 'bg-white border-gray-200 shadow-xl' : 'bg-gray-50 border-gray-100 opacity-60'}`}>
                     <div
-                        className={`w-full p-8 flex items-center justify-between border-b border-gray-100 ${nomineeData?.round2Unlocked && !nomineeData?.round3Unlocked ? 'cursor-pointer header-glass-hover' : ''}`}
-                        onClick={() => nomineeData?.round2Unlocked && !nomineeData?.round3Unlocked && setStage2Open(!stage2Open)}
+                        className={`w-full p-8 flex items-center justify-between border-b border-gray-100 ${nomineeData?.round2Unlocked && (isReviewMode || !nomineeData?.round3Unlocked) ? 'cursor-pointer header-glass-hover' : ''}`}
+                        onClick={() => nomineeData?.round2Unlocked && (isReviewMode || !nomineeData?.round3Unlocked) && setStage2Open(!stage2Open)}
                     >
                         <div className="flex items-center space-x-6">
-                            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all ${nomineeData?.round2Unlocked && !nomineeData?.round3Unlocked ? 'bg-gkk-navy text-white shadow-lg' : 'bg-gray-200 text-gray-400'}`}>{nomineeData?.round2Unlocked && !nomineeData?.round3Unlocked ? <Unlock size={24} /> : <Lock size={24} />}</div>
+                            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all ${nomineeData?.round2Unlocked && (isReviewMode || !nomineeData?.round3Unlocked) ? 'bg-gkk-navy text-white shadow-lg' : 'bg-gray-200 text-gray-400'}`}>{nomineeData?.round2Unlocked && (isReviewMode || !nomineeData?.round3Unlocked) ? <Unlock size={24} /> : <Lock size={24} />}</div>
                             <div className="text-left">
                                 <div className="flex items-center gap-3">
-                                    <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${nomineeData?.round2Unlocked && !nomineeData?.round3Unlocked ? 'bg-gkk-gold text-gkk-navy' : 'bg-gray-300 text-white'}`}>2</div>
+                                    <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${nomineeData?.round2Unlocked && (isReviewMode || !nomineeData?.round3Unlocked) ? 'bg-gkk-gold text-gkk-navy' : 'bg-gray-300 text-white'}`}>2</div>
                                     <h4 className="font-bold text-gkk-navy text-xl leading-none">STAGE 2 (DOCUMENT EVALUATION)</h4>
-                                    {!!nomineeData?.round2Unlocked && !nomineeData?.round3Unlocked && (
+                                    {!!nomineeData?.round2Unlocked && (isReviewMode || !nomineeData?.round3Unlocked) && (
                                         <div className={`transition-transform duration-300 ${stage2Open ? 'rotate-180' : 'rotate-0'}`}>
                                             <ChevronDown size={20} className="text-gray-400" />
                                         </div>
                                     )}
                                 </div>
                                 <div className="text-xs text-gray-500 mt-2 font-bold uppercase tracking-widest leading-relaxed">
-                                    {nomineeData?.round2Unlocked && !nomineeData?.round3Unlocked
+                                    {nomineeData?.round2Unlocked && (isReviewMode || !nomineeData?.round3Unlocked)
                                         ? '- This stage focuses on the correctness and consistency of data and validity.'
                                         : nomineeData?.round3Unlocked ? 'Locked - Final Evaluation in Progress' : 'Locked - Monitoring current submission status'}
                                 </div>
                             </div>
                         </div>
                     </div>
-                    {/* Stage 2 Contents - Only visible if activated and NOT locked by stage 3 */}
-                    <div className={`collapse-transition overflow-hidden ${!!nomineeData?.round2Unlocked && !nomineeData?.round3Unlocked && stage2Open ? 'max-h-[5000px] opacity-100 p-8' : 'max-h-0 opacity-0 px-8 pb-0'}`}>
-                        <EvaluationInProgress />
+                    {/* Stage 2 Contents */}
+                    <div className={`collapse-transition overflow-hidden ${!!nomineeData?.round2Unlocked && (isReviewMode || (!nomineeData?.round3Unlocked && stage2Open)) ? 'max-h-[5000px] opacity-100 p-8' : 'max-h-0 opacity-0 px-8 pb-0'}`}>
+                        {isReviewMode ? (
+                            <DocumentGrid
+                                round={2}
+                                documents={documents}
+                                nomineeData={nomineeData}
+                                handleOpenUpload={handleOpenUpload}
+                                handlePreview={handlePreview}
+                                isReviewMode={isReviewMode}
+                                onVerdict={(sid, v) => onVerdict?.(sid, v, 2)}
+                                onRemarkChange={(sid, r) => onRemarkChange?.(sid, r, 2)}
+                            />
+                        ) : (
+                            !nomineeData?.round3Unlocked && stage2Open && <EvaluationInProgress />
+                        )}
                     </div>
                 </div>
 
@@ -173,10 +197,10 @@ const GovernmentPortalView: React.FC<GovernmentPortalViewProps> = ({
                             </div>
                         </div>
                     </div>
-                    {/* Stage 3 Contents - Only visible if activated */}
+                    {/* Stage 3 Contents - Only visible if round3Unlocked is true */}
                     {!!nomineeData?.round3Unlocked && (
                         <div className="p-8 bg-white">
-                            {nomineeData?.status !== 'completed' && (
+                            {nomineeData?.status !== 'completed' && !isReviewMode && (
                                 <div className="flex justify-end mb-6">
                                     <button
                                         onClick={() => handleStageSubmit(3)}
@@ -187,7 +211,16 @@ const GovernmentPortalView: React.FC<GovernmentPortalViewProps> = ({
                                     </button>
                                 </div>
                             )}
-                            <DocumentGrid round={3} documents={documents} nomineeData={nomineeData} handleOpenUpload={handleOpenUpload} handlePreview={handlePreview} />
+                            <DocumentGrid
+                                round={3}
+                                documents={documents}
+                                nomineeData={nomineeData}
+                                handleOpenUpload={handleOpenUpload}
+                                handlePreview={handlePreview}
+                                isReviewMode={isReviewMode}
+                                onVerdict={(sid, v) => onVerdict?.(sid, v, 3)}
+                                onRemarkChange={(sid, r) => onRemarkChange?.(sid, r, 3)}
+                            />
                         </div>
                     )}
                 </div>

@@ -297,12 +297,14 @@ export const updateNominee = async (uid: string, updates: Partial<Nominee>) => {
     await logAction('UPDATE_NOMINEE', `Fields: ${Object.keys(updates).join(', ')}`, uid);
 };
 
-export const updateDocumentEvaluation = async (appId: string, slotId: string, verdict: 'pass' | 'fail') => {
+export const updateDocumentEvaluation = async (appId: string, slotId: string, verdict: 'pass' | 'fail', round: number = 1) => {
     // Database enum uses capitalized values: 'Pass' / 'Fail'
     const dbVerdict = verdict === 'pass' ? 'Pass' : 'Fail';
+    const updateField = round === 2 ? 'verdict_r2' : 'verdict';
+
     const { error } = await supabase
         .from(DOCUMENTS_COLLECTION)
-        .update({ verdict: dbVerdict })
+        .update({ [updateField]: dbVerdict })
         .eq('application_id', appId)
         .eq('slot_id', slotId);
 
@@ -311,14 +313,16 @@ export const updateDocumentEvaluation = async (appId: string, slotId: string, ve
         return false;
     }
 
-    await logAction('VERIFY_DOCUMENT', `Slot ${slotId} -> ${dbVerdict}`, appId);
+    await logAction('VERIFY_DOCUMENT', `Slot ${slotId} (R${round}) -> ${dbVerdict}`, appId);
     return true;
 };
 
-export const updateDocumentRemarks = async (appId: string, slotId: string, remarks: string) => {
+export const updateDocumentRemarks = async (appId: string, slotId: string, remarks: string, round: number = 1) => {
+    const updateField = round === 2 ? 'remarks_r2' : 'remarks';
+
     const { error } = await supabase
         .from(DOCUMENTS_COLLECTION)
-        .update({ remarks })
+        .update({ [updateField]: remarks })
         .eq('application_id', appId)
         .eq('slot_id', slotId);
 
