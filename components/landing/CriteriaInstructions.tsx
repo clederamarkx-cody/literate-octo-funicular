@@ -173,11 +173,7 @@ const criteriaGroups = [
 ];
 
 const CriteriaInstructions: React.FC<CriteriaProps> = ({ onBack }) => {
-    const [openSection, setOpenSection] = useState<number | null>(0);
-
-    const toggleSection = (index: number) => {
-        setOpenSection(openSection === index ? null : index);
-    };
+    const [isAccordionOpen, setIsAccordionOpen] = useState(true);
 
     return (
         <div className="min-h-screen bg-gkk-navy pt-24 pb-12 relative overflow-hidden">
@@ -221,64 +217,69 @@ const CriteriaInstructions: React.FC<CriteriaProps> = ({ onBack }) => {
 
                 {/* Requirements Accordion Structure */}
                 <div className="space-y-4">
-                    {criteriaGroups.map((group, groupIdx) => {
-                        const isOpen = openSection === groupIdx;
+                    <div
+                        className={`bg-white/5 backdrop-blur-md rounded-2xl border transition-colors duration-300 overflow-hidden ${isAccordionOpen ? 'border-gkk-gold/50' : 'border-white/10 hover:border-white/20'
+                            }`}
+                    >
+                        <button
+                            onClick={() => setIsAccordionOpen(!isAccordionOpen)}
+                            className="w-full text-left px-6 py-5 flex items-center justify-between focus:outline-none focus-visible:ring-2 focus-visible:ring-gkk-gold/50 rounded-2xl"
+                        >
+                            <div className="flex items-center gap-4">
+                                <div className={`p-3 rounded-xl transition-colors ${isAccordionOpen ? 'bg-gkk-gold/20' : 'bg-white/5'}`}>
+                                    <Award className="w-6 h-6 text-gkk-gold" />
+                                </div>
+                                <h2 className="text-xl font-bold text-white uppercase tracking-wider">Private Sector - Industry Category</h2>
+                            </div>
+                            <ChevronDown
+                                className={`w-6 h-6 text-gray-400 transition-transform duration-300 ${isAccordionOpen ? 'rotate-180 text-gkk-gold' : ''}`}
+                            />
+                        </button>
 
-                        return (
-                            <div
-                                key={groupIdx}
-                                className={`bg-white/5 backdrop-blur-md rounded-2xl border transition-colors duration-300 overflow-hidden ${isOpen ? 'border-gkk-gold/50' : 'border-white/10 hover:border-white/20'
-                                    }`}
-                            >
-                                <button
-                                    onClick={() => toggleSection(groupIdx)}
-                                    className="w-full text-left px-6 py-5 flex items-center justify-between focus:outline-none focus-visible:ring-2 focus-visible:ring-gkk-gold/50 rounded-2xl"
-                                >
-                                    <div className="flex items-center gap-4">
-                                        <div className={`p-3 rounded-xl transition-colors ${isOpen ? 'bg-gkk-gold/20' : 'bg-white/5'}`}>
-                                            {group.icon}
+                        <div
+                            className={`transition-all duration-500 ease-in-out ${isAccordionOpen ? 'max-h-[8000px] opacity-100' : 'max-h-0 opacity-0'
+                                }`}
+                        >
+                            <div className="px-6 pb-6 pt-2 border-t border-white/5 mx-6">
+                                <div className="divide-y divide-white/5">
+                                    {criteriaGroups.map((group, groupIdx) => (
+                                        <div key={groupIdx} className="py-8 first:pt-4 last:pb-4">
+                                            <div className="flex items-center gap-3 mb-6">
+                                                <div className="p-2 bg-gkk-gold/10 rounded-lg">
+                                                    {React.cloneElement(group.icon as React.ReactElement, { className: "w-4 h-4 text-gkk-gold" })}
+                                                </div>
+                                                <h3 className="text-lg font-bold text-gkk-gold/90">{group.title}</h3>
+                                            </div>
+                                            <ul className="space-y-4">
+                                                {group.items.map((item, itemIdx) => (
+                                                    <li key={itemIdx} className="flex gap-3">
+                                                        <CheckCircle2 className="w-5 h-5 text-gkk-gold/50 flex-shrink-0 mt-0.5" />
+                                                        <div className="text-gray-200 text-[15px] leading-relaxed">
+                                                            {typeof item === 'string' ? (
+                                                                <span>{item}</span>
+                                                            ) : (
+                                                                <div>
+                                                                    <span className="font-semibold text-white">{item.text}</span>
+                                                                    <ul className="mt-3 space-y-2 pl-4 border-l border-white/10 ml-2">
+                                                                        {item.subItems.map((subItem, subIdx) => (
+                                                                            <li key={subIdx} className="text-gray-400 text-sm flex gap-2">
+                                                                                <span className="w-1.5 h-1.5 rounded-full bg-gkk-gold/30 mt-1.5 flex-shrink-0" />
+                                                                                {subItem}
+                                                                            </li>
+                                                                        ))}
+                                                                    </ul>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </li>
+                                                ))}
+                                            </ul>
                                         </div>
-                                        <h2 className="text-xl font-bold text-white">{group.title}</h2>
-                                    </div>
-                                    <ChevronDown
-                                        className={`w-6 h-6 text-gray-400 transition-transform duration-300 ${isOpen ? 'rotate-180 text-gkk-gold' : ''}`}
-                                    />
-                                </button>
-
-                                <div
-                                    className={`transition-all duration-500 ease-in-out ${isOpen ? 'max-h-[3000px] opacity-100' : 'max-h-0 opacity-0'
-                                        }`}
-                                >
-                                    <div className="px-6 pb-6 pt-2 border-t border-white/5 mx-6">
-                                        <ul className="space-y-4">
-                                            {group.items.map((item, itemIdx) => (
-                                                <li key={itemIdx} className="flex gap-3">
-                                                    <CheckCircle2 className="w-5 h-5 text-gkk-gold/70 flex-shrink-0 mt-0.5" />
-                                                    <div className="text-gray-200 text-[15px] leading-relaxed">
-                                                        {typeof item === 'string' ? (
-                                                            <span>{item}</span>
-                                                        ) : (
-                                                            <div>
-                                                                <span className="font-semibold text-white">{item.text}</span>
-                                                                <ul className="mt-3 space-y-2 pl-4 border-l border-white/10 ml-2">
-                                                                    {item.subItems.map((subItem, subIdx) => (
-                                                                        <li key={subIdx} className="text-gray-400 text-sm flex gap-2">
-                                                                            <span className="w-1.5 h-1.5 rounded-full bg-gkk-gold/50 mt-1.5 flex-shrink-0" />
-                                                                            {subItem}
-                                                                        </li>
-                                                                    ))}
-                                                                </ul>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </div>
+                                    ))}
                                 </div>
                             </div>
-                        );
-                    })}
+                        </div>
+                    </div>
                 </div>
 
                 {/* Footer info box */}
