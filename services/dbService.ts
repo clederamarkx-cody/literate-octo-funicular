@@ -302,29 +302,77 @@ export const updateDocumentEvaluation = async (appId: string, slotId: string, ve
     const dbVerdict = verdict === 'pass' ? 'Pass' : 'Fail';
     const updateField = round === 2 ? 'verdict_r2' : 'verdict';
 
-    const { error } = await supabase
+    // Check if the document exists first
+    const { data: existingDoc } = await supabase
         .from(DOCUMENTS_COLLECTION)
-        .update({ [updateField]: dbVerdict })
+        .select('id')
         .eq('application_id', appId)
-        .eq('slot_id', slotId);
+        .eq('slot_id', slotId)
+        .single();
+
+    let error;
+
+    if (existingDoc) {
+        const { error: updateError } = await supabase
+            .from(DOCUMENTS_COLLECTION)
+            .update({ [updateField]: dbVerdict })
+            .eq('application_id', appId)
+            .eq('slot_id', slotId);
+        error = updateError;
+    } else {
+        // If it doesn't exist, create it with the verdict
+        const { error: insertError } = await supabase
+            .from(DOCUMENTS_COLLECTION)
+            .insert({
+                application_id: appId,
+                slot_id: slotId,
+                [updateField]: dbVerdict,
+                status: 'pending' // Default status for an empty evaluated slot
+            });
+        error = insertError;
+    }
 
     if (error) {
         console.error("Update document evaluation failed:", error);
-        return false;
+        return { success: false, error: error.message || 'Unknown database error' };
     }
 
     await logAction('VERIFY_DOCUMENT', `Slot ${slotId} (R${round}) -> ${dbVerdict}`, appId);
-    return true;
+    return { success: true };
 };
 
 export const updateDocumentRemarks = async (appId: string, slotId: string, remarks: string, round: number = 1) => {
     const updateField = round === 2 ? 'remarks_r2' : 'remarks';
 
-    const { error } = await supabase
+    // Check if the document exists first
+    const { data: existingDoc } = await supabase
         .from(DOCUMENTS_COLLECTION)
-        .update({ [updateField]: remarks })
+        .select('id')
         .eq('application_id', appId)
-        .eq('slot_id', slotId);
+        .eq('slot_id', slotId)
+        .single();
+
+    let error;
+
+    if (existingDoc) {
+        const { error: updateError } = await supabase
+            .from(DOCUMENTS_COLLECTION)
+            .update({ [updateField]: remarks })
+            .eq('application_id', appId)
+            .eq('slot_id', slotId);
+        error = updateError;
+    } else {
+        // If it doesn't exist, create it with the remark
+        const { error: insertError } = await supabase
+            .from(DOCUMENTS_COLLECTION)
+            .insert({
+                application_id: appId,
+                slot_id: slotId,
+                [updateField]: remarks,
+                status: 'pending' // Default status for an empty evaluated slot
+            });
+        error = insertError;
+    }
 
     if (error) {
         console.error("Update document remarks failed:", error);

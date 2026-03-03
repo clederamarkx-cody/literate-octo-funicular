@@ -327,8 +327,12 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
 
   const handleDocVerdict = async (slotId: string, verdict: 'pass' | 'fail', round: number = 1) => {
     if (!selectedNominee) return;
-    const success = await updateDocumentEvaluation(selectedNominee.id, slotId, verdict, round);
-    if (success) {
+    try {
+      const result = await updateDocumentEvaluation(selectedNominee.id, slotId, verdict, round);
+      if (result.error) {
+        alert(`Warning: Database evaluation update failed.\nError: ${result.error}\nThe change may not persist after a refresh.`);
+      }
+
       const updatedDocs = (selectedNominee.documents || []).map(d =>
         d.slotId === slotId
           ? (round === 2 ? { ...d, verdict_r2: verdict } : { ...d, verdict })
@@ -337,6 +341,9 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
       const updatedNominee = { ...selectedNominee, documents: updatedDocs };
       setSelectedNominee(updatedNominee);
       setLocalNominees(prev => prev.map(a => a.id === selectedNominee.id ? updatedNominee : a));
+    } catch (e: any) {
+      console.error(e);
+      alert(`Error updating verdict: ${e.message}`);
     }
   };
 
@@ -568,7 +575,7 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                   </button>
                 </div>
               )}
-              <div className="mt-2">
+              <div className="mt-3 pb-2">
                 {!isReuReadOnly && (
                   <textarea
                     placeholder="Add remarks for the nominee..."
@@ -1011,19 +1018,102 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
               </div>
             </div>
 
-            {/* Right: Consolidated Progress Trackers */}
-            <div className="flex flex-wrap gap-4 items-center bg-gray-50/50 p-2 rounded-[25px] border border-gray-100/50">
-              <div className="w-36 bg-white rounded-[20px] p-4 text-center border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
-                {renderProgressBar(selectedNominee, 1)}
-              </div>
-              {userRole !== 'reu' && (selectedNominee.round2Unlocked || ['admin', 'scd_team_leader', 'evaluator'].includes(userRole || '')) && (
+            {/* Right: Consolidated Progress Trackers and Actions */}
+            <div className="flex flex-col gap-4 items-end">
+              <div className="flex flex-wrap gap-4 items-center bg-gray-50/50 p-2 rounded-[25px] border border-gray-100/50">
                 <div className="w-36 bg-white rounded-[20px] p-4 text-center border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
-                  {renderProgressBar(selectedNominee, 2)}
+                  {renderProgressBar(selectedNominee, 1)}
                 </div>
-              )}
-              {userRole !== 'reu' && (selectedNominee.round3Unlocked || ['admin', 'scd_team_leader', 'evaluator'].includes(userRole || '')) && (
-                <div className="w-36 bg-white rounded-[20px] p-4 text-center border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
-                  {renderProgressBar(selectedNominee, 3)}
+                {userRole !== 'reu' && (selectedNominee.round2Unlocked || ['admin', 'scd_team_leader', 'evaluator'].includes(userRole || '')) && (
+                  <div className="w-36 bg-white rounded-[20px] p-4 text-center border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+                    {renderProgressBar(selectedNominee, 2)}
+                  </div>
+                )}
+                {userRole !== 'reu' && (selectedNominee.round3Unlocked || ['admin', 'scd_team_leader', 'evaluator'].includes(userRole || '')) && (
+                  <div className="w-36 bg-white rounded-[20px] p-4 text-center border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+                    {renderProgressBar(selectedNominee, 3)}
+                  </div>
+                )}
+              </div>
+
+              {(userRole === 'admin' || userRole === 'scd_team_leader') && (
+                <div className="flex gap-3 mt-4 w-full justify-end">
+                  <button
+                    onClick={() => {
+                      const newStatus = !selectedNominee.round2Unlocked;
+                      onToggleRound2?.(selectedNominee.id, newStatus);
+                      const updated = { ...selectedNominee, round2Unlocked: newStatus };
+                      setSelectedNominee(updated);
+                      setLocalNominees(prev => prev.map(n => n.id === updated.id ? updated : n));
+                    }}
+                    className={`px-6 py-2.5 rounded-full font-bold transition-all shadow-sm text-[10px] tracking-widest uppercase flex items-center gap-2 ${selectedNominee.round2Unlocked ? 'bg-red-50/30 text-red-600 border border-black hover:bg-red-50' : 'bg-gkk-gold text-gkk-navy hover:bg-yellow-400'}`}
+                  >
+                    {selectedNominee.round2Unlocked ? <Lock size={14} /> : <Unlock size={14} />}
+                    {selectedNominee.round2Unlocked ? 'Lock Stage 2' : 'Proceed to Stage 2'}
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      const newStatus = !selectedNominee.round3Unlocked;
+                      onToggleRound3?.(selectedNominee.id, newStatus);
+                      const updated = { ...selectedNominee, round3Unlocked: newStatus, status: newStatus ? 'in_progress' : selectedNominee.status };
+                      setSelectedNominee(updated as any);
+                      setLocalNominees(prev => prev.map(n => n.id === updated.id ? (updated as any) : n));
+                    }}
+                    disabled={!selectedNominee.round2Unlocked}
+                    className={`px-6 py-2.5 rounded-full font-bold transition-all shadow-sm text-[10px] tracking-widest uppercase flex items-center gap-2 ${selectedNominee.round3Unlocked ? 'bg-red-50 text-red-600 hover:bg-red-100' : 'bg-gkk-navy text-white hover:bg-gkk-royalBlue'} disabled:opacity-50 disabled:cursor-not-allowed`}
+                  >
+                    {selectedNominee.round3Unlocked ? <Lock size={14} /> : <Unlock size={14} />}
+                    {selectedNominee.round3Unlocked ? 'Lock Stage 3' : 'Proceed to Stage 3'}
+                  </button>
+
+                  {selectedNominee.status !== 'completed' ? (
+                    <button
+                      onClick={async () => {
+                        const confirmed = window.confirm("Are you sure you want to close this application? This marks the review process as fully completed, locking Stage 2 and 3 for the nominee.");
+                        if (confirmed) {
+                          try {
+                            await updateNominee(selectedNominee.id, {
+                              status: 'completed'
+                            });
+
+                            const updated = {
+                              ...selectedNominee,
+                              status: 'completed' as any
+                            };
+                            setSelectedNominee(updated);
+                            setLocalNominees(prev => prev.map(n => n.id === updated.id ? updated : n));
+                          } catch (error) {
+                            console.error("Failed to close application.", error);
+                            alert("Failed to close application.");
+                          }
+                        }
+                      }}
+                      className="px-6 py-2.5 bg-emerald-600 text-white font-bold rounded-2xl hover:bg-emerald-700 transition-all text-[10px] tracking-widest uppercase shadow-md flex items-center gap-2 ml-2"
+                    >
+                      <CheckCircle size={14} /> Close Application
+                    </button>
+                  ) : (
+                    <button
+                      onClick={async () => {
+                        const confirmed = window.confirm("Are you sure you want to reopen this application?");
+                        if (confirmed) {
+                          try {
+                            await updateNominee(selectedNominee.id, { status: 'in_progress' });
+                            const updated = { ...selectedNominee, status: 'in_progress' as any };
+                            setSelectedNominee(updated);
+                            setLocalNominees(prev => prev.map(n => n.id === updated.id ? updated : n));
+                          } catch (error) {
+                            console.error("Failed to reopen application.", error);
+                            alert("Failed to reopen application.");
+                          }
+                        }
+                      }}
+                      className="px-6 py-2.5 bg-gray-500 text-white font-bold rounded-2xl hover:bg-gray-600 transition-all text-[10px] tracking-widest uppercase shadow-md flex items-center gap-2 ml-2"
+                    >
+                      <Unlock size={14} /> Reopen Application
+                    </button>
+                  )}
                 </div>
               )}
             </div>
@@ -1033,20 +1123,91 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
         <div className="space-y-8">
           {(() => {
             const category = selectedNominee.details?.nomineeCategory || 'Private Sector';
+
+            const assembledDocs: any[] = [];
+            if (dynamicRequirements) {
+              const processStage = (stageReqs: any[], round: number, prefix: string) => {
+                stageReqs.forEach((req: any, idx: number) => {
+                  const slotId = `${prefix}-${idx}`;
+                  const savedDoc = selectedNominee.documents?.find(d => d.slotId === slotId);
+                  assembledDocs.push({
+                    id: slotId,
+                    category: req.category || 'General',
+                    label: req.label,
+                    fileName: savedDoc ? savedDoc.name : null,
+                    status: savedDoc ? 'uploaded' : 'pending',
+                    lastUpdated: savedDoc ? (savedDoc.date || '-') : '-',
+                    previewUrl: savedDoc ? (savedDoc.url || null) : null,
+                    type: savedDoc ? (savedDoc.type || '') : '',
+                    round: round,
+                    remarks: savedDoc?.remarks || undefined,
+                    verdict: savedDoc?.verdict || undefined,
+                    remarks_r2: savedDoc?.remarks_r2 || undefined,
+                    verdict_r2: savedDoc?.verdict_r2 || undefined,
+                    isCorrection: false
+                  });
+
+                  // We ONLY create deficiency slots when processing round 1 to prevent duplication,
+                  // because we check BOTH the Stage 1 verdict AND the Stage 2 verdict on the `r1-` document.
+                  // Stage 2 evaluation actually evaluates the `r1-` document slots. Wait, does it?
+                  // Let's check how Stage 2 evaluates. If evaluator evaluates Stage 2, it updates `verdict_r2` on the `r1-` slot?
+                  // No, Stage 2 has its own `r2-` slots or it evaluates `r1-`? 
+                  // If `dynamicRequirements.stage2` has its own slots (`r2-x`), then `isR2Failed` is correct.
+
+                  // Let's just completely restrict deficiency pushing to ONLY happen during a specific condition
+                  // such that it doesn't accidentally trigger for empty/unspecified states.
+                  // THE REQUIREMENT IS: Stage 3 should ONLY pull items strictly marked as "INCOMPLETE" from Stage 2.
+                  // AND it should ONLY show them once Stage 3 is actually unlocked/authorized.
+                  const isR2Failed = round === 2 && savedDoc?.verdict_r2 === 'fail' && selectedNominee?.round3Unlocked;
+
+                  if (isR2Failed) {
+                    // Normalize the deficiency ID to always point back to the r1 origin if it's an r2 failure
+                    // so we don't get double deficiencies for the same requirement.
+                    const originSlotId = slotId.replace('r2-', 'r1-');
+                    const deficiencySlotId = `r3-deficiency-${originSlotId}`;
+                    const currentCorrection = selectedNominee.documents?.find(d => d.slotId === deficiencySlotId);
+
+                    // Prevent pushing the same deficiency slot twice
+                    if (!assembledDocs.some(d => d.id === deficiencySlotId)) {
+                      assembledDocs.push({
+                        id: deficiencySlotId,
+                        category: 'Deficiency Correction',
+                        label: `[DEFICIENCY] ${req.label}`,
+                        fileName: currentCorrection ? currentCorrection.name : null,
+                        status: currentCorrection ? 'uploaded' : 'pending',
+                        lastUpdated: currentCorrection ? (currentCorrection.date || '-') : '-',
+                        previewUrl: currentCorrection ? (currentCorrection.url || null) : null,
+                        type: currentCorrection ? (currentCorrection.type || '') : '',
+                        round: 3,
+                        remarks: currentCorrection?.remarks || undefined,
+                        verdict: currentCorrection?.verdict || undefined,
+                        isCorrection: true
+                      });
+                    }
+                  }
+                });
+              };
+              if (dynamicRequirements.stage1) processStage(dynamicRequirements.stage1, 1, 'r1');
+              if (dynamicRequirements.stage2) processStage(dynamicRequirements.stage2, 2, 'r2');
+              if (dynamicRequirements.stage3) processStage(dynamicRequirements.stage3, 3, 'r3');
+            }
+
             const commonProps = {
               nomineeData: selectedNominee,
-              documents: selectedNominee.documents,
+              documents: assembledDocs,
               stage1Progress: calculateProgress(selectedNominee, 1),
               stage2Progress: calculateProgress(selectedNominee, 2),
               stage3Progress: calculateProgress(selectedNominee, 3),
               handleOpenUpload: () => { }, // Read-only for evaluators
               handlePreview: handlePreview,
               handleStageSubmit: () => { }, // Evaluators don't submit
+              handleExportStage: handleExportStage,
+              isExporting: isExporting,
               failedDocs: (selectedNominee.documents || []).filter(d => d.verdict === 'fail'),
               stage1Open: !isStage1Folded,
               setStage1Open: (open: boolean) => setIsStage1Folded(!open),
-              stage2Open: true, // Evaluators usually want to see stage 2
-              setStage2Open: () => { },
+              stage2Open: round2Open, // Tied to the actual state
+              setStage2Open: (open: boolean) => setRound2Open(open),
               isReviewMode: true,
               onVerdict: (slotId: string, verdict: 'pass' | 'fail', round: number = 1) => {
                 // If we are looking at round 2, we use round 2

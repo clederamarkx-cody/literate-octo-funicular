@@ -122,6 +122,7 @@ interface DocumentSlot {
   remarks?: string;
   verdict?: 'pass' | 'fail';
   isCorrection?: boolean;
+  originalSlotId?: string; // Add this line to resolve typescript error
 }
 
 const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nomineeData: nomineeData, onDocumentUpload, onUpdateNominee: onUpdateNominee }) => {
@@ -219,6 +220,14 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
   const [showSplash, setShowSplash] = useState(true);
 
   useEffect(() => {
+    // If the application is completely finalized, visually lock stages 2 and 3 and unfold stage 1 for the nominee
+    if (nomineeData?.status === 'completed') {
+      setStage1Open(true);
+      setStage2Open(false);
+      // Stage 3 isn't explicitly tracked via state here, but we can manage standard locks
+      return;
+    }
+
     // Stage 1 is folded by default if Stage 2 or 3 is unlocked
     if (nomineeData?.round2Unlocked || nomineeData?.round3Unlocked) {
       setStage1Open(false);
@@ -227,7 +236,7 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
     if (nomineeData?.round3Unlocked) {
       setStage2Open(false);
     }
-  }, [nomineeData?.id, nomineeData?.round2Unlocked, nomineeData?.round3Unlocked]);
+  }, [nomineeData?.id, nomineeData?.round2Unlocked, nomineeData?.round3Unlocked, nomineeData?.status]);
 
   // Close dropdown on click outside
   useEffect(() => {
@@ -308,25 +317,34 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
           verdict: savedDoc?.verdict || undefined
         });
 
-        // Deficiency Logic: If this is Stage 1 or 2 and it failed, create a corresponding Stage 3 deficiency slot
-        if ((round === 1 || round === 2) && savedDoc?.verdict === 'fail') {
-          const deficiencySlotId = `r3-deficiency-${slotId}`;
+        // THE REQUIREMENT IS: Stage 3 should ONLY pull items strictly marked as "INCOMPLETE" from Stage 2.
+        // AND it should ONLY show them once Stage 3 is actually unlocked/authorized.
+        const isR2Failed = round === 2 && savedDoc?.verdict_r2 === 'fail' && nomineeData?.round3Unlocked;
+
+        if (isR2Failed) {
+          // Normalize the deficiency ID to always point back to the r1 origin if it's an r2 failure
+          const originSlotId = slotId.replace('r2-', 'r1-');
+          const deficiencySlotId = `r3-deficiency-${originSlotId}`;
           const currentCorrection = nomineeData?.documents?.find((d: any) => d.slotId === deficiencySlotId);
 
-          initialDocs.push({
-            id: deficiencySlotId,
-            category: 'Deficiency Correction' as any,
-            label: `[DEFICIENCY] ${req.label}`,
-            fileName: currentCorrection ? currentCorrection.name : null,
-            status: currentCorrection ? 'uploaded' : 'pending',
-            lastUpdated: currentCorrection ? (currentCorrection.date || '-') : '-',
-            previewUrl: currentCorrection ? (currentCorrection.url || null) : null,
-            type: currentCorrection ? (currentCorrection.type || '') : '',
-            round: 3,
-            remarks: currentCorrection?.remarks || undefined,
-            verdict: currentCorrection?.verdict || undefined,
-            isCorrection: true
-          });
+          // Prevent pushing the same deficiency slot twice
+          if (!initialDocs.some(d => d.id === deficiencySlotId)) {
+            initialDocs.push({
+              id: deficiencySlotId,
+              category: 'Deficiency Correction' as any,
+              label: `[DEFICIENCY] ${req.label}`,
+              fileName: currentCorrection ? currentCorrection.name : null,
+              status: currentCorrection ? 'uploaded' : 'pending',
+              lastUpdated: currentCorrection ? (currentCorrection.date || '-') : '-',
+              previewUrl: currentCorrection ? (currentCorrection.url || null) : null,
+              type: currentCorrection ? (currentCorrection.type || '') : '',
+              round: 3,
+              remarks: currentCorrection?.remarks || undefined,
+              verdict: currentCorrection?.verdict || undefined,
+              isCorrection: true,
+              originalSlotId: slotId
+            });
+          }
         }
       });
     };

@@ -149,35 +149,35 @@ const DocumentGrid: React.FC<DocumentGridProps> = ({
                         )}
 
                         {isReviewMode && doc.status === 'uploaded' && (
-                            <div className="mb-3 space-y-3">
+                            <div className="mb-4 space-y-3">
                                 <div className="flex gap-2">
                                     <button
-                                        onClick={() => onVerdict?.(doc.id, 'pass')}
+                                        onClick={() => onVerdict?.(doc.id, 'pass', round)}
                                         className={`flex-1 py-3 px-4 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 ${effectiveVerdict === 'pass' ? 'bg-emerald-600 text-white shadow-lg' : 'bg-white text-gray-400 border border-gray-200 hover:bg-emerald-50 hover:text-emerald-600'}`}
                                     >
-                                        <Check size={16} /> PASS
+                                        PASS
                                     </button>
                                     <button
-                                        onClick={() => onVerdict?.(doc.id, 'fail')}
+                                        onClick={() => onVerdict?.(doc.id, 'fail', round)}
                                         className={`flex-1 py-3 px-4 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 ${effectiveVerdict === 'fail' ? 'bg-red-600 text-white shadow-lg' : 'bg-white text-gray-400 border border-gray-200 hover:bg-red-50 hover:text-red-600'}`}
                                     >
-                                        <X size={16} /> INCOMPLETE
+                                        INCOMPLETE
                                     </button>
                                 </div>
                                 <textarea
                                     placeholder="Add remarks for the nominee..."
                                     value={effectiveRemarks || ''}
-                                    onChange={(e) => onRemarkChange?.(doc.id, e.target.value)}
+                                    onChange={(e) => onRemarkChange?.(doc.id, e.target.value, round)}
                                     className="w-full p-3 text-[11px] font-medium bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-gkk-gold/20 outline-none resize-none min-h-[60px] text-gkk-navy"
                                 />
                             </div>
                         )}
 
                         <div className="flex gap-2 pt-3 border-t border-gray-100">
-                            {!isLockedInThisRound && (
+                            {!isLockedInThisRound && !isReviewMode && (
                                 <button
                                     onClick={() => handleOpenUpload(doc.id)}
-                                    className={`flex-1 py-2.5 rounded-xl text-[10px] font-bold tracking-wider transition-all flex items-center justify-center gap-2 whitespace-nowrap ${doc.status === 'uploaded' ? 'bg-white text-gkk-navy border border-gray-200 hover:bg-gray-50' : 'bg-gkk-navy text-white hover:bg-gkk-royalBlue shadow-md'}`}
+                                    className={`flex-[3] py-2.5 rounded-[20px] text-[10px] font-bold tracking-wider transition-all flex items-center justify-center gap-2 whitespace-nowrap border shadow-sm ${doc.status === 'uploaded' ? 'bg-white text-gkk-navy border-gray-200 hover:bg-gray-50' : 'bg-gkk-navy text-white hover:bg-gkk-royalBlue border-transparent'}`}
                                 >
                                     <Upload size={14} />
                                     <span>{doc.status === 'uploaded' ? 'RE-UPLOAD' : (doc.round === 3 && (doc.id.includes('deficiency') || doc.category === 'Deficiency Correction')) ? 'NEW UPLOAD' : 'UPLOAD PDF'}</span>
@@ -186,7 +186,7 @@ const DocumentGrid: React.FC<DocumentGridProps> = ({
                             {doc.status === 'uploaded' && (
                                 <button
                                     onClick={() => handlePreview(doc)}
-                                    className={`${!isLockedInThisRound ? 'px-3' : 'flex-1'} py-2.5 bg-white text-blue-600 rounded-xl hover:bg-blue-600 hover:text-white transition-all border border-blue-200 shadow-sm flex items-center justify-center gap-2`}
+                                    className={`flex-1 py-2.5 bg-white text-blue-600 rounded-[20px] hover:bg-blue-50 transition-all border border-blue-200 shadow-sm flex items-center justify-center gap-2`}
                                     title="View Proof"
                                 >
                                     <Eye size={16} />

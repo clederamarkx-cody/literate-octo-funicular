@@ -47,6 +47,10 @@ const GovernmentPortalView: React.FC<GovernmentPortalViewProps> = ({
     onVerdict,
     onRemarkChange
 }) => {
+    const completed = nomineeData?.status === 'completed';
+    const isStage2Unlocked = nomineeData?.round2Unlocked && (isReviewMode || !completed);
+    const isStage3Unlocked = nomineeData?.round3Unlocked && (isReviewMode || !completed);
+
     return (
         <div className="animate-in fade-in duration-500 space-y-8">
             {/* Header Info */}
@@ -65,7 +69,7 @@ const GovernmentPortalView: React.FC<GovernmentPortalViewProps> = ({
                                 </div>
                             </div>
 
-                            {!!nomineeData?.round3Unlocked && nomineeData?.status !== 'completed' && failedDocs.length > 0 && (
+                            {!!nomineeData?.round3Unlocked && nomineeData?.status !== 'completed' && failedDocs.length > 0 && !isReviewMode && (
                                 <div className="animate-in slide-in-from-top-4 duration-500">
                                     <FailedDocumentsAlert failedDocs={failedDocs} />
                                 </div>
@@ -122,7 +126,7 @@ const GovernmentPortalView: React.FC<GovernmentPortalViewProps> = ({
                             </button>
                         )}
                     </div>
-                    <div className={`collapse-transition overflow-hidden ${stage1Open ? 'max-h-[5000px] opacity-100 px-8 pb-8' : 'max-h-0 opacity-0 px-8 pb-0'}`}>
+                    <div className={`collapse-transition overflow-hidden ${stage1Open ? 'max-h-[20000px] opacity-100 px-8 pb-8' : 'max-h-0 opacity-0 px-8 pb-0'}`}>
                         <DocumentGrid
                             round={1}
                             documents={documents}
@@ -155,15 +159,15 @@ const GovernmentPortalView: React.FC<GovernmentPortalViewProps> = ({
                                     )}
                                 </div>
                                 <div className="text-xs text-gray-500 mt-2 font-bold uppercase tracking-widest leading-relaxed">
-                                    {nomineeData?.round2Unlocked && (isReviewMode || !nomineeData?.round3Unlocked)
+                                    {isStage2Unlocked && (isReviewMode || !isStage3Unlocked)
                                         ? '- This stage focuses on the correctness and consistency of data and validity.'
-                                        : nomineeData?.round3Unlocked ? 'Locked - Final Evaluation in Progress' : 'Locked - Monitoring current submission status'}
+                                        : isStage3Unlocked ? 'Locked - Final Evaluation in Progress' : 'Locked - Monitoring current submission status'}
                                 </div>
                             </div>
                         </div>
                     </div>
                     {/* Stage 2 Contents */}
-                    <div className={`collapse-transition overflow-hidden ${!!nomineeData?.round2Unlocked && (isReviewMode || (!nomineeData?.round3Unlocked && stage2Open)) ? 'max-h-[5000px] opacity-100 p-8' : 'max-h-0 opacity-0 px-8 pb-0'}`}>
+                    <div className={`collapse-transition overflow-hidden ${!!isStage2Unlocked && (isReviewMode || (!isStage3Unlocked && stage2Open)) ? 'max-h-[20000px] opacity-100 p-8' : 'max-h-0 opacity-0 px-8 pb-0'}`}>
                         {isReviewMode ? (
                             <DocumentGrid
                                 round={2}
@@ -176,29 +180,29 @@ const GovernmentPortalView: React.FC<GovernmentPortalViewProps> = ({
                                 onRemarkChange={(sid, r) => onRemarkChange?.(sid, r, 2)}
                             />
                         ) : (
-                            !nomineeData?.round3Unlocked && stage2Open && <EvaluationInProgress />
+                            !isStage3Unlocked && stage2Open && <EvaluationInProgress />
                         )}
                     </div>
                 </div>
 
                 {/* Stage 3 */}
-                <div id="round-3-lock" className={`rounded-3xl border transition-all duration-300 overflow-hidden ${nomineeData?.round3Unlocked ? 'bg-white border-gray-200 shadow-xl' : 'bg-gray-50 border-gray-100 opacity-60'}`}>
+                <div id="round-3-lock" className={`rounded-3xl border transition-all duration-300 overflow-hidden ${isStage3Unlocked ? 'bg-white border-gray-200 shadow-xl' : 'bg-gray-50 border-gray-100 opacity-60'}`}>
                     <div className={`w-full p-8 flex items-center justify-between border-b border-gray-100`}>
                         <div className="flex items-center space-x-6">
-                            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all ${nomineeData?.round3Unlocked ? 'bg-gkk-gold text-gkk-navy shadow-lg' : 'bg-gray-200 text-gray-400'}`}>{nomineeData?.round3Unlocked ? <Unlock size={24} /> : <Lock size={24} />}</div>
+                            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all ${isStage3Unlocked ? 'bg-gkk-gold text-gkk-navy shadow-lg' : 'bg-gray-200 text-gray-400'}`}>{isStage3Unlocked ? <Unlock size={24} /> : <Lock size={24} />}</div>
                             <div className="text-left">
                                 <div className="flex items-center gap-3">
-                                    <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${nomineeData?.round3Unlocked ? 'bg-gkk-navy text-white' : 'bg-gray-300 text-white'}`}>3</div>
+                                    <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${isStage3Unlocked ? 'bg-gkk-navy text-white' : 'bg-gray-300 text-white'}`}>3</div>
                                     <h4 className="font-bold text-gkk-navy text-xl leading-none">STAGE 3 (SUBMISSION OF DEFICIENCIES)</h4>
                                 </div>
                                 <div className="text-xs text-gray-500 mt-2 font-bold uppercase tracking-widest">
-                                    {nomineeData?.round3Unlocked ? '- Only upload requirements that are for re-submission.' : 'Locked'}
+                                    {isStage3Unlocked ? '- Only upload requirements that are for re-submission.' : 'Locked'}
                                 </div>
                             </div>
                         </div>
                     </div>
                     {/* Stage 3 Contents - Only visible if round3Unlocked is true */}
-                    {!!nomineeData?.round3Unlocked && (
+                    {!!isStage3Unlocked && (
                         <div className="p-8 bg-white">
                             {nomineeData?.status !== 'completed' && !isReviewMode && (
                                 <div className="flex justify-end mb-6">

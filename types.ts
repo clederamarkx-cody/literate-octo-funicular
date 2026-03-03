@@ -31,6 +31,7 @@ export interface NomineeDocument {
   verdict_r2?: 'pass' | 'fail'; // Fresh evaluation for Stage 2 (National)
   remarks_r2?: string; // Fresh remarks for Stage 2
   isCorrection?: boolean; // Flag to indicate a deficiency has been corrected
+  originalSlotId?: string; // The origin slot that triggered this deficiency
 }
 
 // 1. Users (Consolidated Staff & Nominees)
