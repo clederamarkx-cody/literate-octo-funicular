@@ -121,8 +121,6 @@ interface DocumentSlot {
   round: number;
   remarks?: string;
   verdict?: 'pass' | 'fail';
-  verdict_r2?: 'pass' | 'fail';
-  remarks_r2?: string;
   isCorrection?: boolean;
 }
 
@@ -307,14 +305,11 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
           type: savedDoc ? (savedDoc.type || '') : '',
           round: round,
           remarks: savedDoc?.remarks || undefined,
-          remarks_r2: savedDoc?.remarks_r2 || undefined,
-          verdict: savedDoc?.verdict || undefined,
-          verdict_r2: savedDoc?.verdict_r2 || undefined
+          verdict: savedDoc?.verdict || undefined
         });
 
         // Deficiency Logic: If this is Stage 1 or 2 and it failed, create a corresponding Stage 3 deficiency slot
-        const isFailed = round === 1 ? savedDoc?.verdict === 'fail' : savedDoc?.verdict_r2 === 'fail';
-        if ((round === 1 || round === 2) && isFailed) {
+        if ((round === 1 || round === 2) && savedDoc?.verdict === 'fail') {
           const deficiencySlotId = `r3-deficiency-${slotId}`;
           const currentCorrection = nomineeData?.documents?.find((d: any) => d.slotId === deficiencySlotId);
 
@@ -360,9 +355,7 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
               previewUrl: savedDoc.url || null,
               type: savedDoc.type || '',
               remarks: savedDoc.remarks || '',
-              remarks_r2: savedDoc.remarks_r2 || '',
               verdict: savedDoc.verdict || undefined,
-              verdict_r2: savedDoc.verdict_r2 || undefined,
               isCorrection: savedDoc.isCorrection || doc.isCorrection
             };
           }
@@ -636,12 +629,12 @@ const NomineePortal: React.FC<NomineePortalProps> = ({ onLogout, onUnderDev, nom
 
   const hasActionRequired = useMemo(() => documents.some(d => {
     const persisted = nomineeData?.documents?.find((nd: any) => nd.slotId === d.id);
-    return d.round === 1 ? persisted?.verdict === 'fail' : persisted?.verdict_r2 === 'fail';
+    return persisted?.verdict === 'fail';
   }), [documents, nomineeData?.documents]);
 
   const failedDocs = useMemo(() => documents.filter(d => {
     const persisted = nomineeData?.documents?.find((nd: any) => nd.slotId === d.id);
-    return d.round === 1 ? persisted?.verdict === 'fail' : persisted?.verdict_r2 === 'fail';
+    return persisted?.verdict === 'fail';
   }), [documents, nomineeData?.documents]);
 
   const portalProps = useMemo(() => ({

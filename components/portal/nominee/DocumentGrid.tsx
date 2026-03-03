@@ -50,8 +50,8 @@ const DocumentGrid: React.FC<DocumentGridProps> = ({
             return doc.round === 1;
         }
         if (round === 2) {
-            // Stage 2 is now a fresh set of documents as requested
-            return doc.round === 2;
+            // Stage 2 is a "Bank" for ALL Stage 1 documents
+            return doc.round === 1;
         }
         if (round === 3) {
             // Stage 3: Only show dynamic deficiency slots (corrections)
@@ -67,7 +67,7 @@ const DocumentGrid: React.FC<DocumentGridProps> = ({
     if (roundDocs.length === 0 && round === 2) {
         return (
             <div className="p-8 text-center bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200">
-                <p className="text-gray-400 font-medium italic">Waiting for Nominee to upload documents for Stage 2.</p>
+                <p className="text-gray-400 font-medium italic">No documents available from Stage 1.</p>
             </div>
         );
     }
@@ -82,13 +82,13 @@ const DocumentGrid: React.FC<DocumentGridProps> = ({
                 // Stage 1 is locked if Stage 2 is active
                 // Stage 2 is locked if Stage 3 is active
                 const isLockedInThisRound =
-                    (nomineeData?.status === 'completed' && !isReviewMode) ||
+                    (nomineeData?.status === 'completed') ||
                     (round === 1 && nomineeData?.round2Unlocked) ||
                     (round === 2 && nomineeData?.round3Unlocked) ||
                     (round === 3 && (!nomineeData?.round3Unlocked || (doc.status === 'uploaded' && doc.verdict !== 'fail')));
 
-                // Hide verdicts and remarks in Stage 1 EXCEPT for review mode (staff)
-                const showVerdicts = round !== 1 || isReviewMode;
+                // Hide verdicts and remarks in Stage 1
+                const showVerdicts = round !== 1;
 
                 return (
                     <div key={doc.id} className={`group p-4 border rounded-2xl transition-all ${doc.status === 'uploaded' ? 'bg-green-50/20 border-green-100' : 'bg-white border-gray-200 hover:border-gkk-gold/30 hover:shadow-lg hover:-translate-y-0.5'}`}>
