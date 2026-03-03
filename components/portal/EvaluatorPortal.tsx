@@ -615,10 +615,14 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
   };
 
   const calculateProgress = (nominee: Nominee, round: number) => {
-    if (!dynamicRequirements) return 0;
+    if (!dynamicRequirements) return { percent: 0, count: 0, total: 0 };
 
     // Stage 2 override: 100% if Stage 3 is unlocked
-    if (round === 2 && nominee.round3Unlocked) return 100;
+    if (round === 2 && nominee.round3Unlocked) {
+      const stageKey = 'stage1';
+      const total = dynamicRequirements[stageKey]?.length || 0;
+      return { percent: 100, count: total, total };
+    }
 
     const roundDocs = nominee.documents || [];
 
@@ -626,9 +630,13 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
     if (round === 3) {
       const deficiencies = roundDocs.filter(d => d.slotId?.startsWith('r3-deficiency-'));
       const totalItems = deficiencies.length;
-      if (totalItems === 0) return 0;
+      if (totalItems === 0) return { percent: 0, count: 0, total: 0 };
       const evaluatedCount = deficiencies.filter(d => d.verdict === 'pass' || d.verdict === 'fail').length;
-      return Math.round((evaluatedCount / totalItems) * 100);
+      return {
+        percent: Math.round((evaluatedCount / totalItems) * 100),
+        count: evaluatedCount,
+        total: totalItems
+      };
     }
 
     const stageKey = 'stage1';
@@ -636,33 +644,62 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
     const stagePrefix = 'r1';
 
     const totalItems = stageReqs.length;
-    if (totalItems === 0) return 0;
+    if (totalItems === 0) return { percent: 0, count: 0, total: 0 };
 
     const evaluatedCount = stageReqs.filter((req: any, idx: number) => {
       const slotId = `${stagePrefix}-${idx}`;
       const doc = roundDocs.find(d => d.slotId === slotId);
-      return doc?.verdict === 'pass' || doc?.verdict === 'fail';
+      // Round 2 (SCD/Evaluator) uses verdict_r2 field on the same r1 slots
+      return round === 2
+        ? (doc?.verdict_r2 === 'pass' || doc?.verdict_r2 === 'fail')
+        : (doc?.verdict === 'pass' || doc?.verdict === 'fail');
     }).length;
 
-    return Math.round((evaluatedCount / totalItems) * 100);
+    return {
+      percent: Math.round((evaluatedCount / totalItems) * 100),
+      count: evaluatedCount,
+      total: totalItems
+    };
   };
 
   const renderProgressBar = (nominee: Nominee, round: number) => {
-    const progress = calculateProgress(nominee, round);
-    const colorClass = round === 1 ? 'bg-gkk-navy' : round === 2 ? 'bg-blue-600' : 'bg-gkk-gold';
+    const { percent, count, total } = calculateProgress(nominee, round);
+
+    // Role-specific labels and colors
+    let label = 'Progress';
+    let colorClass = 'bg-gkk-navy';
+
+    if (round === 1) {
+      label = 'REU Validation';
+      colorClass = 'bg-gkk-navy';
+    } else if (round === 2) {
+      label = 'SCD Evaluation';
+      colorClass = 'bg-blue-600';
+    } else if (round === 3) {
+      label = 'Final Correction';
+      colorClass = 'bg-gkk-gold';
+    }
+
+    // Highlight if relevant to current user role
+    const isRelevant = (round === 1 && userRole === 'reu') ||
+      (round === 2 && ['scd_team_leader', 'evaluator'].includes(userRole || '')) ||
+      (round === 3 && ['scd_team_leader', 'evaluator'].includes(userRole || ''));
 
     return (
-      <div className="w-full">
-        <div className="flex justify-between items-center mb-1.5">
-          <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">
-            {round === 1 ? 'REU Progress' : 'Evaluator Progress'}
+      <div className={`w-full transition-all ${isRelevant ? 'scale-100' : 'scale-[0.98] opacity-80'}`}>
+        <div className="flex justify-between items-center mb-2">
+          <span className={`text-[10px] font-black uppercase tracking-widest ${isRelevant ? 'text-gkk-navy' : 'text-gray-400'}`}>
+            {label}
           </span>
-          <span className="text-[9px] font-bold text-gray-400">{progress}%</span>
+          <div className="flex items-center gap-1.5">
+            <span className="text-[10px] font-black text-gkk-navy">{percent}%</span>
+            <span className="text-[9px] font-bold text-gray-300">({count}/{total})</span>
+          </div>
         </div>
-        <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+        <div className={`h-2 w-full ${isRelevant ? 'bg-gray-100' : 'bg-gray-50'} rounded-full overflow-hidden shadow-inner border border-black/5`}>
           <div
-            className={`h-full ${colorClass} transition-all duration-1000 ease-out`}
-            style={{ width: `${progress}%` }}
+            className={`h-full ${colorClass} transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(0,0,0,0.1)]`}
+            style={{ width: `${percent}%` }}
           />
         </div>
       </div>
@@ -1025,16 +1062,16 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
             {/* Right: Consolidated Progress Trackers and Actions */}
             <div className="flex flex-col gap-4 items-end">
               <div className="flex flex-wrap gap-4 items-center bg-gray-50/50 p-2 rounded-[25px] border border-gray-100/50">
-                <div className="w-36 bg-white rounded-[20px] p-4 text-center border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+                <div className="w-48 bg-white rounded-[20px] p-4 text-center border border-gray-100 shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5">
                   {renderProgressBar(selectedNominee, 1)}
                 </div>
                 {userRole !== 'reu' && (selectedNominee.round2Unlocked || ['admin', 'scd_team_leader', 'evaluator'].includes(userRole || '')) && (
-                  <div className="w-36 bg-white rounded-[20px] p-4 text-center border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+                  <div className="w-48 bg-white rounded-[20px] p-4 text-center border border-gray-100 shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5">
                     {renderProgressBar(selectedNominee, 2)}
                   </div>
                 )}
                 {userRole !== 'reu' && (selectedNominee.round3Unlocked || ['admin', 'scd_team_leader', 'evaluator'].includes(userRole || '')) && (
-                  <div className="w-36 bg-white rounded-[20px] p-4 text-center border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+                  <div className="w-48 bg-white rounded-[20px] p-4 text-center border border-gray-100 shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5">
                     {renderProgressBar(selectedNominee, 3)}
                   </div>
                 )}
