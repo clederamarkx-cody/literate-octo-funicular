@@ -1110,25 +1110,31 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
 
                   {selectedNominee.status !== 'completed' ? (
                     <button
-                      onClick={async () => {
-                        const confirmed = window.confirm("Are you sure you want to close this application? This marks the review process as fully completed, locking Stage 2 and 3 for the nominee.");
-                        if (confirmed) {
-                          try {
-                            await updateNominee(selectedNominee.id, {
-                              status: 'completed'
-                            });
+                      onClick={() => {
+                        setConfirmModal({
+                          isOpen: true,
+                          title: 'Close Application',
+                          message: 'Are you sure you want to close this application? This marks the review process as fully completed, locking Stage 2 and 3 for the nominee.',
+                          type: 'warning',
+                          onConfirm: async () => {
+                            setConfirmModal(prev => ({ ...prev, isOpen: false }));
+                            try {
+                              await updateNominee(selectedNominee.id, {
+                                status: 'completed'
+                              });
 
-                            const updated = {
-                              ...selectedNominee,
-                              status: 'completed' as any
-                            };
-                            setSelectedNominee(updated);
-                            setLocalNominees(prev => prev.map(n => n.id === updated.id ? updated : n));
-                          } catch (error) {
-                            console.error("Failed to close application.", error);
-                            alert("Failed to close application.");
+                              const updated = {
+                                ...selectedNominee,
+                                status: 'completed' as any
+                              };
+                              setSelectedNominee(updated);
+                              setLocalNominees(prev => prev.map(n => n.id === updated.id ? updated : n));
+                            } catch (error) {
+                              console.error("Failed to close application.", error);
+                              alert("Failed to close application.");
+                            }
                           }
-                        }
+                        });
                       }}
                       className="px-6 py-2.5 bg-emerald-600 text-white font-bold rounded-2xl hover:bg-emerald-700 transition-all text-[10px] tracking-widest uppercase shadow-md flex items-center gap-2 ml-2"
                     >
@@ -1136,19 +1142,25 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                     </button>
                   ) : (
                     <button
-                      onClick={async () => {
-                        const confirmed = window.confirm("Are you sure you want to reopen this application?");
-                        if (confirmed) {
-                          try {
-                            await updateNominee(selectedNominee.id, { status: 'in_progress' });
-                            const updated = { ...selectedNominee, status: 'in_progress' as any };
-                            setSelectedNominee(updated);
-                            setLocalNominees(prev => prev.map(n => n.id === updated.id ? updated : n));
-                          } catch (error) {
-                            console.error("Failed to reopen application.", error);
-                            alert("Failed to reopen application.");
+                      onClick={() => {
+                        setConfirmModal({
+                          isOpen: true,
+                          title: 'Reopen Application',
+                          message: 'Are you sure you want to reopen this application?',
+                          type: 'warning',
+                          onConfirm: async () => {
+                            setConfirmModal(prev => ({ ...prev, isOpen: false }));
+                            try {
+                              await updateNominee(selectedNominee.id, { status: 'in_progress' });
+                              const updated = { ...selectedNominee, status: 'in_progress' as any };
+                              setSelectedNominee(updated);
+                              setLocalNominees(prev => prev.map(n => n.id === updated.id ? updated : n));
+                            } catch (error) {
+                              console.error("Failed to reopen application.", error);
+                              alert("Failed to reopen application.");
+                            }
                           }
-                        }
+                        });
                       }}
                       className="px-6 py-2.5 bg-gray-500 text-white font-bold rounded-2xl hover:bg-gray-600 transition-all text-[10px] tracking-widest uppercase shadow-md flex items-center gap-2 ml-2"
                     >
