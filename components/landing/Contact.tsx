@@ -17,9 +17,9 @@ const Contact: React.FC = () => {
   };
 
   return (
-    <section id="contact" className="py-24 bg-white relative overflow-hidden">
+    <section id="contact" className="py-24 bg-white relative overflow-hidden min-h-screen flex flex-col justify-center">
       <div className="absolute top-0 right-0 w-96 h-96 bg-gkk-gold/5 rounded-full blur-[100px] pointer-events-none"></div>
-      
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center mb-16">
           <span className="text-gkk-gold text-sm font-bold tracking-widest uppercase">Support Center</span>
@@ -34,7 +34,7 @@ const Contact: React.FC = () => {
           <div className="space-y-10">
             <div className="bg-gray-50 rounded-[40px] p-10 border border-gray-100 shadow-sm">
               <h3 className="text-2xl font-serif font-bold text-gkk-navy mb-8">The Secretariat</h3>
-              
+
               <div className="space-y-8">
                 <div className="flex items-start gap-6 group">
                   <div className="w-14 h-14 bg-white rounded-2xl shadow-sm border border-gray-100 flex items-center justify-center text-gkk-gold group-hover:bg-gkk-navy group-hover:text-white transition-all duration-300">
@@ -79,10 +79,10 @@ const Contact: React.FC = () => {
               <p className="text-gkk-gold text-[10px] font-bold uppercase tracking-[0.3em] mb-3">Regional Support</p>
               <h4 className="text-xl font-serif font-bold mb-4 leading-tight">Need to speak with your Regional Office?</h4>
               <p className="text-gray-400 text-sm mb-6 leading-relaxed">
-                Nominations are initiated at the regional level. If you are inquiring about a specific nomination in your area, we can redirect you to your local OSH Center.
+                Nominations are initiated at the DOLE Regional Office. If you are inquiring about a specific nomination in your area, we can redirect you to our Regional Extension Unit.
               </p>
               <a href="https://oshc.dole.gov.ph/contact-us/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center text-sm font-bold text-gkk-gold hover:text-white transition-colors uppercase tracking-widest group">
-                Regional Directory <Send size={14} className="ml-2 group-hover:translate-x-1 transition-transform" />
+                Regional Support <Send size={14} className="ml-2 group-hover:translate-x-1 transition-transform" />
               </a>
             </div>
           </div>
@@ -104,19 +104,19 @@ const Contact: React.FC = () => {
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Full Name</label>
-                    <input 
-                      required 
-                      type="text" 
-                      className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-gkk-gold/10 focus:border-gkk-gold focus:bg-white outline-none transition-all font-medium" 
+                    <input
+                      required
+                      type="text"
+                      className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-gkk-gold/10 focus:border-gkk-gold focus:bg-white outline-none transition-all font-medium"
                       placeholder="Juan Dela Cruz"
                     />
                   </div>
                   <div className="space-y-2">
                     <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Email Address</label>
-                    <input 
-                      required 
-                      type="email" 
-                      className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-gkk-gold/10 focus:border-gkk-gold focus:bg-white outline-none transition-all font-medium" 
+                    <input
+                      required
+                      type="email"
+                      className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-gkk-gold/10 focus:border-gkk-gold focus:bg-white outline-none transition-all font-medium"
                       placeholder="name@company.com"
                     />
                   </div>
@@ -124,8 +124,8 @@ const Contact: React.FC = () => {
 
                 <div className="space-y-2">
                   <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Inquiry Subject</label>
-                  <select 
-                    required 
+                  <select
+                    required
                     className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-gkk-gold/10 focus:border-gkk-gold focus:bg-white outline-none transition-all font-medium appearance-none"
                   >
                     <option value="">Select a topic</option>
@@ -139,15 +139,15 @@ const Contact: React.FC = () => {
 
                 <div className="space-y-2">
                   <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Your Message</label>
-                  <textarea 
-                    required 
+                  <textarea
+                    required
                     rows={4}
-                    className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-gkk-gold/10 focus:border-gkk-gold focus:bg-white outline-none transition-all font-medium resize-none" 
+                    className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-gkk-gold/10 focus:border-gkk-gold focus:bg-white outline-none transition-all font-medium resize-none"
                     placeholder="Describe your inquiry in detail..."
                   ></textarea>
                 </div>
 
-                <button 
+                <button
                   type="submit"
                   disabled={isSubmitting}
                   className="w-full py-5 bg-gkk-navy text-white font-bold rounded-2xl shadow-xl shadow-gkk-navy/20 hover:bg-gkk-royalBlue hover:-translate-y-1 transition-all disabled:opacity-50 flex items-center justify-center gap-3 uppercase tracking-[0.2em] text-sm"

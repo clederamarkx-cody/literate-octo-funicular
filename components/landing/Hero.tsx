@@ -1,5 +1,6 @@
 import React from 'react';
 import { ArrowRight, ChevronDown, Lock } from 'lucide-react';
+import { PARTNERS } from '../../constants';
 
 interface HeroProps {
   onNominate?: () => void;
@@ -8,7 +9,7 @@ interface HeroProps {
 
 const Hero: React.FC<HeroProps> = ({ onNominate, onUnderDev }) => {
   return (
-    <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gkk-navy">
+    <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gkk-navy snap-start">
       <div className="absolute inset-0 z-0">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[120%] h-[120%] bg-gradient-radial from-gkk-royalBlue/40 via-gkk-navy to-black opacity-80"></div>
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gkk-gold/10 rounded-full blur-[120px] animate-pulse"></div>
@@ -29,7 +30,7 @@ const Hero: React.FC<HeroProps> = ({ onNominate, onUnderDev }) => {
             GAWAD KALIGTASAN <br className="hidden md:block" /> AT KALUSUGAN
           </h1>
           <p className="mt-6 max-w-2xl mx-auto text-lg sm:text-xl text-gray-300 font-sans leading-relaxed">
-            Honoring the elite OSH champions <strong>nominated by the Department of Labor and Employment</strong> for their unwavering commitment to Filipino worker safety.
+            A new era of occupational safety and health unfolds. The search for the most outstanding OSH champions officially begins.
           </p>
         </div>
         <div className="mt-10 flex flex-col items-center space-y-6">
@@ -50,8 +51,22 @@ const Hero: React.FC<HeroProps> = ({ onNominate, onUnderDev }) => {
           </div>
           <p className="text-[10px] text-gray-500 uppercase tracking-[0.2em] font-bold">Invitation Only • DOLE-OSHC Official System</p>
         </div>
+
+        {/* Integrated Social Proof */}
+        <div className="mt-20 pt-10 border-t border-white/5 animate-in fade-in slide-in-from-bottom-10 duration-1000 delay-300">
+          <p className="text-center text-gkk-gold/40 text-[10px] font-bold uppercase tracking-[0.3em] mb-8">
+            Endorsed by National Safety Bodies
+          </p>
+          <div className="flex flex-wrap justify-center items-center gap-12 md:gap-24 opacity-40 grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-700">
+            {PARTNERS.map((partner, idx) => (
+              <div key={idx} className="text-white font-serif font-bold text-sm md:text-base tracking-widest text-center">
+                {partner}
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-center animate-bounce"><ChevronDown className="w-6 h-6 text-gkk-gold/50" /></div>
+      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-center animate-bounce"><ChevronDown className="w-5 h-5 text-gkk-gold/30" /></div>
     </section>
   );
 };

@@ -42,7 +42,8 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate, isNominationPage = false })
     if (isNominationPage && onNavigate) {
       onNavigate('home');
     } else {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      const element = document.querySelector('#home');
+      if (element) element.scrollIntoView({ behavior: 'smooth' });
     }
     setIsMobileMenuOpen(false);
   };
@@ -78,7 +79,7 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate, isNominationPage = false })
                   <button
                     key={link.name}
                     onClick={() => handleNavClick(link.href)}
-                    className="text-gray-300 hover:text-gkk-gold transition-colors text-xs font-bold uppercase tracking-widest relative group"
+                    className="text-gray-300 hover:text-gkk-gold transition-colors text-[10.5px] font-bold uppercase tracking-widest relative group"
                   >
                     {link.name}
                     <span className="absolute -bottom-2 left-0 w-0 h-0.5 bg-gkk-gold transition-all duration-300 group-hover:w-full"></span>
@@ -87,13 +88,13 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate, isNominationPage = false })
                 <div className="h-6 w-px bg-white/10 mx-2"></div>
                 <button
                   onClick={() => onNavigate && onNavigate('hall-of-fame')}
-                  className="flex items-center px-5 py-2.5 text-gkk-gold hover:text-white font-bold uppercase tracking-widest text-xs transition-all border border-gkk-gold/40 rounded-lg hover:bg-gkk-gold/10 hover:border-gkk-gold"
+                  className="flex items-center px-5 py-2.5 text-gkk-gold hover:text-white font-bold uppercase tracking-widest text-[10.5px] transition-all border border-gkk-gold/40 rounded-lg hover:bg-gkk-gold/10 hover:border-gkk-gold"
                 >
                   <Trophy size={16} className="mr-2" /> GKK Winners
                 </button>
                 <button
                   onClick={() => onNavigate && onNavigate('login')}
-                  className="flex items-center px-6 py-2.5 bg-gkk-gold text-gkk-navy font-bold rounded-lg shadow-lg shadow-gkk-gold/20 hover:shadow-gkk-gold/40 hover:-translate-y-0.5 hover:bg-white transition-all text-xs uppercase tracking-widest group"
+                  className="flex items-center px-6 py-2.5 bg-gkk-gold text-gkk-navy font-bold rounded-lg shadow-lg shadow-gkk-gold/20 hover:shadow-gkk-gold/40 hover:-translate-y-0.5 hover:bg-white transition-all text-[10.5px] uppercase tracking-widest group"
                 >
                   Login <ArrowRight size={14} className="ml-2 group-hover:translate-x-1 transition-transform" />
                 </button>
@@ -103,7 +104,7 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate, isNominationPage = false })
             {/* Nomination Page Specific Button */}
             {isNominationPage && (
               <div className="hidden lg:block">
-                <button onClick={() => onNavigate && onNavigate('home')} className="flex items-center text-white hover:text-gkk-gold text-xs font-bold uppercase tracking-widest transition-colors group">
+                <button onClick={() => onNavigate && onNavigate('home')} className="flex items-center text-white hover:text-gkk-gold text-[10.5px] font-bold uppercase tracking-widest transition-colors group">
                   <ChevronRight size={16} className="rotate-180 mr-2 group-hover:-translate-x-1 transition-transform" /> Back to Home
                 </button>
               </div>

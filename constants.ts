@@ -10,9 +10,9 @@ export const GKK_INFO = `
 `;
 
 export const NAV_LINKS = [
-  { name: 'Award Cycle', href: '#timeline' },
+  { name: 'About', href: '#about' },
+  { name: 'Selection Process', href: '#timeline' },
   { name: 'Categories', href: '#categories' },
-  { name: 'FAQ', href: '#faq' },
   { name: 'Contact Us', href: '#contact' },
 ];
 

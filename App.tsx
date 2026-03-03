@@ -1,14 +1,10 @@
 import React, { useState, Suspense, lazy, useCallback, useMemo, useEffect } from 'react';
 import Navbar from './components/layout/Navbar';
 import Hero from './components/landing/Hero';
-import SocialProof from './components/landing/SocialProof';
-import Features from './components/landing/Features';
+
 import About from './components/landing/About';
 import Categories from './components/landing/Categories';
 import Timeline from './components/landing/Timeline';
-import SubmissionGuidelines from './components/landing/SubmissionGuidelines';
-import Testimonials from './components/landing/Testimonials';
-import FAQ from './components/landing/FAQ';
 import Contact from './components/landing/Contact';
 import Footer from './components/layout/Footer';
 import ChatWidget from './components/layout/ChatWidget';
@@ -24,9 +20,10 @@ const NomineePortal = lazy(() => import('./components/portal/NomineePortal'));
 const HallOfFame = lazy(() => import('./components/portal/HallOfFame'));
 const EvaluatorPortal = lazy(() => import('./components/portal/EvaluatorPortal'));
 const UnderDevelopment = lazy(() => import('./components/UnderDevelopment'));
+const CriteriaInstructions = lazy(() => import('./components/landing/CriteriaInstructions'));
 
 
-type ViewState = 'home' | 'nominate' | 'login' | 'nominee-portal' | 'evaluator-portal' | 'hall-of-fame' | 'under-development';
+type ViewState = 'home' | 'nominate' | 'login' | 'nominee-portal' | 'evaluator-portal' | 'hall-of-fame' | 'under-development' | 'criteria';
 
 function App() {
   const [view, setView] = useState<ViewState>('home');
@@ -38,7 +35,7 @@ function App() {
   useEffect(() => {
     const restoreSession = async () => {
       const savedView = sessionStorage.getItem('gkk_last_view') as ViewState;
-      if (savedView && ['hall-of-fame', 'nominate', 'login', 'under-development'].includes(savedView)) {
+      if (savedView && ['hall-of-fame', 'nominate', 'login', 'under-development', 'criteria'].includes(savedView)) {
         setView(savedView);
       }
 
@@ -162,7 +159,7 @@ function App() {
   }, []);
 
   const isPortalView = useMemo(() => view === 'nominee-portal' || view === 'evaluator-portal', [view]);
-  const isSpecialView = useMemo(() => view === 'nominate' || view === 'login' || view === 'hall-of-fame' || view === 'under-development', [view]);
+  const isSpecialView = useMemo(() => view === 'nominate' || view === 'login' || view === 'hall-of-fame' || view === 'under-development' || view === 'criteria', [view]);
 
   const handleLogout = useCallback(() => {
     sessionStorage.removeItem('gkk_session');
@@ -175,6 +172,14 @@ function App() {
     return (
       <Suspense fallback={<div className="flex justify-center items-center h-screen">Loading...</div>}>
         <UnderDevelopment onBack={() => navigateTo(prevView)} />
+      </Suspense>
+    );
+  }
+
+  if (view === 'criteria') {
+    return (
+      <Suspense fallback={<div className="flex justify-center items-center h-screen">Loading...</div>}>
+        <CriteriaInstructions onBack={() => navigateTo('home')} />
       </Suspense>
     );
   }
@@ -198,44 +203,19 @@ function App() {
         <Navbar onNavigate={navigateTo} isNominationPage={isSpecialView} />
       )}
 
-      <main key={view} className={!isPortalView ? "page-transition" : "h-screen overflow-hidden page-transition"}>
+      <main key={view} className={!isPortalView ? "h-screen overflow-y-auto snap-y snap-mandatory page-transition" : "h-screen overflow-hidden page-transition"}>
         {view === 'home' && (
           <>
             <Hero onNominate={() => navigateTo('nominate')} onUnderDev={() => navigateTo('under-development')} />
-            <SocialProof />
-            <Features />
-            <div className="bg-gray-50/50"><About /></div>
-            <Categories onUnderDev={() => navigateTo('under-development')} />
+            <About />
+            <Categories onViewCriteria={() => navigateTo('criteria')} />
             <Timeline />
-            <SubmissionGuidelines onUnderDev={() => navigateTo('under-development')} />
-            <Testimonials />
-            <FAQ />
-            <Contact />
+            <div className="snap-start">
+              <Contact />
+              <Footer onUnderDev={() => navigateTo('under-development')} />
+            </div>
 
-            {/* CTA SECTION */}
-            <section id="cta" className="relative py-28 bg-gkk-navy overflow-hidden">
-              <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-gkk-royalBlue to-transparent opacity-30"></div>
-              <div className="absolute bottom-0 left-0 w-64 h-64 bg-gkk-gold/10 rounded-full blur-3xl"></div>
 
-              <div className="max-w-4xl mx-auto px-4 relative z-10 text-center">
-                <div className="inline-block p-3 rounded-full bg-white/5 backdrop-blur-sm border border-white/10 mb-8 animate-bounce">
-                  <Calendar className="w-6 h-6 text-gkk-gold" />
-                </div>
-                <h2 className="text-4xl md:text-5xl font-serif font-bold text-white mb-6">Ready to be Recognized?</h2>
-                <p className="text-lg text-gray-300 mb-12 max-w-2xl mx-auto">
-                  If your establishment has been officially nominated by DOLE, use your invitation key below to activate your portal and submit evidence.
-                </p>
-                <div className="flex flex-col sm:flex-row justify-center gap-6">
-                  <button onClick={() => navigateTo('nominate')} className="flex items-center justify-center px-10 py-5 bg-gradient-to-r from-gkk-gold to-gkk-goldDark text-white font-bold tracking-wide uppercase rounded shadow-xl hover:-translate-y-1 transition-all duration-300 text-lg group">
-                    <FileText className="w-5 h-5 mr-3 group-hover:scale-110 transition-transform" /> Register Nominee
-                  </button>
-                  <button onClick={() => navigateTo('under-development')} className="flex items-center justify-center px-10 py-5 bg-transparent border border-gray-600 text-gray-300 font-semibold tracking-wide uppercase rounded hover:bg-white/5 hover:border-white transition-all duration-300 text-lg">
-                    <Mail className="w-5 h-5 mr-3" /> Download Kit
-                  </button>
-                </div>
-                <p className="mt-10 text-[10px] text-gray-500 uppercase tracking-[0.4em] font-bold">Official OSHC-DOLE 14<sup>th</sup> GKK Cycle</p>
-              </div>
-            </section>
           </>
         )}
 
