@@ -37,12 +37,12 @@ const Contact: React.FC = () => {
 
               <div className="space-y-8">
                 <div className="flex items-start gap-6 group">
-                  <div className="w-14 h-14 bg-white rounded-2xl shadow-sm border border-gray-100 flex items-center justify-center text-gkk-gold group-hover:bg-gkk-navy group-hover:text-white transition-all duration-300">
+                  <div className="w-14 h-14 flex-shrink-0 aspect-square bg-white rounded-2xl shadow-sm border border-gray-100 flex items-center justify-center text-gkk-gold group-hover:bg-gkk-navy group-hover:text-white transition-all duration-300">
                     <MapPin size={24} />
                   </div>
                   <div>
                     <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Office Location</p>
-                    <p className="text-gkk-navy font-bold leading-relaxed">
+                    <p className="text-slate-600 font-black text-lg tracking-tight leading-relaxed">
                       Occupational Safety and Health Center<br />
                       North Avenue corner Sen. Miriam P. Defensor-Santiago Avenue, Diliman,<br />
                       Quezon City, Philippines 1105
@@ -51,23 +51,23 @@ const Contact: React.FC = () => {
                 </div>
 
                 <div className="flex items-start gap-6 group">
-                  <div className="w-14 h-14 bg-white rounded-2xl shadow-sm border border-gray-100 flex items-center justify-center text-gkk-gold group-hover:bg-gkk-navy group-hover:text-white transition-all duration-300">
+                  <div className="w-14 h-14 flex-shrink-0 aspect-square bg-white rounded-2xl shadow-sm border border-gray-100 flex items-center justify-center text-gkk-gold group-hover:bg-gkk-navy group-hover:text-white transition-all duration-300">
                     <Phone size={24} />
                   </div>
                   <div>
                     <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Hotline Number</p>
-                    <p className="text-gkk-navy font-black text-xl tracking-tight leading-none">(02) 8929-6036</p>
+                    <p className="text-slate-600 font-black text-lg tracking-tight leading-none">(02) 8929-6036</p>
                     <p className="text-xs text-gray-400 mt-1">Available Mon-Fri, 8AM - 5PM</p>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-6 group">
-                  <div className="w-14 h-14 bg-white rounded-2xl shadow-sm border border-gray-100 flex items-center justify-center text-gkk-gold group-hover:bg-gkk-navy group-hover:text-white transition-all duration-300">
+                  <div className="w-14 h-14 flex-shrink-0 aspect-square bg-white rounded-2xl shadow-sm border border-gray-100 flex items-center justify-center text-gkk-gold group-hover:bg-gkk-navy group-hover:text-white transition-all duration-300">
                     <Mail size={24} />
                   </div>
                   <div>
                     <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Email Inquiry</p>
-                    <p className="text-gkk-navy font-black text-xl tracking-tight leading-none">gkk@oshc.dole.gov.ph</p>
+                    <p className="text-slate-600 font-black text-lg tracking-tight leading-none">gkk@oshc.dole.gov.ph</p>
                     <p className="text-xs text-gray-400 mt-1">Official Cycle Communications</p>
                   </div>
                 </div>
