@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
-    FileText, ShieldAlert, Zap, Lock, Upload, Eye, Check, X
+    FileText, ShieldAlert, Zap, Lock, Upload, Eye, Check, X, Loader2
 } from 'lucide-react';
 
 interface DocumentSlot {
@@ -41,6 +41,21 @@ const DocumentGrid: React.FC<DocumentGridProps> = ({
     onVerdict,
     onRemarkChange
 }) => {
+    const [pendingSlots, setPendingSlots] = useState<Record<string, boolean>>({});
+
+    const handleVerdictClick = async (slotId: string, verdict: 'pass' | 'fail', round: number) => {
+        if (pendingSlots[slotId]) return;
+
+        setPendingSlots(prev => ({ ...prev, [slotId]: true }));
+        try {
+            await onVerdict?.(slotId, verdict);
+        } finally {
+            // Add a small delay for better UX and to prevent immediate double-tap
+            setTimeout(() => {
+                setPendingSlots(prev => ({ ...prev, [slotId]: false }));
+            }, 500);
+        }
+    };
     // Filter logic for Document Migration:
     // Stage 1: Show only Stage 1 docs.
     // Stage 2: Show ALL docs from Stage 1 (The Results Bank).
@@ -152,16 +167,18 @@ const DocumentGrid: React.FC<DocumentGridProps> = ({
                             <div className="mb-4 space-y-3">
                                 <div className="flex gap-2">
                                     <button
-                                        onClick={() => onVerdict?.(doc.id, 'pass', round)}
-                                        className={`flex-1 py-3 px-4 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 ${effectiveVerdict === 'pass' ? 'bg-emerald-600 text-white shadow-lg' : 'bg-white text-gray-400 border border-gray-200 hover:bg-emerald-50 hover:text-emerald-600'}`}
+                                        onClick={() => handleVerdictClick(doc.id, 'pass', round)}
+                                        disabled={pendingSlots[doc.id]}
+                                        className={`flex-1 py-3 px-4 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 ${effectiveVerdict === 'pass' ? 'bg-emerald-600 text-white shadow-lg' : 'bg-white text-gray-400 border border-gray-200 hover:bg-emerald-50 hover:text-emerald-600'} ${pendingSlots[doc.id] ? 'opacity-50 cursor-not-allowed' : ''}`}
                                     >
-                                        PASS
+                                        {pendingSlots[doc.id] ? <Loader2 size={14} className="animate-spin" /> : 'PASS'}
                                     </button>
                                     <button
-                                        onClick={() => onVerdict?.(doc.id, 'fail', round)}
-                                        className={`flex-1 py-3 px-4 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 ${effectiveVerdict === 'fail' ? 'bg-red-600 text-white shadow-lg' : 'bg-white text-gray-400 border border-gray-200 hover:bg-red-50 hover:text-red-600'}`}
+                                        onClick={() => handleVerdictClick(doc.id, 'fail', round)}
+                                        disabled={pendingSlots[doc.id]}
+                                        className={`flex-1 py-3 px-4 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 ${effectiveVerdict === 'fail' ? 'bg-red-600 text-white shadow-lg' : 'bg-white text-gray-400 border border-gray-200 hover:bg-red-50 hover:text-red-600'} ${pendingSlots[doc.id] ? 'opacity-50 cursor-not-allowed' : ''}`}
                                     >
-                                        INCOMPLETE
+                                        {pendingSlots[doc.id] ? <Loader2 size={14} className="animate-spin" /> : 'INCOMPLETE'}
                                     </button>
                                 </div>
                                 <textarea

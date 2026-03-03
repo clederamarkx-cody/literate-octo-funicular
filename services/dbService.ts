@@ -304,34 +304,17 @@ export const updateDocumentEvaluation = async (appId: string, slotId: string, ve
     const dbVerdict = verdict === 'pass' ? 'Pass' : 'Fail';
     const updateField = round === 2 ? 'verdict_r2' : 'verdict';
 
-    // Check if the document exists first
-    const { data: existingDoc } = await supabase
+    console.log(`[DB] Upserting evaluation for app: ${appId}, slot: ${slotId}, round: ${round}, verdict: ${dbVerdict}`);
+
+    const { error } = await supabase
         .from(DOCUMENTS_COLLECTION)
-        .select('id')
-        .eq('application_id', appId)
-        .eq('slot_id', slotId)
-        .single();
-
-    let error;
-
-    if (existingDoc) {
-        const { error: updateError } = await supabase
-            .from(DOCUMENTS_COLLECTION)
-            .update({ [updateField]: dbVerdict })
-            .eq('application_id', appId)
-            .eq('slot_id', slotId);
-        error = updateError;
-    } else {
-        // If it doesn't exist, create it with the verdict
-        const { error: insertError } = await supabase
-            .from(DOCUMENTS_COLLECTION)
-            .insert({
-                application_id: appId,
-                slot_id: slotId,
-                [updateField]: dbVerdict
-            });
-        error = insertError;
-    }
+        .upsert({
+            application_id: appId,
+            slot_id: slotId,
+            [updateField]: dbVerdict
+        }, {
+            onConflict: 'application_id,slot_id'
+        });
 
     if (error) {
         console.error("Update document evaluation failed:", error);
@@ -345,34 +328,17 @@ export const updateDocumentEvaluation = async (appId: string, slotId: string, ve
 export const updateDocumentRemarks = async (appId: string, slotId: string, remarks: string, round: number = 1) => {
     const updateField = round === 2 ? 'remarks_r2' : 'remarks';
 
-    // Check if the document exists first
-    const { data: existingDoc } = await supabase
+    console.log(`[DB] Upserting remarks for app: ${appId}, slot: ${slotId}, round: ${round}`);
+
+    const { error } = await supabase
         .from(DOCUMENTS_COLLECTION)
-        .select('id')
-        .eq('application_id', appId)
-        .eq('slot_id', slotId)
-        .single();
-
-    let error;
-
-    if (existingDoc) {
-        const { error: updateError } = await supabase
-            .from(DOCUMENTS_COLLECTION)
-            .update({ [updateField]: remarks })
-            .eq('application_id', appId)
-            .eq('slot_id', slotId);
-        error = updateError;
-    } else {
-        // If it doesn't exist, create it with the remark
-        const { error: insertError } = await supabase
-            .from(DOCUMENTS_COLLECTION)
-            .insert({
-                application_id: appId,
-                slot_id: slotId,
-                [updateField]: remarks
-            });
-        error = insertError;
-    }
+        .upsert({
+            application_id: appId,
+            slot_id: slotId,
+            [updateField]: remarks
+        }, {
+            onConflict: 'application_id,slot_id'
+        });
 
     if (error) {
         console.error("Update document remarks failed:", error);

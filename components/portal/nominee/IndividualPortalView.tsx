@@ -83,12 +83,14 @@ const IndividualPortalView: React.FC<IndividualPortalViewProps> = ({
                             </div>
 
                         </div>
-                        <StageProgress
-                            stage1Progress={stage1Progress}
-                            stage2Progress={stage2Progress}
-                            stage3Progress={stage3Progress}
-                            nomineeData={nomineeData}
-                        />
+                        {!isReviewMode && (
+                            <StageProgress
+                                stage1Progress={stage1Progress}
+                                stage2Progress={stage2Progress}
+                                stage3Progress={stage3Progress}
+                                nomineeData={nomineeData}
+                            />
+                        )}
                     </div>
                 </div>
             </div>
