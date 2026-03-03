@@ -1076,6 +1076,29 @@ const EvaluatorPortal: React.FC<EvaluatorPortalProps> = ({ onLogout, onUnderDev,
                           {selectedNominee.round2Unlocked ? 'Deactivate Stage 2' : (!selectedNominee.stage1PassedByReu ? 'Waiting for Regional Verification' : 'Activate Stage 2')}
                         </button>
                       )}
+                      {userRole === 'scd_team_leader' && !selectedNominee.stage1PassedByReu && !selectedNominee.round2Unlocked && (
+                        <button
+                          onClick={() => {
+                            setConfirmModal({
+                              isOpen: true,
+                              title: 'Bypass Regional Verification',
+                              message: 'Force activate Stage 2? This will bypass the Regional Evaluation Unit verification.',
+                              type: 'warning',
+                              onConfirm: () => {
+                                const newStatus = true;
+                                if (onToggleRound2) onToggleRound2(selectedNominee.id, newStatus);
+                                const updated = { ...selectedNominee, round2Unlocked: newStatus };
+                                setSelectedNominee(updated);
+                                setLocalNominees(prev => prev.map(a => a.id === updated.id ? updated : a));
+                                setConfirmModal(prev => ({ ...prev, isOpen: false }));
+                              }
+                            });
+                          }}
+                          className="px-10 py-4 rounded-[20px] font-bold bg-gkk-navy text-white hover:bg-gkk-royalBlue transition-all shadow-xl text-[10px] tracking-widest uppercase flex items-center gap-2 border border-white/10"
+                        >
+                          <Zap size={16} className="text-gkk-gold" /> Bypass & Activate Stage 2
+                        </button>
+                      )}
                       {userRole === 'reu' && !selectedNominee.round2Unlocked && (
                         <span className="text-[10px] font-bold text-amber-500 uppercase tracking-widest bg-amber-50 px-5 py-3 rounded-2xl border border-amber-100">Regional verification pending</span>
                       )}
