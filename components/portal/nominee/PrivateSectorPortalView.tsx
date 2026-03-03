@@ -4,6 +4,7 @@ import { Nominee, NomineeDocument } from '../../../types';
 import StageProgress from './StageProgress';
 import DocumentGrid from './DocumentGrid';
 import FailedDocumentsAlert from './FailedDocumentsAlert';
+import EvaluationInProgress from './EvaluationInProgress';
 
 interface PrivateSectorPortalViewProps {
     nomineeData: Nominee | null;
@@ -152,15 +153,7 @@ const PrivateSectorPortalView: React.FC<PrivateSectorPortalViewProps> = ({
                     </div>
                     {/* Stage 2 Contents - Only visible if active and NOT locked by stage 3 */}
                     <div className={`collapse-transition overflow-hidden ${!!nomineeData?.round2Unlocked && !nomineeData?.round3Unlocked && stage2Open ? 'max-h-[5000px] opacity-100 p-8' : 'max-h-0 opacity-0 px-8 pb-0'}`}>
-                        <div className="flex flex-col items-center justify-center py-12 text-center space-y-4 bg-gray-50/50 rounded-3xl border border-dashed border-gray-200">
-                            <div className="p-4 bg-white rounded-2xl shadow-sm text-gray-400">
-                                <ShieldAlert size={32} />
-                            </div>
-                            <div>
-                                <h5 className="text-sm font-bold text-gray-600">Evaluation in Progress</h5>
-                                <p className="text-xs text-gray-400 mt-1 max-w-xs mx-auto">The Regional Board is currently reviewing your submissions. Preliminary findings will be released in Stage 3.</p>
-                            </div>
-                        </div>
+                        <EvaluationInProgress />
                     </div>
                 </div>
 
