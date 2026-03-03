@@ -98,7 +98,7 @@ export const STAGE_1_REQUIREMENTS = [
   { "category": "Requirement", "label": "44. PhilHealth Proof of Compliance (≤6 months coverage)" },
   { "category": "Requirement", "label": "45. Pag-IBIG Proof of Compliance (≤6 months coverage)" },
   { "category": "Requirement", "label": "46. Compliance to applicable environmental laws and programs (ECC, DENR-EMB certificates, permits, licenses, etc.)" },
-  { "category": "Requirement", "label": "47. Valid OSH-related Certifications / Accreditations / Awards (e.g. ISO 45001, 14001)" },
+  { "category": "Requirement", "label": "47. Valid OSH-related Certifications / Accreditations / Awards (e.g., ISO 45001, ISO 14001)" },
   { "category": "Requirement", "label": "48. Industry-specific compliances per IRR of R.A. No. 11058" }
 ];
 interface NomineePortalProps {
