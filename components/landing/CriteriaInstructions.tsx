@@ -535,8 +535,9 @@ const CriteriaInstructions: React.FC<CriteriaProps> = ({ onBack, category = 'Pri
                                             </div>
                                         </div>
                                         <a
-                                            href="/forms/GKK_Undertaking.pdf"
-                                            download
+                                            href="https://drive.google.com/drive/folders/1_jgbBW7lOluqDLCg7zTIefDLZpAhzSOl?usp=sharing"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
                                             className="px-4 py-2 bg-gkk-gold/20 hover:bg-gkk-gold/30 text-gkk-gold rounded-lg text-sm font-semibold transition-colors inline-flex items-center"
                                         >
                                             Download PDF
