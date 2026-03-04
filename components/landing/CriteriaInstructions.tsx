@@ -485,9 +485,13 @@ const CriteriaInstructions: React.FC<CriteriaProps> = ({ onBack, category = 'Pri
                                                 <p className="text-gray-400 text-sm">Official application document</p>
                                             </div>
                                         </div>
-                                        <button className="px-4 py-2 bg-gkk-gold/20 hover:bg-gkk-gold/30 text-gkk-gold rounded-lg text-sm font-semibold transition-colors">
+                                        <a
+                                            href="/forms/14th_GKK_Application_Form.pdf"
+                                            download
+                                            className="px-4 py-2 bg-gkk-gold/20 hover:bg-gkk-gold/30 text-gkk-gold rounded-lg text-sm font-semibold transition-colors inline-flex items-center"
+                                        >
                                             Download PDF
-                                        </button>
+                                        </a>
                                     </div>
                                 </div>
                             </div>
@@ -530,9 +534,13 @@ const CriteriaInstructions: React.FC<CriteriaProps> = ({ onBack, category = 'Pri
                                                 <p className="text-gray-400 text-sm">Mandatory for all nominees</p>
                                             </div>
                                         </div>
-                                        <button className="px-4 py-2 bg-gkk-gold/20 hover:bg-gkk-gold/30 text-gkk-gold rounded-lg text-sm font-semibold transition-colors">
+                                        <a
+                                            href="/forms/GKK_Undertaking.pdf"
+                                            download
+                                            className="px-4 py-2 bg-gkk-gold/20 hover:bg-gkk-gold/30 text-gkk-gold rounded-lg text-sm font-semibold transition-colors inline-flex items-center"
+                                        >
                                             Download PDF
-                                        </button>
+                                        </a>
                                     </div>
                                 </div>
                             </div>
