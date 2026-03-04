@@ -1,9 +1,3 @@
-export interface ChatMessage {
-  id: string;
-  role: 'user' | 'model';
-  text: string;
-  isLoading?: boolean;
-}
 
 export type UserRole = 'nominee' | 'reu' | 'evaluator' | 'scd_team_leader' | 'admin';
 

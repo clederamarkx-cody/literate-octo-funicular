@@ -7,7 +7,7 @@ import Categories from './components/landing/Categories';
 import Timeline from './components/landing/Timeline';
 import Contact from './components/landing/Contact';
 import Footer from './components/layout/Footer';
-import ChatWidget from './components/layout/ChatWidget';
+
 import { FileText, Calendar, Mail } from 'lucide-react';
 import { Nominee, NomineeDocument } from './types';
 import { getNominee, addNomineeDocument, updateNominee, createUserProfile, createNominee, setAuthUser } from './services/dbService';
@@ -300,9 +300,7 @@ function App() {
         )}
       </main>
 
-      {!isPortalView && (
-        <ChatWidget />
-      )}
+
     </div>
   );
 }
