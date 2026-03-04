@@ -61,8 +61,8 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate, isNominationPage = false })
           <div className="flex justify-between items-center relative">
             {/* Logo Section */}
             <div className="flex items-center space-x-3 cursor-pointer group" onClick={handleLogoClick}>
-              <div className="bg-gradient-to-tr from-gkk-gold to-yellow-200 p-2 rounded-xl shadow-lg shadow-yellow-500/20 group-hover:scale-105 transition-transform duration-300">
-                <Award className="h-6 w-6 text-gkk-navy" />
+              <div className="bg-gradient-to-tr from-gkk-gold to-yellow-200 p-1.5 rounded-xl shadow-lg shadow-yellow-500/20 group-hover:scale-105 transition-transform duration-300">
+                <img src="/logo.png" alt="GKK Logo" className="h-8 w-8 object-contain" />
               </div>
               <div className="text-white">
                 <span className="block font-serif text-lg font-bold tracking-wider leading-none group-hover:text-gkk-gold transition-colors duration-300">
