@@ -11,23 +11,26 @@ const categories = [
   {
     title: "Public Sector - Government Agency Category",
     desc: "Agencies that have complied with CSC-DOH-DOLE Joint Memorandum Circular No. 1-20, or the “Occupational Safety and Health (OSH) Standards for the Public Sector”.",
-    icon: <Landmark size={24} />
+    icon: <Landmark size={24} />,
+    hasCriteria: true
   },
   {
     title: "Individual Category",
     desc: "Designated OSH personnel of GKK-nominated companies or government agencies who have implemented workplace safety and health initiatives that have significantly improved their organization’s safety and health management system and who have performed duties beyond their immediate OSH responsibilities.",
-    icon: <User size={24} />
+    icon: <User size={24} />,
+    hasCriteria: true
   },
   {
     title: "Microenterprise\nInformal Sector Category",
     desc: "Enterprises with one (1) to nine (9) workers and a capitalization of up to ₱3,000,000, organized as a single proprietorship, cooperative, partnership, or corporation, that have implemented safety and health innovations, improvements, or initiatives in their operations.",
-    icon: <Building size={24} />
+    icon: <Building size={24} />,
+    hasCriteria: true
   }
 ];
 
 interface CategoriesProps {
   onUnderDev?: () => void;
-  onViewCriteria?: () => void;
+  onViewCriteria?: (category: string) => void;
 }
 
 const Categories: React.FC<CategoriesProps> = ({ onUnderDev, onViewCriteria }) => {
@@ -55,7 +58,7 @@ const Categories: React.FC<CategoriesProps> = ({ onUnderDev, onViewCriteria }) =
               </div>
               <div className="p-5 xl:p-6 bg-white/5 border-t border-white/5">
                 <button
-                  onClick={cat.hasCriteria && onViewCriteria ? onViewCriteria : onUnderDev}
+                  onClick={() => cat.hasCriteria && onViewCriteria ? onViewCriteria(cat.title) : onUnderDev?.()}
                   className="block w-full py-2.5 text-center text-sm font-bold text-white border border-white/20 rounded-lg hover:bg-white hover:text-gkk-navy transition-colors"
                 >
                   View Criteria

@@ -31,12 +31,18 @@ function App() {
   const [nominees, setNominees] = useState<Nominee[]>([]);
   const [currentNomineeId, setCurrentNomineeId] = useState<string | null>(null);
   const [isLoadingSession, setIsLoadingSession] = useState(true);
+  const [selectedCategory, setSelectedCategory] = useState<string>('Private Sector');
 
   useEffect(() => {
     const restoreSession = async () => {
       const savedView = sessionStorage.getItem('gkk_last_view') as ViewState;
       if (savedView && ['hall-of-fame', 'nominate', 'login', 'under-development', 'criteria'].includes(savedView)) {
         setView(savedView);
+
+        const savedCategory = sessionStorage.getItem('gkk_selected_category');
+        if (savedCategory) {
+          setSelectedCategory(savedCategory);
+        }
       }
 
       const session = sessionStorage.getItem('gkk_session');
@@ -86,6 +92,10 @@ function App() {
     setPrevView(view);
     setView(newView);
     sessionStorage.setItem('gkk_last_view', newView);
+    if (newView !== 'criteria') {
+      // Optional: clear category when leaving criteria if desired, 
+      // but safer to keep it for "Back" button scenarios
+    }
   }, [view]);
 
   const handleQuickRegister = useCallback(async (companyName: string) => {
@@ -179,7 +189,7 @@ function App() {
   if (view === 'criteria') {
     return (
       <Suspense fallback={<div className="flex justify-center items-center h-screen">Loading...</div>}>
-        <CriteriaInstructions onBack={() => navigateTo('home')} />
+        <CriteriaInstructions onBack={() => navigateTo('home')} category={selectedCategory} />
       </Suspense>
     );
   }
@@ -208,7 +218,11 @@ function App() {
           <>
             <Hero onNominate={() => navigateTo('nominate')} onUnderDev={() => navigateTo('under-development')} />
             <About />
-            <Categories onViewCriteria={() => navigateTo('criteria')} />
+            <Categories onViewCriteria={(cat) => {
+              setSelectedCategory(cat);
+              sessionStorage.setItem('gkk_selected_category', cat);
+              navigateTo('criteria');
+            }} />
             <Timeline />
             <div className="snap-start">
               <Contact />
